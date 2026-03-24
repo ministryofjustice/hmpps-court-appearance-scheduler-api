@@ -9,11 +9,10 @@ import java.time.Duration
 
 @Configuration
 class WebClientConfiguration(
-  @param:Value("\${hmpps-auth.url}") val hmppsAuthBaseUri: String,
-  @param:Value("\${api.health-timeout:2s}") val healthTimeout: Duration,
-  @param:Value("\${api.timeout:20s}") val timeout: Duration,
+  @Value($$"${integration.hmpps-auth.url}") private val hmppsAuthBaseUri: String,
+  @Value($$"${api.health-timeout:1s}") private val healthTimeout: Duration,
+  @Value($$"${api.timeout:1s}") private val timeout: Duration,
 ) {
-  // HMPPS Auth health ping is required if your service calls HMPPS Auth to get a token to call other services
   @Bean
   fun hmppsAuthHealthWebClient(builder: WebClient.Builder): WebClient = builder.healthWebClient(hmppsAuthBaseUri, healthTimeout)
 }

@@ -1,0 +1,44 @@
+name: Build with Jib
+
+on:
+  workflow_call:
+    outputs:
+      app_version:
+        value: ${{ jobs.jib_build.outputs.app_version }}
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  jib_build:
+    name: build and push container image
+    runs-on: ubuntu-latest
+    outputs:
+      app_version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Set version
+        id: version
+        shell: bash
+        run: |
+          version=$(date '+%Y-%m-%d').${{ github.run_number }}.$(echo ${{ github.sha }} | cut -c1-7)
+          echo "VERSION=$version" | tee -a "$GITHUB_ENV"
+          echo "version=$version" | tee -a "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - name: Checkout Project
+        uses: actions/checkout@v6
+
+      - name: Push Image
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        # Configuration cache is not yet supported for Jib - see: https://github.com/GoogleContainerTools/jib/issues/3132
+        run: ./gradlew jib --no-configuration-cache
+        env:
+          GITHUB_USERNAME: ${{ github.actor }}
+          GITHUB_PASSWORD: ${{ github.token }}
+          BUILD_NUMBER: ${{ steps.version.outputs.version }}

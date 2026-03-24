@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.getBeansOfType
 import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo
@@ -33,7 +34,7 @@ class ResourceSecurityTest : IntegrationTestBase() {
         it.addAll(unprotectedDefaultMethods)
       }
 
-    val beans = context.getBeansOfType(RequestMappingHandlerMapping::class.java)
+    val beans = context.getBeansOfType<RequestMappingHandlerMapping>()
     beans.forEach { (_, mapping) ->
       mapping.handlerMethods.forEach { (mappingInfo, method) ->
         val classAnnotation = method.beanType.getAnnotation(PreAuthorize::class.java)
