@@ -1,0 +1,4 @@
+integration:
+  hmpps-auth:
+    url: "https://sign-in-preprod.hmpps.service.justice.gov.uk/auth"
+

@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.hea
 
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTestBase
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.HmppsAuthApiExtension.Companion.hmppsAuth
 
 class HealthCheckTest : IntegrationTestBase() {
 
@@ -63,5 +64,9 @@ class HealthCheckTest : IntegrationTestBase() {
       .isOk
       .expectBody()
       .jsonPath("status").isEqualTo("UP")
+  }
+
+  private fun stubPingWithResponse(status: Int) {
+    hmppsAuth.stubHealthPing(status)
   }
 }
