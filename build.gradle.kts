@@ -13,6 +13,7 @@ plugins {
 val hmppsKotlinVersion = "2.1.0"
 val sentryVersion = "8.36.0"
 val springDocVersion = "3.0.2"
+val sqsStarterVersion = "7.2.0"
 val swaggerParserVersion = "2.1.39"
 val testContainersVersion = "1.21.4"
 val uuidGeneratorVersion = "5.2.0"
@@ -21,6 +22,7 @@ val wiremockVersion = "3.13.2"
 dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:$hmppsKotlinVersion")
   implementation("org.springframework.boot:spring-boot-starter-webclient")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:$sqsStarterVersion")
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springDocVersion")
   implementation("com.fasterxml.uuid:java-uuid-generator:$uuidGeneratorVersion")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
