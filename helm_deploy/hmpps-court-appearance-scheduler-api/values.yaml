@@ -38,6 +38,7 @@ generic-service:
     JDK_JAVA_OPTIONS: "-javaagent:/agent/agent.jar -Xmx512m -XX:+UseG1GC"
     SENTRY_TRACES_SAMPLE_RATE: '0.05'
     SENTRY_IGNORED_EXCEPTIONS_FOR_TYPE: "org.apache.catalina.connector.ClientAbortException,org.springframework.web.servlet.resource.NoResourceFoundException,org.springframework.web.context.request.async.AsyncRequestNotUsableException"
+    HMPPS_SQS_QUEUES_HMPPSDOMAINEVENTSQUEUE_PROPAGATE_TRACING: "false"
 
   namespace_secrets:
     hmpps-court-appearance-scheduler-api-application-insights:
