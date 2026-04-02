@@ -3,7 +3,7 @@ import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.1.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.1.2"
   kotlin("plugin.spring") version "2.3.20"
   kotlin("plugin.jpa") version "2.3.20"
   id("com.google.cloud.tools.jib") version "3.5.3"
@@ -11,9 +11,9 @@ plugins {
 }
 
 val hmppsKotlinVersion = "2.1.0"
-val sentryVersion = "8.36.0"
+val sentryVersion = "8.37.1"
 val springDocVersion = "3.0.2"
-val sqsStarterVersion = "7.2.0"
+val sqsStarterVersion = "7.3.0"
 val swaggerParserVersion = "2.1.39"
 val testContainersVersion = "1.21.4"
 val uuidGeneratorVersion = "5.2.0"
