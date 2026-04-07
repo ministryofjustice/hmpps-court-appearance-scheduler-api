@@ -33,8 +33,17 @@ spring:
     show-sql: false
     generate-ddl: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     properties:
+      hibernate:
+        jdbc:
+          lob.non_contextual_creation: true
+          batch_size: 1000
+          fetch_size: 1000
+        globally_quoted_identifiers: true
+        globally_quoted_identifiers_skip_column_definitions: true
+        order_inserts: true
+        order_updates: true
       org.hibernate.envers:
         audit_table_suffix: _audit
         revision_field_name: rev_id
@@ -113,3 +122,9 @@ springdoc:
 logging:
   level:
     org.springframework: INFO
+
+service:
+  active-prisons:
+  domain-events:
+    poll-interval: PT0s
+    batch-size: 10

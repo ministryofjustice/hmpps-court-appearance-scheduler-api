@@ -8,6 +8,14 @@ management.endpoint:
 integration:
   hmpps-auth:
     url: "http://localhost:8090/auth"
+  manage-users:
+    url:  "http://localhost:8095"
+  nomis-migration:
+    url: "http://localhost:9990"
+  prison-register:
+    url: "http://localhost:9005"
+  prisoner-search:
+    url: "http://localhost:9000"
 
 spring:
   jpa:
