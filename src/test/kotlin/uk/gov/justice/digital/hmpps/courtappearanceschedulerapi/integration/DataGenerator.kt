@@ -24,5 +24,5 @@ object DataGenerator {
     }
   }
 
-  fun postcode(): String = ((1..2).map { letters.random() } + (1..3).map { (1..9).random() } + (1..2).map { letters.random() }).joinToString("")
+  fun courtCode(): String = (1..6).map { letters.random() }.joinToString("")
 }

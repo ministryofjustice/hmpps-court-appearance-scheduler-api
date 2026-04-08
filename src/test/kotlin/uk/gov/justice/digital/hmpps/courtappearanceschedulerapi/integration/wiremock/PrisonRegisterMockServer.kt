@@ -1,18 +1,20 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock
 
-import com.fasterxml.jackson.module.kotlin.jsonMapper
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.springframework.http.HttpStatus
+import tools.jackson.module.kotlin.jsonMapper
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonregister.Prison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonregister.PrisonsByIdsRequest
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Prison
 
 class PrisonRegisterMockServer : WireMockServer(9005) {
   fun givenPrison(prison: Prison = prison()): Prison = givenPrisons(setOf(prison)).first()
@@ -23,8 +25,7 @@ class PrisonRegisterMockServer : WireMockServer(9005) {
   ): Set<Prison> {
     val request = PrisonsByIdsRequest((prisonCodes.takeIf { it.isNotEmpty() } ?: prisons.map { it.code }.toSet()))
     stubFor(
-      WireMock
-        .post(WireMock.urlPathEqualTo("/prisons/prisonsByIds"))
+      post(urlPathEqualTo("/prisons/prisonsByIds"))
         .withRequestBody(
           equalToJson(
             jsonMapper().writeValueAsString(request),
@@ -32,8 +33,7 @@ class PrisonRegisterMockServer : WireMockServer(9005) {
             true,
           ),
         ).willReturn(
-          WireMock
-            .aResponse()
+          aResponse()
             .withHeader("Content-Type", "application/json")
             .withStatus(HttpStatus.OK.value())
             .withBody(

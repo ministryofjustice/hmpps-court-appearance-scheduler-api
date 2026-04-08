@@ -1,6 +1,8 @@
 integration:
   hmpps-auth:
     url: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth"
+  court-register:
+    url: "https://court-register-api-dev.hmpps.service.justice.gov.uk"
   manage-users:
     url:  "https://manage-users-api-dev.hmpps.service.justice.gov.uk"
   nomis-migration:

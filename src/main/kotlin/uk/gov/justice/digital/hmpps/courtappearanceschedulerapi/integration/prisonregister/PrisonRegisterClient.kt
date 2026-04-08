@@ -1,18 +1,19 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonregister
 
-import com.fasterxml.jackson.annotation.JsonAlias
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
+import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.retryOnTransientException
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Prison
 
 @Service
 class PrisonRegisterClient(
   @Qualifier("prisonRegisterApiWebClient") private val webClient: WebClient,
 ) {
-  fun findPrisons(ids: Set<String>): List<Prison> = if (ids.isEmpty()) {
-    emptyList()
+  fun findPrisons(ids: Set<String>): Mono<List<Prison>> = if (ids.isEmpty()) {
+    Mono.just(emptyList())
   } else {
     webClient
       .post()
@@ -21,17 +22,9 @@ class PrisonRegisterClient(
       .retrieve()
       .bodyToMono<List<Prison>>()
       .retryOnTransientException()
-      .block()!!
   }
 
-  fun findPrison(code: String): Prison? = findPrisons(setOf(code)).firstOrNull()
-  fun getPrisonOrDefault(code: String): Prison = findPrison(code) ?: Prison.default(code)
+  fun findPrison(code: String): Mono<Prison> = findPrisons(setOf(code)).map { prs -> prs.firstOrNull { it.code == code } ?: Prison.default(code) }
 }
 
 data class PrisonsByIdsRequest(val prisonIds: Set<String>)
-
-data class Prison(@JsonAlias("prisonId") val code: String, @JsonAlias("prisonName") val name: String) {
-  companion object {
-    fun default(code: String): Prison = Prison(code = code, name = code)
-  }
-}

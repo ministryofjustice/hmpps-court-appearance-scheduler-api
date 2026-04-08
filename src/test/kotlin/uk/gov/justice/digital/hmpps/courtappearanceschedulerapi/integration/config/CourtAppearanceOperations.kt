@@ -12,8 +12,14 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReasonByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getStatusByCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.*
 
 typealias PersonProvider = (String, String) -> PersonSummary
@@ -27,14 +33,14 @@ interface CourtAppearanceOperations {
 
   companion object {
     fun courtAppearance(
-      personIdentifier: String,
-      prisonCode: String,
-      courtCode: String,
-      reasonCode: String,
-      start: LocalDateTime,
-      end: LocalDateTime?,
-      comments: String?,
-      legacyId: Long?,
+      personIdentifier: String = personIdentifier(),
+      prisonCode: String = prisonCode(),
+      courtCode: String = courtCode(),
+      reasonCode: String = "CRT",
+      start: LocalDateTime = LocalDateTime.of(LocalDate.now().plusDays(7), LocalTime.of(10, 0)),
+      end: LocalDateTime? = LocalDateTime.of(LocalDate.now().plusDays(7), LocalTime.of(17, 0)),
+      comments: String? = word(25),
+      legacyId: Long? = null,
       movements: List<CourtAppearanceMovement> = listOf(),
     ): CourtAppearanceProvider = { person, reason, status ->
       CourtAppearance(

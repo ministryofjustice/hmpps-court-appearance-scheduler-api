@@ -37,6 +37,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.conf
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.container.LocalStackContainer
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.container.LocalStackContainer.setLocalStackProperties
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.container.PostgresContainer
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourterRegisterExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.HmppsAuthApiExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.ManageUsersExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.NomisMigrationExtension
@@ -56,6 +57,7 @@ import java.util.concurrent.TimeUnit
 @ExtendWith(
   value = [
     HmppsAuthApiExtension::class,
+    CourterRegisterExtension::class,
     ManageUsersExtension::class,
     NomisMigrationExtension::class,
     PrisonerRegisterExtension::class,

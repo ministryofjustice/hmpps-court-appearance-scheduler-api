@@ -8,6 +8,8 @@ management.endpoint:
 integration:
   hmpps-auth:
     url: "http://localhost:8090/auth"
+  court-register:
+    url: "http://localhost:9006"
   manage-users:
     url:  "http://localhost:8095"
   nomis-migration:

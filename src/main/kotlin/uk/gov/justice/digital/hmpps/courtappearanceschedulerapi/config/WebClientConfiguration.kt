@@ -12,11 +12,15 @@ import java.time.Duration.ofSeconds
 
 @Configuration
 class WebClientConfiguration(
+  @Value($$"${integration.court-register.url}") private val courtRegisterBaseUri: String,
   @Value($$"${integration.manage-users.url}") private val manageUsersBaseUri: String,
-  @Value($$"${integration.prisoner-search.url}") private val prisonerSearchBaseUri: String,
   @Value($$"${integration.nomis-migration.url}") private val nomisMigrationBaseUri: String,
   @Value($$"${integration.prison-register.url}") private val prisonRegisterBaseUri: String,
+  @Value($$"${integration.prisoner-search.url}") private val prisonerSearchBaseUri: String,
 ) {
+  @Bean
+  fun courtRegisterApiWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient = builder.authorisedWebClient(authorizedClientManager, DEFAULT_REGISTRATION_ID, courtRegisterBaseUri, timeout)
+
   @Bean
   fun manageUsersWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder) = builder.authorisedWebClient(authorizedClientManager, DEFAULT_REGISTRATION_ID, manageUsersBaseUri, timeout)
 
