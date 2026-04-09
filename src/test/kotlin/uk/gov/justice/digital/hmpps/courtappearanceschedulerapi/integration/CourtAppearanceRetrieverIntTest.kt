@@ -15,7 +15,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wire
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Appearance
 import java.util.*
 
-class RetrieveCourtAppearanceIntTest(
+class CourtAppearanceRetrieverIntTest(
   @Autowired cao: CourtAppearanceOperations,
 ) : IntegrationTest(),
   CourtAppearanceOperations by cao {
@@ -41,7 +41,7 @@ class RetrieveCourtAppearanceIntTest(
     val court = courtRegister.givenCourt()
     val ca = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code))
 
-    val res = requireNotNull(getAppearance(ca.id)).successResponse<Appearance>()
+    val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
     assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
@@ -55,7 +55,7 @@ class RetrieveCourtAppearanceIntTest(
     courtRegister.givenCourts(setOf(), setOf(courtCode))
     val ca = givenCourtAppearance(courtAppearance(prisonCode = prisonCode, courtCode = courtCode))
 
-    val res = requireNotNull(getAppearance(ca.id)).successResponse<Appearance>()
+    val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
     assertThat(res.prison.name).isEqualTo(prisonCode)
     assertThat(res.court.name).isEqualTo(courtCode)

@@ -13,7 +13,6 @@ import org.hibernate.type.SqlTypes
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.QueryHints
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEvent
 import java.util.*
 
@@ -25,18 +24,18 @@ class HmppsDomainEvent(
   @Column(name = "event")
   val event: DomainEvent<*>,
 
+  @Column(name = "entity_id")
+  val entityId: UUID,
+
   @Id
   @Column(name = "id", nullable = false)
-  val id: UUID = newUuid(),
+  val id: UUID = event.id,
 ) {
   @Version
   val version: Int? = null
 
   @Column(name = "event_type")
   val eventType: String = event.eventType
-
-  @Column(name = "entity_id")
-  val entityId: UUID = event.id
 
   var published: Boolean = false
 }

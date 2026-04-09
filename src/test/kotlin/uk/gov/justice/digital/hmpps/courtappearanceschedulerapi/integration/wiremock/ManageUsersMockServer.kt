@@ -9,20 +9,23 @@ import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.springframework.http.HttpStatus
 import tools.jackson.module.kotlin.jsonMapper
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.username
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.manageusers.UserDetails
 
 class ManageUsersServer : WireMockServer(8095) {
 
-  fun givenUser(username: String, userDetails: UserDetails = user(username), status: HttpStatus = HttpStatus.OK) {
+  fun givenUser(userDetails: UserDetails = user(), status: HttpStatus = HttpStatus.OK): UserDetails {
     val response = aResponse().withHeader("Content-Type", "application/json")
     if (status == HttpStatus.OK) {
       response.withBody(jsonMapper().writeValueAsString(userDetails))
     }
-    stubFor(get("/users/$username").willReturn(response.withStatus(status.value())))
+    stubFor(get("/users/${userDetails.username}").willReturn(response.withStatus(status.value())))
+    return userDetails
   }
 
   companion object {
-    fun user(username: String, name: String = username) = UserDetails(username, name)
+    fun user(username: String = username(), name: String = word(8) + word(8)) = UserDetails(username, name)
   }
 }
 

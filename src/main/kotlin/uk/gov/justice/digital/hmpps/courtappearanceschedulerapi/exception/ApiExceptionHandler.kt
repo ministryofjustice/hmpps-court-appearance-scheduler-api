@@ -27,7 +27,7 @@ class ApiExceptionHandler {
     .body(
       ErrorResponse(
         status = CONFLICT,
-        userMessage = e.message,
+        userMessage = "A conflict has been detected",
         developerMessage = e.devMessage(),
       ),
     )
@@ -53,7 +53,7 @@ class ApiExceptionHandler {
     .body(
       ErrorResponse(
         status = BAD_REQUEST,
-        userMessage = "Invalid request: ${e.message}",
+        userMessage = "Invalid request",
         developerMessage = e.devMessage(),
       ),
     )
@@ -70,7 +70,7 @@ class ApiExceptionHandler {
     .body(
       ErrorResponse(
         status = FORBIDDEN,
-        userMessage = "Forbidden: ${e.message}",
+        userMessage = "Forbidden",
         developerMessage = e.message,
       ),
     )
@@ -81,13 +81,13 @@ class ApiExceptionHandler {
     .body(
       ErrorResponse(
         status = NOT_FOUND,
-        userMessage = "No resource found failure: ${e.message}",
+        userMessage = "No resource found failure",
         developerMessage = e.message,
       ),
     )
 
   @ExceptionHandler(NotFoundException::class)
-  fun handleNoResourceFoundException(e: NotFoundException): ResponseEntity<ErrorResponse> = ResponseEntity
+  fun handleNotFoundException(e: NotFoundException): ResponseEntity<ErrorResponse> = ResponseEntity
     .status(NOT_FOUND)
     .body(
       ErrorResponse(
@@ -114,7 +114,7 @@ class ApiExceptionHandler {
     .body(
       ErrorResponse(
         status = INTERNAL_SERVER_ERROR,
-        userMessage = "Unexpected error: ${e.message}",
+        userMessage = "Unexpected error",
         developerMessage = e.message,
       ),
     )

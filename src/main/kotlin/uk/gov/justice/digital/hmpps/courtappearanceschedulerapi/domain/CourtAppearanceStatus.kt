@@ -35,6 +35,12 @@ class CourtAppearanceStatus(
     IN_PROGRESS,
     COMPLETED,
     EXPIRED,
+    ;
+
+    companion object {
+      fun of(code: String): Code = entries.firstOrNull { it.name.equals(code, true) }
+        ?: throw IllegalArgumentException("Invalid Court Appearance Status Code")
+    }
   }
 }
 

@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.pris
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonersearch.PrisonerNumbers
 
 class PrisonerSearchServer : WireMockServer(9000) {
+  fun givenPrisoner(prisoner: Prisoner): Prisoner = givenPrisoners(prisoner.prisonId!!, setOf(prisoner.prisonerNumber), listOf(prisoner)).first()
 
   fun givenPrisoners(
     prisonCode: String,
@@ -38,7 +39,7 @@ class PrisonerSearchServer : WireMockServer(9000) {
 
   companion object {
     fun prisoner(
-      prisonCode: String?,
+      prisonCode: String,
       personIdentifier: String = personIdentifier(),
       firstName: String = word(8),
       lastName: String = word(12),

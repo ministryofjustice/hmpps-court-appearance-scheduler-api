@@ -16,7 +16,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.asStatus
 import java.util.*
 
 @Service
-class RetrieveCourtAppearance(
+class CourtAppearanceRetriever(
   private val appearanceRepository: CourtAppearanceRepository,
   private val prisonRegister: PrisonRegisterClient,
   private val courtRegister: CourtRegisterClient,

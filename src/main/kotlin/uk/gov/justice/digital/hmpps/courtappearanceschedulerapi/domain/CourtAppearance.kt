@@ -8,7 +8,9 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.PostLoad
 import jakarta.persistence.Table
+import jakarta.persistence.Transient
 import jakarta.persistence.Version
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
@@ -17,6 +19,14 @@ import org.hibernate.annotations.FetchMode
 import org.hibernate.envers.Audited
 import org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRecorded
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceScheduled
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.changes
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
@@ -35,11 +45,12 @@ final class CourtAppearance(
   legacyId: Long?,
   @Id
   @Column(name = "id", nullable = false)
-  val id: UUID = newUuid(),
-) {
+  override val id: UUID = newUuid(),
+) : Identifiable,
+  DomainEventProducer {
   @Version
   @Column(name = "version", nullable = false)
-  var version: Int? = null
+  override var version: Int? = null
     private set
 
   @Audited(targetAuditMode = NOT_AUDITED)
@@ -66,7 +77,10 @@ final class CourtAppearance(
   @ManyToOne(optional = false)
   @JoinColumn(name = "reason_id", nullable = false)
   var reason: CourtAppearanceReason = reason
-    private set
+    private set(value) {
+      field = value
+      external = value.external
+    }
 
   @Audited(targetAuditMode = NOT_AUDITED)
   @NotNull
@@ -90,7 +104,7 @@ final class CourtAppearance(
     private set
 
   @Column(name = "comments", length = Integer.MAX_VALUE)
-  var comments: String? = comments
+  var comments: String? = comments?.trim()
     private set
 
   @Column(name = "legacy_id")
@@ -101,6 +115,23 @@ final class CourtAppearance(
   @OneToMany(mappedBy = "courtAppearance", cascade = [CascadeType.PERSIST, CascadeType.MERGE], fetch = FetchType.EAGER)
   val movements: List<CourtAppearanceMovement>
     field = mutableListOf<CourtAppearanceMovement>()
+
+  @Transient
+  private var appliedActions: List<CourtAppearanceAction> = listOf()
+
+  @PostLoad
+  private fun load() {
+    appliedActions = listOf()
+  }
+
+  override fun initialEvents(): Set<DomainEventPublication> = when (status.code) {
+    CourtAppearanceStatus.Code.SCHEDULED -> setOf(CourtAppearanceScheduled(person.identifier, id).publication(id))
+    else -> setOf(CourtAppearanceRecorded(person.identifier, id).publication(id))
+  }
+
+  override fun domainEvents(): Set<DomainEventPublication> = appliedActions.mapNotNull { action ->
+    action.domainEvent(this)?.publication(id)
+  }.toSet()
 
   fun addMovement(movement: CourtAppearanceMovement) = apply {
     movements.add(movement)
@@ -130,4 +161,41 @@ final class CourtAppearance(
   private fun isExpired() = movements.isEmpty() && isInThePast()
 
   private fun isInThePast() = end?.isBefore(LocalDateTime.now()) ?: start.toLocalDate().isBefore(LocalDate.now())
+
+  fun recategorise(action: RecategoriseAppearance, reasonSupplier: (String) -> CourtAppearanceReason) = apply {
+    if (action.reasonCode != reason.code) {
+      reason = reasonSupplier(action.reasonCode)
+      appliedActions += action
+    }
+  }
+
+  fun relocate(action: RelocateAppearance) = apply {
+    if (action.courtCode != courtCode) {
+      courtCode = action.courtCode
+      appliedActions += action
+    }
+  }
+
+  fun reschedule(action: RescheduleAppearance) = apply {
+    if (action.changes(::start, ::end)) {
+      appliedActions += action
+    }
+  }
+
+  fun applyComments(action: ChangeAppearanceComments) = apply {
+    if (action changes ::comments) {
+      appliedActions += action
+    }
+  }
+
+  companion object {
+    fun changeableProperties() = listOf(
+      CourtAppearance::prisonCode,
+      CourtAppearance::courtCode,
+      CourtAppearance::comments,
+      CourtAppearance::start,
+      CourtAppearance::end,
+      CourtAppearance::reason,
+    )
+  }
 }
