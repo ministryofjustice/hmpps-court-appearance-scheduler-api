@@ -1,0 +1,10 @@
+audit_revision
+person_summary
+court_appearance_reason
+court_appearance_status
+court_appearance
+court_appearance_movement
+court_appearance_movement_audit
+court_appearance_audit
+hmpps_domain_event
+hmpps_domain_event_audit
