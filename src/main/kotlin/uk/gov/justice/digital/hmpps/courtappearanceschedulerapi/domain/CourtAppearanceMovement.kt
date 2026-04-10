@@ -63,7 +63,6 @@ final class CourtAppearanceMovement(
   var courtCode: String = courtCode
     private set
 
-  @Size(max = 3)
   @NotNull
   @Enumerated(EnumType.STRING)
   @Column(name = "direction", nullable = false, length = 3)

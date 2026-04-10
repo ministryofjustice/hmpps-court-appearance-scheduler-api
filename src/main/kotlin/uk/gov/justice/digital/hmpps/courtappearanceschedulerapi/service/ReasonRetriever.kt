@@ -7,7 +7,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.CourtAppea
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.asReason
 
 @Service
-class RetrieveReasons(private val reasonRepository: CourtAppearanceReasonRepository) {
+class ReasonRetriever(private val reasonRepository: CourtAppearanceReasonRepository) {
   fun allReasons(): CourtAppearanceReasons = CourtAppearanceReasons(
     reasonRepository.findAll().filter { it.active }.sortedBy { it.sequenceNumber }.map(CourtAppearanceReason::asReason),
   )

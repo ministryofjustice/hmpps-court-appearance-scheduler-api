@@ -23,6 +23,5 @@ data class Prisoner(
     )
 
     const val PATTERN: String = "\\w\\d{4}\\w{2}"
-    const val UNKNOWN_PRISON = "UNK"
   }
 }

@@ -6,16 +6,21 @@ import jakarta.validation.ConstraintValidatorContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRescheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEvent
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.StartAndEnd
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ValidStartAndEnd
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty0
 
+@ValidReschedule
+@ValidStartAndEnd
 data class RescheduleAppearance(
-  val start: LocalDateTime?,
-  val end: LocalDateTime?,
+  override val start: LocalDateTime?,
+  override val end: LocalDateTime?,
   override val reason: String? = null,
-) : CourtAppearanceAction {
+) : CourtAppearanceAction,
+  StartAndEnd<LocalDateTime> {
   override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceRescheduled(ca.person.identifier, ca.id)
 }
 

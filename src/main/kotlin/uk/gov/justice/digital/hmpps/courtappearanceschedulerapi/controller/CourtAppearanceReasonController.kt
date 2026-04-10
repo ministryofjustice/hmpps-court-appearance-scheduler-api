@@ -6,12 +6,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.CourtAppearanceReasons
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.RetrieveReasons
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.ReasonRetriever
 
 @RestController
 @RequestMapping("/court-appearance-reasons")
 @PreAuthorize("hasAnyRole('${Roles.SCHEDULER_RO}', '${Roles.SCHEDULER_RW}', '${Roles.SCHEDULER_UI}')")
-class CourtAppearanceReasonController(private val retrieve: RetrieveReasons) {
+class CourtAppearanceReasonController(private val retrieve: ReasonRetriever) {
   @GetMapping
   fun getCourtAppearanceReasons(): CourtAppearanceReasons = retrieve.allReasons()
 }

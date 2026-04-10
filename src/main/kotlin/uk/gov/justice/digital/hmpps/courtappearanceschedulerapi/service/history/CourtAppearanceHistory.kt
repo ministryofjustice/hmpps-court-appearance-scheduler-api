@@ -13,8 +13,8 @@ class CourtAppearanceHistory(
 ) : HistoryService<CourtAppearance>(entityManager, managerUsers) {
   override val entityClass = CourtAppearance::class.java
   override fun CourtAppearance.changesFrom(previous: CourtAppearance): List<AuditedAction.Change> = CourtAppearance.changeableProperties().mapNotNull {
-    val change = it.invoke(this).asChangeValue()
-    val previous = it.invoke(previous).asChangeValue()
+    val change = it(this).asChangeValue()
+    val previous = it(previous).asChangeValue()
     if (change != previous) {
       AuditedAction.Change(it.name, previous, change)
     } else {

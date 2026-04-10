@@ -31,8 +31,8 @@ class SchedulerContextHolder {
       ThreadLocal.withInitial { SchedulerContext(SYSTEM_USERNAME) }
 
     internal fun getContext(): SchedulerContext = context.get()
-    internal fun setContext(emc: SchedulerContext) {
-      context.set(emc)
+    internal fun setContext(sc: SchedulerContext) {
+      context.set(sc)
     }
 
     internal fun clearContext() {

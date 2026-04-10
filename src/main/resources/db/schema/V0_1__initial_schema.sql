@@ -74,7 +74,9 @@ create table court_appearance
 )
 ;
 
-create index idx_court_appearance_person_identifier on court_appearance (person_identifier);
+create index idx_court_appearance_person_status_start on court_appearance (person_identifier, status_id, start);
+create index idx_court_appearance_prison_start_status_reason on court_appearance (prison_code, start, status_id, reason_id);
+create index idx_court_appearance_prison_start_external on court_appearance (prison_code, start) where external = true;
 
 create table court_appearance_movement
 (

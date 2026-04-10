@@ -4,6 +4,7 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceReason
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceReasonRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
@@ -20,6 +21,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.conf
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 typealias PersonProvider = (String, String) -> PersonSummary
@@ -38,24 +40,33 @@ interface CourtAppearanceOperations {
       courtCode: String = courtCode(),
       reasonCode: String = "CRT",
       start: LocalDateTime = LocalDateTime.of(LocalDate.now().plusDays(7), LocalTime.of(10, 0, 0)),
-      end: LocalDateTime? = LocalDateTime.of(LocalDate.now().plusDays(7), LocalTime.of(17, 0, 0)),
+      end: LocalDateTime? = LocalDateTime.of(start.toLocalDate(), LocalTime.of(17, 0, 0)),
       comments: String? = word(25),
       legacyId: Long? = null,
-      movements: List<CourtAppearanceMovement> = listOf(),
+      movements: List<(CourtAppearance) -> CourtAppearanceMovement> = listOf(),
     ): CourtAppearanceProvider = { person, reason, status ->
       CourtAppearance(
         person(personIdentifier, prisonCode),
         prisonCode,
         courtCode,
         reason(reasonCode),
-        start,
-        end,
+        start.truncatedTo(ChronoUnit.SECONDS),
+        end?.truncatedTo(ChronoUnit.SECONDS),
         comments,
         legacyId,
       )
-        .apply { movements.forEach { addMovement(it) } }
+        .apply { movements.forEach { addMovement(it(this)) } }
         .calculateStatus(status)
     }
+  }
+
+  fun movement(
+    direction: Direction,
+    occurredAt: LocalDateTime = LocalDateTime.now(),
+    comments: String? = word(25),
+    legacyId: String? = null,
+  ): (CourtAppearance) -> CourtAppearanceMovement = { ca ->
+    CourtAppearanceMovement(ca, ca.person, ca.prisonCode, ca.courtCode, direction, occurredAt, comments, legacyId)
   }
 }
 

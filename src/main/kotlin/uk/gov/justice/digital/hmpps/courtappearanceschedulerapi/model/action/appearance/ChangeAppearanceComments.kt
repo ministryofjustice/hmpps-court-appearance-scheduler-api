@@ -12,9 +12,9 @@ data class ChangeAppearanceComments(
   override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceCommentsChanged(ca.person.identifier, ca.id)
 }
 
-infix fun ChangeAppearanceComments.changes(property: KMutableProperty0<String?>): Boolean = if (comments?.trim() == property.get()?.trim()) {
+infix fun ChangeAppearanceComments.changes(property: KMutableProperty0<String?>): Boolean = if (comments == property.get()) {
   false
 } else {
-  property.set(comments?.trim())
+  property.set(comments)
   true
 }

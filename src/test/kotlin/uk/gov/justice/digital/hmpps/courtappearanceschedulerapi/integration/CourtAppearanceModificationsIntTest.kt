@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.envers.RevisionType
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
@@ -26,6 +27,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.app
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
 
@@ -49,6 +51,25 @@ class CourtAppearanceModificationsIntTest(
   fun `403 forbidden without correct role`() {
     applyAction(newUuid(), ChangeAppearanceComments("403"), role = Roles.SCHEDULER_RO)
       .expectStatus().isForbidden
+  }
+
+  @Test
+  fun `400 bad request if reschedule start and end are null`() {
+    val action = RescheduleAppearance(null, null)
+    val res = applyAction(newUuid(), action).errorResponse(HttpStatus.BAD_REQUEST)
+    assertThat(res.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
+    assertThat(res.userMessage).isEqualTo("Validation failure: Either start or end must be provided.")
+  }
+
+  @Test
+  fun `400 bad request if reschedule end is before start`() {
+    val action = RescheduleAppearance(
+      LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES).plusDays(1).plusHours(2),
+      LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES).plusDays(1),
+    )
+    val res = applyAction(newUuid(), action).errorResponse(HttpStatus.BAD_REQUEST)
+    assertThat(res.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
+    assertThat(res.userMessage).isEqualTo("Validation failure: End must be after start.")
   }
 
   @Test
@@ -94,7 +115,10 @@ class CourtAppearanceModificationsIntTest(
     with(res.content.single()) {
       assertThat(domainEvents).containsExactly(CourtAppearanceRescheduled.EVENT_TYPE)
       assertThat(reason).isEqualTo(action.reason)
-      assertThat(changes.map { it.propertyName }).containsExactly(CourtAppearance::start.name, CourtAppearance::end.name)
+      assertThat(changes.map { it.propertyName }).containsExactly(
+        CourtAppearance::start.name,
+        CourtAppearance::end.name,
+      )
     }
 
     val saved = requireNotNull(findCourtAppearance(ca.id))
@@ -123,7 +147,10 @@ class CourtAppearanceModificationsIntTest(
     with(res.content.single()) {
       assertThat(domainEvents).containsExactly(CourtAppearanceRescheduled.EVENT_TYPE)
       assertThat(reason).isEqualTo(action.reason)
-      assertThat(changes.map { it.propertyName }).containsExactly(CourtAppearance::start.name, CourtAppearance::end.name)
+      assertThat(changes.map { it.propertyName }).containsExactly(
+        CourtAppearance::start.name,
+        CourtAppearance::end.name,
+      )
     }
 
     val saved = requireNotNull(findCourtAppearance(ca.id))

@@ -7,5 +7,5 @@ import tools.jackson.databind.ValueDeserializer
 
 @JacksonComponent
 class StringDeserializer : ValueDeserializer<String>() {
-  override fun deserialize(p: JsonParser, ctxt: DeserializationContext): String = p.string.filter { it != Char.MIN_VALUE }
+  override fun deserialize(p: JsonParser, ctxt: DeserializationContext): String = p.string.filter { it != Char.MIN_VALUE }.trim()
 }

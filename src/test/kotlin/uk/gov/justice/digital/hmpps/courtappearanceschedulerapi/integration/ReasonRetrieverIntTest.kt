@@ -7,7 +7,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AppearanceReason
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.CourtAppearanceReasons
 
-class RetrieveReasonsIntTest : IntegrationTest() {
+class ReasonRetrieverIntTest : IntegrationTest() {
 
   @Test
   fun `401 unauthorised without a valid token`() {
