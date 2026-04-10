@@ -1,7 +1,6 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception
 
 import jakarta.validation.ValidationException
-import org.slf4j.LoggerFactory
 import org.springframework.context.MessageSourceResolvable
 import org.springframework.dao.DataAccessException
 import org.springframework.dao.DataIntegrityViolationException
@@ -21,7 +20,18 @@ import org.springframework.web.servlet.resource.NoResourceFoundException
 import uk.gov.justice.hmpps.kotlin.common.ErrorResponse
 
 @RestControllerAdvice
-class CourtAppearanceSchedulerApiExceptionHandler {
+class ApiExceptionHandler {
+  @ExceptionHandler(ConflictException::class)
+  fun handleConflictException(e: ConflictException): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(CONFLICT)
+    .body(
+      ErrorResponse(
+        status = CONFLICT,
+        userMessage = "A conflict has been detected",
+        developerMessage = e.devMessage(),
+      ),
+    )
+
   @ExceptionHandler(ValidationException::class)
   fun handleValidationException(e: ValidationException): ResponseEntity<ErrorResponse> = ResponseEntity
     .status(BAD_REQUEST)
@@ -43,7 +53,7 @@ class CourtAppearanceSchedulerApiExceptionHandler {
     .body(
       ErrorResponse(
         status = BAD_REQUEST,
-        userMessage = "Invalid request: ${e.message}",
+        userMessage = "Invalid request",
         developerMessage = e.devMessage(),
       ),
     )
@@ -60,7 +70,7 @@ class CourtAppearanceSchedulerApiExceptionHandler {
     .body(
       ErrorResponse(
         status = FORBIDDEN,
-        userMessage = "Forbidden: ${e.message}",
+        userMessage = "Forbidden",
         developerMessage = e.message,
       ),
     )
@@ -71,8 +81,19 @@ class CourtAppearanceSchedulerApiExceptionHandler {
     .body(
       ErrorResponse(
         status = NOT_FOUND,
-        userMessage = "No resource found failure: ${e.message}",
+        userMessage = "No resource found failure",
         developerMessage = e.message,
+      ),
+    )
+
+  @ExceptionHandler(NotFoundException::class)
+  fun handleNotFoundException(e: NotFoundException): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(NOT_FOUND)
+    .body(
+      ErrorResponse(
+        status = NOT_FOUND,
+        userMessage = e.message,
+        developerMessage = e.devMessage(),
       ),
     )
 
@@ -93,14 +114,10 @@ class CourtAppearanceSchedulerApiExceptionHandler {
     .body(
       ErrorResponse(
         status = INTERNAL_SERVER_ERROR,
-        userMessage = "Unexpected error: ${e.message}",
+        userMessage = "Unexpected error",
         developerMessage = e.message,
       ),
-    ).also { log.error("Unexpected exception", e) }
-
-  private companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-  }
+    )
 }
 
 private fun RuntimeException.devMessage(): String = message ?: "${this::class.simpleName}: ${cause?.message ?: ""}"

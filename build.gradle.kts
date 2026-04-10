@@ -11,7 +11,7 @@ plugins {
 }
 
 val hmppsKotlinVersion = "2.1.0"
-val sentryVersion = "8.37.1"
+val sentryVersion = "8.38.0"
 val springDocVersion = "3.0.2"
 val sqsStarterVersion = "7.3.0"
 val swaggerParserVersion = "2.1.39"
@@ -53,6 +53,7 @@ tasks {
       jvmTarget = JVM_25
       freeCompilerArgs.addAll(
         "-Xannotation-default-target=param-property",
+        "-Xexplicit-backing-fields",
       )
     }
   }
