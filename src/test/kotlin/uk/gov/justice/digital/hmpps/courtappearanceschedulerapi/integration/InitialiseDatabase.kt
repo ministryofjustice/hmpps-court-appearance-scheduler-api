@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration
 
 import org.junit.jupiter.api.Test
 
-class InitialiseDatabase : IntegrationTestBase() {
+class InitialiseDatabase : IntegrationTest() {
 
   @Test
   fun `initialises database`() {

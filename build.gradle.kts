@@ -53,6 +53,7 @@ tasks {
       jvmTarget = JVM_25
       freeCompilerArgs.addAll(
         "-Xannotation-default-target=param-property",
+        "-Xexplicit-backing-fields",
       )
     }
   }
