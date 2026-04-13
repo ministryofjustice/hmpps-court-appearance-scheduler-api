@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.AppearanceScheduleSearchRequest
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.CourtAppearanceSchedules
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.CourtAppearanceSearchRequest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.CourtAppearanceSearchResponse
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.PersonAppearanceSearchRequest
@@ -30,4 +32,11 @@ class SearchController(
     @PathVariable personIdentifier: String,
     @Valid @RequestBody request: PersonAppearanceSearchRequest,
   ): CourtAppearanceSearchResponse = appearance.findForPerson(personIdentifier, request)
+
+  @PreAuthorize("hasAnyRole('${Roles.SCHEDULER_RO}','${Roles.SCHEDULER_RW}')")
+  @PostMapping("/prisons/{prisonCode}/court-appearances/schedules")
+  fun findAppearanceSchedules(
+    @PathVariable prisonCode: String,
+    @Valid @RequestBody request: AppearanceScheduleSearchRequest,
+  ): CourtAppearanceSchedules = appearance.findSchedules(prisonCode, request)
 }

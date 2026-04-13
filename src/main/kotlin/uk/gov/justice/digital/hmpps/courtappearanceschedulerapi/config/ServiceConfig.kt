@@ -19,6 +19,7 @@ class ServiceConfigInfo(
 data class ServiceConfig(
   val activePrisons: Set<String>,
   val domainEvents: DomainEventConfig,
+  val uiBaseUrl: String,
 ) {
   data class DomainEventConfig(val pollInterval: Duration, val batchSize: Int)
 }
