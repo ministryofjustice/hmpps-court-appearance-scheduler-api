@@ -6,28 +6,26 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
-import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonersearch.Prisoner
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourtRegisterMockServer.Companion.court
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourterRegisterExtension.Companion.courtRegister
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerRegisterExtension.Companion.prisonRegister
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.CourtAppearanceSearchResponse
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.PersonAppearanceSearchRequest
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.AppearanceScheduleSearchRequest
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.CourtAppearanceSchedules
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-class PersonAppearanceSearchIntTest(
+class AppearanceScheduleSearchIntTest(
   @Autowired cao: CourtAppearanceOperations,
   @Autowired pso: PersonSummaryOperations,
 ) : IntegrationTest(),
@@ -37,49 +35,33 @@ class PersonAppearanceSearchIntTest(
   fun `401 unauthorised without a valid token`() {
     webTestClient
       .get()
-      .uri(URL_TO_TEST, personIdentifier())
+      .uri(URL_TO_TEST, "NAR")
       .exchange()
       .expectStatus()
       .isUnauthorized
   }
 
   @ParameterizedTest
-  @ValueSource(strings = [Roles.SCHEDULER_RO, Roles.SCHEDULER_RW])
+  @ValueSource(strings = [Roles.SCHEDULER_UI])
   fun `403 forbidden without correct role`(role: String) {
-    searchAppearances(personIdentifier(), searchRequest(), role).expectStatus().isForbidden
+    val prisonCode = "FBD"
+    searchAppearances(prisonCode, searchRequest(), role).expectStatus().isForbidden
   }
 
   @Test
-  fun `400 bad request if start after end`() {
-    val res =
-      searchAppearances(personIdentifier(), searchRequest(end = LocalDate.now(), start = LocalDate.now().plusDays(1)))
-        .errorResponse(HttpStatus.BAD_REQUEST)
+  fun `400 bad request if date range more than 31 days`() {
+    val prisonCode = "IDR"
+    val res = searchAppearances(prisonCode, searchRequest(start = LocalDate.now(), end = LocalDate.now().plusDays(32)))
+      .errorResponse(HttpStatus.BAD_REQUEST)
 
     assertThat(res.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
-    assertThat(res.userMessage).isEqualTo("Validation failure: End must be after start.")
-  }
-
-  @Test
-  fun `appearances by person identifier`() {
-    val prison = prisonRegister.givenPrison()
-    val court = courtRegister.givenCourt()
-
-    val toFind = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code))
-    givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code))
-
-    val res = searchAppearances(toFind.person.identifier, searchRequest())
-      .successResponse<CourtAppearanceSearchResponse>()
-
-    assertThat(res.content).hasSize(1)
-    assertThat(res.metadata.totalElements).isEqualTo(1)
-    assertThat(res.content.single().id).isEqualTo(toFind.id)
+    assertThat(res.userMessage).isEqualTo("Validation failure: Invalid date range")
   }
 
   @Test
   fun `can find appearances by date`() {
     val prison = prisonRegister.givenPrison()
     val courts = courtRegister.givenCourts(setOf(court(), court()))
-    val person = givenPersonSummary(personSummary())
     val start = LocalDate.now().plusDays(2)
     val end = start.plusDays(3)
 
@@ -88,7 +70,6 @@ class PersonAppearanceSearchIntTest(
       givenCourtAppearance(
         courtAppearance(
           prisonCode = prison.code,
-          personIdentifier = person.identifier,
           start = startDateTime,
           reasonCode = if (it % 2 == 0) "VL" else "CRT",
           courtCode = if (it % 2 == 0) courts.last().code else courts.first().code,
@@ -97,9 +78,9 @@ class PersonAppearanceSearchIntTest(
     }
 
     val res = searchAppearances(
-      person.identifier,
+      prison.code,
       searchRequest(start = start, end = end),
-    ).successResponse<CourtAppearanceSearchResponse>()
+    ).successResponse<CourtAppearanceSchedules>()
     assertThat(res.content).hasSize(4)
     assertThat(res.metadata.totalElements).isEqualTo(4)
     println(appearances.map { it.start })
@@ -108,45 +89,46 @@ class PersonAppearanceSearchIntTest(
   }
 
   @Test
+  fun `can filter appearances by person identifier`() {
+    val prison = prisonRegister.givenPrison()
+    val court = courtRegister.givenCourt()
+
+    val toFind = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code))
+    givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code))
+
+    val res = searchAppearances(prison.code, searchRequest(personIdentifiers = setOf(toFind.person.identifier)))
+      .successResponse<CourtAppearanceSchedules>()
+
+    assertThat(res.content).hasSize(1)
+    assertThat(res.metadata.totalElements).isEqualTo(1)
+    assertThat(res.content.single().id).isEqualTo(toFind.id)
+  }
+
+  @Test
   fun `can filter and sort appearances by status`() {
     val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
-    val person = givenPersonSummary(personSummary())
 
     val expired = givenCourtAppearance(
       courtAppearance(
         prisonCode = prison.code,
         courtCode = court.code,
-        personIdentifier = person.identifier,
         start = LocalDate.now().minusDays(1).atTime(9, 0),
       ),
     )
-    assertThat(expired.status.code).isEqualTo(CourtAppearanceStatus.Code.EXPIRED)
-    val scheduled = givenCourtAppearance(
-      courtAppearance(
-        prisonCode = prison.code,
-        courtCode = court.code,
-        personIdentifier = person.identifier,
-        start = LocalDate.now().atTime(6, 0),
-        end = null,
-      ),
-    )
-    assertThat(scheduled.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
+    val scheduled = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code))
     val inProgress = givenCourtAppearance(
       courtAppearance(
         prisonCode = prison.code,
         courtCode = court.code,
-        personIdentifier = person.identifier,
         start = LocalDate.now().atTime(10, 0),
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
       ),
     )
-    assertThat(inProgress.status.code).isEqualTo(CourtAppearanceStatus.Code.IN_PROGRESS)
     val completed = givenCourtAppearance(
       courtAppearance(
         prisonCode = prison.code,
         courtCode = court.code,
-        personIdentifier = person.identifier,
         start = LocalDate.now().minusDays(1).atTime(10, 0),
         movements = listOf(
           movement(CourtAppearanceMovement.Direction.OUT, LocalDate.now().minusDays(1).atTime(8, 0)),
@@ -154,40 +136,39 @@ class PersonAppearanceSearchIntTest(
         ),
       ),
     )
-    assertThat(completed.status.code).isEqualTo(CourtAppearanceStatus.Code.COMPLETED)
 
     val allAsc = searchAppearances(
-      person.identifier,
+      prison.code,
       searchRequest(start = LocalDate.now().minusDays(3), sort = "${CourtAppearance::status.name},asc"),
-    ).successResponse<CourtAppearanceSearchResponse>()
+    ).successResponse<CourtAppearanceSchedules>()
     assertThat(allAsc.content).hasSize(4)
     assertThat(allAsc.metadata.totalElements).isEqualTo(4)
     assertThat(allAsc.content.map { it.id }).containsExactly(scheduled.id, inProgress.id, completed.id, expired.id)
 
     val allDesc = searchAppearances(
-      person.identifier,
+      prison.code,
       searchRequest(start = LocalDate.now().minusDays(3), sort = "${CourtAppearance::status.name},desc"),
-    ).successResponse<CourtAppearanceSearchResponse>()
+    ).successResponse<CourtAppearanceSchedules>()
     assertThat(allDesc.content).hasSize(4)
     assertThat(allDesc.metadata.totalElements).isEqualTo(4)
     assertThat(allDesc.content.map { it.id }).containsExactly(expired.id, completed.id, inProgress.id, scheduled.id)
 
     val schedOnly = searchAppearances(
-      person.identifier,
+      prison.code,
       searchRequest(
         start = LocalDate.now().minusDays(3),
         statuses = setOf(
           CourtAppearanceStatus.Code.SCHEDULED,
         ),
       ),
-    ).successResponse<CourtAppearanceSearchResponse>()
+    ).successResponse<CourtAppearanceSchedules>()
 
     assertThat(schedOnly.content).hasSize(1)
     assertThat(schedOnly.metadata.totalElements).isEqualTo(1)
     assertThat(schedOnly.content.map { it.id }).containsExactly(scheduled.id)
 
     val two = searchAppearances(
-      person.identifier,
+      prison.code,
       searchRequest(
         start = LocalDate.now().minusDays(3),
         statuses = setOf(
@@ -195,7 +176,7 @@ class PersonAppearanceSearchIntTest(
           CourtAppearanceStatus.Code.EXPIRED,
         ),
       ),
-    ).successResponse<CourtAppearanceSearchResponse>()
+    ).successResponse<CourtAppearanceSchedules>()
 
     assertThat(two.content).hasSize(2)
     assertThat(two.metadata.totalElements).isEqualTo(2)
@@ -206,14 +187,12 @@ class PersonAppearanceSearchIntTest(
   fun `can filter appearances by reason and external flag`() {
     val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
-    val person = givenPersonSummary(personSummary())
 
     val videoAppearances = listOf(
       givenCourtAppearance(
         courtAppearance(
           prisonCode = prison.code,
           courtCode = court.code,
-          personIdentifier = person.identifier,
           reasonCode = "VL",
           start = LocalDate.now().plusDays(1).atTime(9, 0),
         ),
@@ -222,7 +201,6 @@ class PersonAppearanceSearchIntTest(
         courtAppearance(
           prisonCode = prison.code,
           courtCode = court.code,
-          personIdentifier = person.identifier,
           reasonCode = "VL",
           start = LocalDate.now().plusDays(1).atTime(11, 0),
         ),
@@ -233,7 +211,6 @@ class PersonAppearanceSearchIntTest(
         courtAppearance(
           prisonCode = prison.code,
           courtCode = court.code,
-          personIdentifier = person.identifier,
           reasonCode = "CRT",
           start = LocalDate.now().plusDays(1).atTime(9, 0),
         ),
@@ -242,44 +219,77 @@ class PersonAppearanceSearchIntTest(
         courtAppearance(
           prisonCode = prison.code,
           courtCode = court.code,
-          personIdentifier = person.identifier,
           reasonCode = "CRT",
           start = LocalDate.now().plusDays(1).atTime(11, 0),
         ),
       ),
     )
 
-    val byAllReasons = searchAppearances(person.identifier, searchRequest(reasons = setOf("VL", "CRT")))
-      .successResponse<CourtAppearanceSearchResponse>()
+    val byAllReasons = searchAppearances(prison.code, searchRequest(reasons = setOf("VL", "CRT")))
+      .successResponse<CourtAppearanceSchedules>()
     assertThat(byAllReasons.content).hasSize(4)
     assertThat(byAllReasons.metadata.totalElements).isEqualTo(4)
 
-    val vlReasons = searchAppearances(person.identifier, searchRequest(reasons = setOf("VL")))
-      .successResponse<CourtAppearanceSearchResponse>()
+    val vlReasons = searchAppearances(prison.code, searchRequest(reasons = setOf("VL")))
+      .successResponse<CourtAppearanceSchedules>()
     assertThat(vlReasons.content).hasSize(2)
     assertThat(vlReasons.metadata.totalElements).isEqualTo(2)
     assertThat(vlReasons.content.map { it.id }).containsExactlyElementsOf(videoAppearances.map { it.id })
 
-    val crtReasons = searchAppearances(person.identifier, searchRequest(reasons = setOf("CRT")))
-      .successResponse<CourtAppearanceSearchResponse>()
+    val crtReasons = searchAppearances(prison.code, searchRequest(reasons = setOf("CRT")))
+      .successResponse<CourtAppearanceSchedules>()
     assertThat(crtReasons.content).hasSize(2)
     assertThat(crtReasons.metadata.totalElements).isEqualTo(2)
     assertThat(crtReasons.content.map { it.id }).containsExactlyElementsOf(inPersonAppearances.map { it.id })
 
-    val externalAppearances = searchAppearances(person.identifier, searchRequest(external = true))
-      .successResponse<CourtAppearanceSearchResponse>()
+    val externalAppearances = searchAppearances(prison.code, searchRequest(external = true))
+      .successResponse<CourtAppearanceSchedules>()
     assertThat(externalAppearances.content).hasSize(2)
     assertThat(externalAppearances.metadata.totalElements).isEqualTo(2)
     assertThat(externalAppearances.content.map { it.id }).containsExactlyElementsOf(inPersonAppearances.map { it.id })
 
-    val internalAppearances = searchAppearances(person.identifier, searchRequest(external = false))
-      .successResponse<CourtAppearanceSearchResponse>()
+    val internalAppearances = searchAppearances(prison.code, searchRequest(external = false))
+      .successResponse<CourtAppearanceSchedules>()
     assertThat(internalAppearances.content).hasSize(2)
     assertThat(internalAppearances.metadata.totalElements).isEqualTo(2)
     assertThat(internalAppearances.content.map { it.id }).containsExactlyElementsOf(videoAppearances.map { it.id })
   }
 
+  @Test
+  fun `person not resident is not found`() {
+    val prison = prisonRegister.givenPrison()
+    val court = courtRegister.givenCourt()
+    val anotherPrisonCode = prisonCode()
+
+    val fPerson = givenPersonSummary(personSummary(prisonCode = prison.code))
+    val nfPerson = givenPersonSummary(personSummary(prisonCode = anotherPrisonCode))
+
+    val fApp = givenCourtAppearance(
+      courtAppearance(
+        prisonCode = prison.code,
+        courtCode = court.code,
+        personIdentifier = fPerson.identifier,
+      ),
+    )
+    givenCourtAppearance(
+      courtAppearance(
+        prisonCode = prison.code,
+        courtCode = court.code,
+        personIdentifier = nfPerson.identifier,
+      ),
+    )
+
+    val res = searchAppearances(prison.code, searchRequest()).successResponse<CourtAppearanceSchedules>()
+    assertThat(res.content.size).isEqualTo(1)
+    assertThat(res.metadata.totalElements).isEqualTo(1)
+    with(res.content.single()) {
+      assertThat(personIdentifier).isEqualTo(fPerson.identifier)
+      assertThat(id).isEqualTo(fApp.id)
+    }
+  }
+
   private fun searchRequest(
+    personIdentifiers: Set<String> = emptySet(),
     start: LocalDate = LocalDate.now(),
     end: LocalDate = start.plusDays(30),
     statuses: Set<CourtAppearanceStatus.Code> = emptySet(),
@@ -288,25 +298,20 @@ class PersonAppearanceSearchIntTest(
     page: Int = 1,
     size: Int = 10,
     sort: String = "${CourtAppearance::start.name},asc",
-  ) = PersonAppearanceSearchRequest(start, end, statuses, reasons, external, page, size, sort)
+  ) = AppearanceScheduleSearchRequest(personIdentifiers, start, end, statuses, reasons, external, page, size, sort)
 
   private fun searchAppearances(
-    personIdentifier: String,
-    request: PersonAppearanceSearchRequest,
-    role: String? = Roles.SCHEDULER_UI,
-  ): WebTestClient.ResponseSpec {
-    check(personIdentifier.matches(Prisoner.PATTERN.toRegex())) {
-      "Test error - person identifier does not match regex"
-    }
-    return webTestClient
-      .post()
-      .uri(URL_TO_TEST, personIdentifier)
-      .bodyValue(request)
-      .headers(setAuthorisation(username = DEFAULT_USERNAME, roles = listOfNotNull(role)))
-      .exchange()
-  }
+    prisonCode: String,
+    request: AppearanceScheduleSearchRequest,
+    role: String? = listOf(Roles.SCHEDULER_RO, Roles.SCHEDULER_RW).random(),
+  ) = webTestClient
+    .post()
+    .uri(URL_TO_TEST, prisonCode)
+    .bodyValue(request)
+    .headers(setAuthorisation(username = DEFAULT_USERNAME, roles = listOfNotNull(role)))
+    .exchange()
 
   companion object {
-    const val URL_TO_TEST = "/search/people/{personIdentifier}/court-appearances"
+    const val URL_TO_TEST = "/search/prisons/{prisonCode}/court-appearances/schedules"
   }
 }

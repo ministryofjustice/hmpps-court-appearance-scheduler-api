@@ -12,3 +12,8 @@ integration:
   prisoner-search:
     url: "https://prisoner-search-preprod.prison.service.justice.gov.uk"
 
+service:
+  active-prisons:
+  domain-events:
+    poll-interval: PT10s
+  ui-base-url: "https://court-appearance-scheduler-ui-preprod.hmpps.service.justice.gov.uk"

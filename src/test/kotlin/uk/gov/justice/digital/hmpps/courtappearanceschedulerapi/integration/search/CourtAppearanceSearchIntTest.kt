@@ -134,7 +134,16 @@ class CourtAppearanceSearchIntTest(
         start = LocalDate.now().minusDays(1).atTime(9, 0),
       ),
     )
-    val scheduled = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code))
+    assertThat(expired.status.code).isEqualTo(CourtAppearanceStatus.Code.EXPIRED)
+    val scheduled = givenCourtAppearance(
+      courtAppearance(
+        prisonCode = prison.code,
+        courtCode = court.code,
+        start = LocalDate.now().atTime(6, 0),
+        end = LocalDate.now().atTime(23, 59),
+      ),
+    )
+    assertThat(scheduled.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
     val inProgress = givenCourtAppearance(
       courtAppearance(
         prisonCode = prison.code,
@@ -143,6 +152,7 @@ class CourtAppearanceSearchIntTest(
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
       ),
     )
+    assertThat(inProgress.status.code).isEqualTo(CourtAppearanceStatus.Code.IN_PROGRESS)
     val completed = givenCourtAppearance(
       courtAppearance(
         prisonCode = prison.code,
@@ -154,6 +164,7 @@ class CourtAppearanceSearchIntTest(
         ),
       ),
     )
+    assertThat(completed.status.code).isEqualTo(CourtAppearanceStatus.Code.COMPLETED)
 
     val allAsc = searchAppearances(
       prison.code,

@@ -16,6 +16,7 @@ service:
   active-prisons: "***"
   domain-events:
     poll-interval: PT10s
+  ui-base-url: "https://court-appearance-scheduler-ui-dev.hmpps.service.justice.gov.uk"
 
 springdoc:
   api-docs:

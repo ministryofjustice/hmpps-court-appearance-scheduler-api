@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.findByIdOrNull
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.IDENTIFIER
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.PRISON_CODE
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
 import java.time.LocalDate
 import java.util.*
@@ -61,6 +63,11 @@ fun appearanceMatchesPersonName(name: String, prisonCode: String?) = Specificati
     person.matchesName(cb, name),
     prisonCode?.let { person.matchesPrisonCode(cb, it) } ?: cb.conjunction(),
   )
+}
+
+fun appearancePersonIdentifierIn(identifiers: Set<String>, prisonCode: String) = Specification<CourtAppearance> { ca, _, cb ->
+  val person = ca.join<CourtAppearance, PersonSummary>(CourtAppearance::person.name, JoinType.INNER)
+  cb.and(person.get<String>(IDENTIFIER).`in`(identifiers), cb.equal(person.get<String>(PRISON_CODE), prisonCode))
 }
 
 fun appearanceStatusCodeIn(statusCodes: Set<CourtAppearanceStatus.Code>) = Specification<CourtAppearance> { ca, _, _ ->
