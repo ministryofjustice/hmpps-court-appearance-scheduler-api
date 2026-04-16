@@ -11,7 +11,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.set
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
-import java.lang.Exception
 
 @Configuration
 class SchedulerContextConfiguration(private val contextInterceptor: SchedulerContextInterceptor) : WebMvcConfigurer {
@@ -44,7 +43,8 @@ class SchedulerContextInterceptor : HandlerInterceptor {
     } else {
       DataSource.DPS
     }
-    SchedulerContext(getUsername(), source = contextSource).set()
+    val caseloadId = request.getHeader(CaseloadIdHeader.NAME)
+    SchedulerContext(getUsername(), source = contextSource, caseloadId = caseloadId).set()
     return true
   }
 

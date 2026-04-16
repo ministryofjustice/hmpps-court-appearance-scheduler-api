@@ -5,6 +5,7 @@ import org.hibernate.envers.RevisionType
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.CaseloadIdHeader
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
@@ -58,7 +59,7 @@ class ScheduleCourtAppearanceIntTest(
     val person = givenPersonSummary(personSummary(prisonCode = prisonCode))
 
     val request = scheduleCourtAppearance(prisonCode, reasonCode = "CE")
-    val res = scheduleAppearance(person.identifier, request, username).successResponse<ReferenceId>()
+    val res = scheduleAppearance(person.identifier, request, username, prisonCode).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(res.id))
     saved.verifyAgainst(request)
@@ -70,7 +71,7 @@ class ScheduleCourtAppearanceIntTest(
       saved,
       RevisionType.ADD,
       setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
-      SchedulerContext.get().copy(username = username),
+      SchedulerContext.get().copy(username = username, caseloadId = prisonCode),
     )
 
     verifyEventPublications(
@@ -86,7 +87,7 @@ class ScheduleCourtAppearanceIntTest(
     val username = username()
 
     val request = scheduleCourtAppearance(prisonCode, reasonCode = "VLWT")
-    val res = scheduleAppearance(prisoner.prisonerNumber, request, username).successResponse<ReferenceId>()
+    val res = scheduleAppearance(prisoner.prisonerNumber, request, username, prisonCode).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(res.id))
     saved.verifyAgainst(request)
@@ -102,7 +103,7 @@ class ScheduleCourtAppearanceIntTest(
       saved,
       RevisionType.ADD,
       setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
-      SchedulerContext.get().copy(username = username),
+      SchedulerContext.get().copy(username = username, caseloadId = prisonCode),
     )
 
     verifyEventPublications(
@@ -134,12 +135,14 @@ class ScheduleCourtAppearanceIntTest(
     personIdentifier: String,
     request: ScheduleCourtAppearance,
     username: String = username(),
+    caseloadId: String? = null,
     role: String? = listOf(Roles.SCHEDULER_RW, Roles.SCHEDULER_UI).random(),
   ) = webTestClient
     .post()
     .uri(URL_TO_TEST, personIdentifier)
     .bodyValue(request)
     .headers(setAuthorisation(username = username, roles = listOfNotNull(role)))
+    .headers { hc -> caseloadId?.also { hc.put(CaseloadIdHeader.NAME, listOf(it)) } }
     .exchange()
 
   companion object {

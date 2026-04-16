@@ -146,6 +146,7 @@ abstract class IntegrationTest {
         assertThat(username).isEqualTo(context.username)
         assertThat(source).isEqualTo(context.source)
         assertThat(reason).isEqualTo(context.reason)
+        assertThat(caseloadId).isEqualTo(context.caseloadId)
       }
     }
   }

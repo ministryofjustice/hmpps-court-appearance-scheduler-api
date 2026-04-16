@@ -113,9 +113,11 @@ management:
         time-to-live: 2000ms
 
 springdoc:
+  default-flat-param-object: false
   paths-to-exclude: "/queue-admin/**"
   api-docs:
     enabled: false
+    version: OPENAPI_3_0
   swagger-ui:
     enabled: false
 

@@ -25,11 +25,13 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.app
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RequestAppearanceByVideoLink
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RequestAppearanceInPerson
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.changes
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 @Audited
 @Entity
@@ -92,7 +94,12 @@ final class CourtAppearance(
   @NotNull
   @Column(name = "external", nullable = false)
   var external: Boolean = reason.external
-    private set
+    private set(value) {
+      if (field != value) {
+        appliedActions += if (value) RequestAppearanceInPerson() else RequestAppearanceByVideoLink()
+        field = value
+      }
+    }
 
   @NotNull
   @Column(name = "start", nullable = false)
