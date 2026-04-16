@@ -21,6 +21,10 @@ import org.springframework.expression.spel.support.StandardEvaluationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.method.HandlerMethod
 
+object OpenApiTags {
+  const val SYNC = "Sync"
+}
+
 @Configuration
 class OpenApiConfiguration(buildProperties: BuildProperties, private val context: ApplicationContext) {
   private val version: String? = buildProperties.version

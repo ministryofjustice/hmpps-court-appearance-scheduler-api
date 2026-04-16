@@ -4,39 +4,16 @@ import jakarta.persistence.criteria.JoinType
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
-import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.findByIdOrNull
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.IDENTIFIER
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.PRISON_CODE
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 interface CourtAppearanceRepository :
   JpaRepository<CourtAppearance, UUID>,
-  JpaSpecificationExecutor<CourtAppearance> {
-  @Query(
-    """
-      select count(1) from court_appearance ca
-      where ca.prison_code = :prisonCode
-      and ca.external = true
-      and ca.start between current_date and current_date + 1
-    """,
-    nativeQuery = true,
-  )
-  fun findLeavingToday(prisonCode: String): Int
-
-  @Query(
-    """
-      select count(1) from court_appearance ca
-      where ca.prison_code = :prisonCode
-      and ca.external = true
-      and coalesce(ca."end", ca.start) between current_date and current_date + 1
-    """,
-    nativeQuery = true,
-  )
-  fun findReturningToday(prisonCode: String): Int
-}
+  JpaSpecificationExecutor<CourtAppearance>
 
 fun CourtAppearanceRepository.getAppearance(id: UUID) = findByIdOrNull(id) ?: throw NotFoundException("Court appearance not found")
 

@@ -11,6 +11,7 @@ data class SchedulerContext(
   val reason: String? = null,
   val source: DataSource = DataSource.DPS,
   val migratingData: Boolean = false,
+  val caseloadId: String? = null,
 ) {
   companion object {
     const val SYSTEM_USERNAME = "SYS"

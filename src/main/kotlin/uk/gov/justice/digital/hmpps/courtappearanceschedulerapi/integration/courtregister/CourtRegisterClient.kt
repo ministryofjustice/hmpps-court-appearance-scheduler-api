@@ -29,5 +29,3 @@ class CourtRegisterClient(
 
   fun findCourt(code: String): Mono<Court> = findCourts(setOf(code)).map { cts -> cts.firstOrNull { it.code == code } ?: Court.default(code) }
 }
-
-data class CourtsByIdsRequest(val courtIds: Set<String>)

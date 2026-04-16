@@ -14,6 +14,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publicati
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCommentsChanged
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRecategorised
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRelocated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRequestedInPerson
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRescheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.username
@@ -29,7 +30,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.app
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 
 class CourtAppearanceModificationsIntTest(
   @Autowired cao: CourtAppearanceOperations,
@@ -178,7 +179,10 @@ class CourtAppearanceModificationsIntTest(
     val action = RecategoriseAppearance("CRT", word(10))
     val res = applyAction(ca.id, action, username).successResponse<AuditHistory>()
     with(res.content.single()) {
-      assertThat(domainEvents).containsExactly(CourtAppearanceRecategorised.EVENT_TYPE)
+      assertThat(domainEvents).containsExactlyInAnyOrder(
+        CourtAppearanceRecategorised.EVENT_TYPE,
+        CourtAppearanceRequestedInPerson.EVENT_TYPE,
+      )
       assertThat(reason).isEqualTo(action.reason)
       assertThat(changes).containsExactly(
         AuditedAction.Change(
@@ -202,7 +206,10 @@ class CourtAppearanceModificationsIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(CourtAppearanceRecategorised(saved.person.identifier, saved.id).publication(saved.id)),
+      setOf(
+        CourtAppearanceRecategorised(saved.person.identifier, saved.id).publication(saved.id),
+        CourtAppearanceRequestedInPerson(saved.person.identifier, saved.id).publication(saved.id),
+      ),
     )
   }
 

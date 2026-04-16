@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.CaseloadIdHeader
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Appearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditHistory
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ReferenceId
@@ -19,7 +20,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.CourtApp
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.CourtAppearanceRetriever
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.CourtAppearanceScheduler
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.history.CourtAppearanceHistory
-import java.util.*
+import java.util.UUID
 
 @RestController
 @RequestMapping("/court-appearances")
@@ -30,6 +31,7 @@ class CourtAppearanceController(
   private val schedule: CourtAppearanceScheduler,
   private val modify: CourtAppearanceModifications,
 ) {
+  @CaseloadIdHeader
   @PreAuthorize("hasAnyRole('${Roles.SCHEDULER_RW}', '${Roles.SCHEDULER_UI}')")
   @PostMapping("/{personIdentifier}")
   fun scheduleCourtAppearance(
@@ -40,6 +42,7 @@ class CourtAppearanceController(
   @GetMapping("/{id}")
   fun getCourtAppearance(@PathVariable id: UUID): Appearance = retrieve.byId(id)
 
+  @CaseloadIdHeader
   @PreAuthorize("hasAnyRole('${Roles.SCHEDULER_RW}', '${Roles.SCHEDULER_UI}')")
   @PutMapping("/{id}")
   fun applyAction(@PathVariable id: UUID, @Valid @RequestBody request: CourtAppearanceAction): AuditHistory = modify.apply(id, request)

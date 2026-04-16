@@ -10,9 +10,13 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.Schedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext.Companion.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.set
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceReasonRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReasonByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCommentsChanged
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRecategorised
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRelocated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRequestedByVideoLink
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceScheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
@@ -26,10 +30,11 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditedAct
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
-import java.util.*
+import java.util.UUID
 
 class CourtAppearanceHistoryIntTest(
   @Autowired cao: CourtAppearanceOperations,
+  @Autowired private val reasonRepository: CourtAppearanceReasonRepository,
 ) : IntegrationTest(),
   CourtAppearanceOperations by cao {
 
@@ -66,12 +71,17 @@ class CourtAppearanceHistoryIntTest(
       SchedulerContext.get().copy(username = relocateUser.username, reason = relocateAction.reason).set()
       requireNotNull(findCourtAppearance(ca.id)).relocate(relocateAction)
     }
-    val recategoriseAction = RecategoriseAppearance("")
+    val recategoriseUser = manageUsers.givenUser()
+    val recategoriseAction = RecategoriseAppearance("VL", word(20))
+    transactionTemplate.executeWithoutResult {
+      SchedulerContext.get().copy(username = recategoriseUser.username, reason = recategoriseAction.reason).set()
+      requireNotNull(findCourtAppearance(ca.id)).recategorise(recategoriseAction, reasonRepository::getReasonByCode)
+    }
 
     SchedulerContext.clear()
 
     val history = getAppearanceHistory(ca.id).successResponse<AuditHistory>()
-    assertThat(history.content).hasSize(3)
+    assertThat(history.content).hasSize(4)
     with(history.content.first()) {
       assertThat(user).isEqualTo(AuditedAction.User(SYSTEM_USERNAME, "User $SYSTEM_USERNAME"))
       assertThat(domainEvents).containsExactly(CourtAppearanceScheduled.EVENT_TYPE)
@@ -98,6 +108,21 @@ class CourtAppearanceHistoryIntTest(
           CourtAppearance::courtCode.name,
           ca.courtCode,
           relocateAction.courtCode,
+        ),
+      )
+    }
+    with(history.content[3]) {
+      assertThat(user).isEqualTo(AuditedAction.User(recategoriseUser.username, recategoriseUser.name))
+      assertThat(domainEvents).containsExactlyInAnyOrder(
+        CourtAppearanceRecategorised.EVENT_TYPE,
+        CourtAppearanceRequestedByVideoLink.EVENT_TYPE,
+      )
+      assertThat(reason).isEqualTo(recategoriseAction.reason)
+      assertThat(changes).containsExactly(
+        AuditedAction.Change(
+          CourtAppearance::reason.name,
+          ca.reason.description,
+          "Video Link (Court Appearance)",
         ),
       )
     }
