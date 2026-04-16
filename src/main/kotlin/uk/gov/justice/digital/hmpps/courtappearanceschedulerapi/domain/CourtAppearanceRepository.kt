@@ -4,6 +4,7 @@ import jakarta.persistence.criteria.JoinType
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.findByIdOrNull
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.IDENTIFIER
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.PRISON_CODE
@@ -13,7 +14,26 @@ import java.util.UUID
 
 interface CourtAppearanceRepository :
   JpaRepository<CourtAppearance, UUID>,
-  JpaSpecificationExecutor<CourtAppearance>
+  JpaSpecificationExecutor<CourtAppearance> {
+  fun findByLegacyId(legacyId: Long): CourtAppearance?
+  fun countByPersonIdentifier(personIdentifier: String): Int
+
+  @Query(
+    """
+    select ca.id from CourtAppearance ca
+    where ca.person.identifier = :personIdentifier
+  """,
+  )
+  fun findIdsForPersonIdentifier(personIdentifier: String): List<UUID>
+
+  @Query(
+    """
+    select ca.id from CourtAppearance ca
+    where ca.legacyId in :legacyIds
+  """,
+  )
+  fun findIdsForLegacyIds(legacyIds: Set<Long>): List<UUID>
+}
 
 fun CourtAppearanceRepository.getAppearance(id: UUID) = findByIdOrNull(id) ?: throw NotFoundException("Court appearance not found")
 

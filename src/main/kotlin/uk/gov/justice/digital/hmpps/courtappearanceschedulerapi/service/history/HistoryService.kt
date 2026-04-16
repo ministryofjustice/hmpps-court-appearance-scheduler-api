@@ -15,7 +15,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.mana
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.manageusers.UserDetails
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditHistory
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditedAction
-import java.util.*
+import java.util.UUID
 
 @Transactional(readOnly = true)
 abstract class HistoryService<T : Identifiable>(

@@ -5,12 +5,12 @@ import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceReason
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceReasonRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatusRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReasonProvider
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.StatusProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReasonByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getStatusByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
@@ -21,11 +21,9 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.conf
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.util.UUID
 
 typealias PersonProvider = (String, String) -> PersonSummary
-typealias StatusProvider = (CourtAppearanceStatus.Code) -> CourtAppearanceStatus
-typealias ReasonProvider = (String) -> CourtAppearanceReason
 typealias CourtAppearanceProvider = (PersonProvider, ReasonProvider, StatusProvider) -> CourtAppearance
 
 interface CourtAppearanceOperations {
@@ -65,7 +63,7 @@ interface CourtAppearanceOperations {
     comments: String? = word(25),
     legacyId: String? = null,
   ): (CourtAppearance) -> CourtAppearanceMovement = { ca ->
-    CourtAppearanceMovement(ca, ca.person, ca.prisonCode, ca.courtCode, direction, occurredAt, comments, legacyId)
+    CourtAppearanceMovement(ca, ca.person, ca.prisonCode, ca.courtCode, ca.reason, direction, occurredAt, comments, legacyId)
   }
 }
 

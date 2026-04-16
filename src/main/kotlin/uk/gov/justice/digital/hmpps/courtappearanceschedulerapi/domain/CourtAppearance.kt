@@ -18,16 +18,22 @@ import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
 import org.hibernate.envers.Audited
 import org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction.IN
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction.OUT
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRecorded
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceScheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CompleteAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RequestAppearanceByVideoLink
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RequestAppearanceInPerson
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.StartAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.changes
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -74,6 +80,7 @@ final class CourtAppearance(
   var courtCode: String = courtCode
     private set
 
+  @Fetch(FetchMode.JOIN)
   @Audited(targetAuditMode = NOT_AUDITED)
   @NotNull
   @ManyToOne(optional = false)
@@ -84,6 +91,7 @@ final class CourtAppearance(
       external = value.external
     }
 
+  @Fetch(FetchMode.JOIN)
   @Audited(targetAuditMode = NOT_AUDITED)
   @NotNull
   @ManyToOne(optional = false)
@@ -131,9 +139,13 @@ final class CourtAppearance(
     appliedActions = listOf()
   }
 
-  override fun initialEvents(): Set<DomainEventPublication> = when (status.code) {
-    CourtAppearanceStatus.Code.SCHEDULED -> setOf(CourtAppearanceScheduled(person.identifier, id).publication(id))
-    else -> setOf(CourtAppearanceRecorded(person.identifier, id).publication(id))
+  override fun initialEvents(): Set<DomainEventPublication> = if (SchedulerContext.get().migratingData) {
+    setOf(CourtAppearanceMigrated(person.identifier, id).publication(id) { false })
+  } else {
+    when (status.code) {
+      CourtAppearanceStatus.Code.SCHEDULED -> setOf(CourtAppearanceScheduled(person.identifier, id).publication(id))
+      else -> setOf(CourtAppearanceRecorded(person.identifier, id).publication(id))
+    }
   }
 
   override fun domainEvents(): Set<DomainEventPublication> = appliedActions.mapNotNull { action ->
@@ -141,7 +153,13 @@ final class CourtAppearance(
   }.toSet()
 
   fun addMovement(movement: CourtAppearanceMovement) = apply {
+    val action = when (movement.direction) {
+      OUT if (movements.isEmpty()) -> StartAppearance()
+      IN if (movements.none { it.direction == IN }) -> CompleteAppearance()
+      else -> null
+    }
     movements.add(movement)
+    action?.also { appliedActions += it }
     movement.courtAppearance = this
   }
 
@@ -150,7 +168,11 @@ final class CourtAppearance(
     movement.courtAppearance = null
   }
 
-  fun calculateStatus(statusProvider: (CourtAppearanceStatus.Code) -> CourtAppearanceStatus) = apply {
+  fun movePerson(person: PersonSummary) = apply {
+    this.person = person
+  }
+
+  fun calculateStatus(statusProvider: StatusProvider) = apply {
     val statusCode = when {
       isCompleted() -> CourtAppearanceStatus.Code.COMPLETED
       isInProgress() -> CourtAppearanceStatus.Code.IN_PROGRESS
@@ -160,7 +182,7 @@ final class CourtAppearance(
     status = statusProvider(statusCode)
   }
 
-  private fun isCompleted() = movements.any { it.direction == CourtAppearanceMovement.Direction.IN } ||
+  private fun isCompleted() = movements.any { it.direction == IN } ||
     (movements.isNotEmpty() && isInThePast())
 
   private fun isInProgress() = movements.isNotEmpty() && !isInThePast()
@@ -169,9 +191,9 @@ final class CourtAppearance(
 
   private fun isInThePast() = end?.isBefore(LocalDateTime.now()) ?: start.toLocalDate().isBefore(LocalDate.now())
 
-  fun recategorise(action: RecategoriseAppearance, reasonSupplier: (String) -> CourtAppearanceReason) = apply {
+  fun recategorise(action: RecategoriseAppearance, reasonProvider: ReasonProvider) = apply {
     if (action.reasonCode != reason.code) {
-      reason = reasonSupplier(action.reasonCode)
+      reason = reasonProvider(action.reasonCode)
       appliedActions += action
     }
   }

@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "eventType")
 @JsonSubTypes(
@@ -23,6 +23,12 @@ import java.util.*
     JsonSubTypes.Type(value = CourtAppearanceRequestedByVideoLink::class, name = CourtAppearanceRequestedByVideoLink.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceStarted::class, name = CourtAppearanceStarted.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceCompleted::class, name = CourtAppearanceCompleted.EVENT_TYPE),
+
+    JsonSubTypes.Type(value = AppearanceMovementMigrated::class, name = AppearanceMovementMigrated.EVENT_TYPE),
+    JsonSubTypes.Type(value = AppearanceMovementRecorded::class, name = AppearanceMovementRecorded.EVENT_TYPE),
+    JsonSubTypes.Type(value = AppearanceMovementRecategorised::class, name = AppearanceMovementRecategorised.EVENT_TYPE),
+    JsonSubTypes.Type(value = AppearanceMovementRelocated::class, name = AppearanceMovementRelocated.EVENT_TYPE),
+    JsonSubTypes.Type(value = AppearanceMovementCommentsChanged::class, name = AppearanceMovementCommentsChanged.EVENT_TYPE),
 
     JsonSubTypes.Type(value = PrisonerMerged::class, name = PrisonerMerged.EVENT_TYPE),
     JsonSubTypes.Type(value = PrisonerUpdated::class, name = PrisonerUpdated.EVENT_TYPE),

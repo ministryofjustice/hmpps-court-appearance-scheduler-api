@@ -7,6 +7,8 @@ import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtProvider
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PrisonProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesExternal
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPersonIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPersonName
@@ -36,9 +38,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.Cour
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.CourtAppearanceSearchResponse
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.PageMetadata
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.PersonAppearanceSearchRequest
-
-typealias PrisonProvider = (String) -> Prison
-typealias CourtProvider = (String) -> Court
 
 @Service
 class SearchCourtAppearances(
