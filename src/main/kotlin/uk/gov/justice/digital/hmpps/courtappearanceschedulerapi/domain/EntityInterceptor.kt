@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
-import java.util.*
+import java.util.UUID
 
 @Component
 class EntityInterceptor : Interceptor {
@@ -64,7 +64,8 @@ class EntityInterceptor : Interceptor {
     return super.onPersist(entity, id, state, propertyNames, types)
   }
 
-  private fun registerDomainEvent(entityId: UUID, eventType: String): Boolean = publishedEventKeys.get().add(entityId to eventType)
+  private fun registerDomainEvent(entityId: UUID, eventType: String): Boolean = publishedEventKeys.get().none { it.first == entityId && it.second.endsWith(".migrated") } &&
+    publishedEventKeys.get().add(entityId to eventType)
 
   override fun afterTransactionCompletion(tx: Transaction) {
     publishedEventKeys.get().clear()

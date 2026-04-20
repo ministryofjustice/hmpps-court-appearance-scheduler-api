@@ -1,0 +1,344 @@
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync
+
+import org.assertj.core.api.Assertions.assertThat
+import org.hibernate.envers.RevisionType
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.repository.findByIdOrNull
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext.Companion.SYSTEM_USERNAME
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDomainEvent
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementCommentsChanged
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementMigrated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRelocated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCommentsChanged
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceMigrated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRelocated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRescheduled
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.username
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtMovementOperations
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtMovementOperations.Companion.unscheduledMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync.SyncGenerator.courtEvent
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync.SyncGenerator.courtEventMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchExtension.Companion.prisonerSearch
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchServer.Companion.prisoner
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.AtAndBy
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ResyncCourtEvent
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ResyncCourtEventMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ResyncCourtEvents
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ResyncResponse
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal.MigrationSystemAuditRepository
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+
+class ResyncCourtAppearanceIntTest(
+  @Autowired cmo: CourtMovementOperations,
+  @Autowired cao: CourtAppearanceOperations,
+  @Autowired pso: PersonSummaryOperations,
+  @Autowired private val msaRepository: MigrationSystemAuditRepository,
+) : IntegrationTest(),
+  CourtMovementOperations by cmo,
+  CourtAppearanceOperations by cao,
+  PersonSummaryOperations by pso {
+
+  @Test
+  fun `401 unauthorised without a valid token`() {
+    webTestClient
+      .put()
+      .uri(URL_TO_TEST, newUuid())
+      .exchange()
+      .expectStatus()
+      .isUnauthorized
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = [Roles.SCHEDULER_RO, Roles.SCHEDULER_RW, Roles.SCHEDULER_UI])
+  fun `403 forbidden without correct role`(role: String) {
+    resync(personIdentifier(), resyncRequest(), role = role)
+      .expectStatus().isForbidden
+  }
+
+  @Test
+  fun `200 ok - can migrate data`() {
+    val prisonCode = prisonCode()
+    val prisoner = prisonerSearch.givenPrisoner(prisoner(prisonCode))
+
+    val request = resyncRequest(
+      listOf(
+        resyncCourtEvent(),
+        resyncCourtEvent(
+          movements = listOf(resyncCourtEventMovement()),
+          modified = AtAndBy(LocalDateTime.now(), username()),
+        ),
+      ),
+      listOf(resyncCourtEventMovement()),
+    )
+    val res = resync(prisoner.prisonerNumber, request).successResponse<ResyncResponse>()
+
+    res.courtEvents.forEach { ce ->
+      val saved = requireNotNull(findCourtAppearance(ce.dpsId))
+      val ceDetail = request.courtEvents.first { it.courtEvent.eventId == ce.eventId }
+      saved verifyAgainst ceDetail.courtEvent
+      val msa = requireNotNull(msaRepository.findByIdOrNull(saved.id))
+      assertThat(msa.createdBy).isEqualTo(ceDetail.created.by)
+      ceDetail.modified?.also { assertThat(msa.modifiedBy).isEqualTo(it.by) }
+      ce.movements.forEach { mov ->
+        val savedMov = requireNotNull(findCourtMovement(mov.dpsId))
+        val courtMov = ceDetail.movements.first {
+          with(it.movement) { bookingId == mov.bookingId && sequenceNumber == mov.sequenceNumber }
+        }
+        savedMov verifyAgainst courtMov.movement
+      }
+      verifyAudit(
+        saved,
+        RevisionType.ADD,
+        setOf(
+          HmppsDomainEvent::class.simpleName!!,
+          CourtAppearance::class.simpleName!!,
+          CourtAppearanceMovement::class.simpleName!!,
+        ),
+        SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS),
+      )
+    }
+
+    val ca = requireNotNull(findCourtAppearance(res.courtEvents.first().dpsId))
+    verifyEventPublications(
+      ca,
+      (
+        res.courtEvents.map {
+          CourtAppearanceMigrated(prisoner.prisonerNumber, it.dpsId, DataSource.NOMIS).publication(
+            it.dpsId,
+          ) { false }
+        } +
+          res.courtEvents.flatMap { ce ->
+            ce.movements.map {
+              AppearanceMovementMigrated(
+                prisoner.prisonerNumber,
+                it.dpsId,
+                DataSource.NOMIS,
+              ).publication(it.dpsId) { false }
+            }
+          } +
+          res.unscheduledMovements.map {
+            AppearanceMovementMigrated(
+              prisoner.prisonerNumber,
+              it.dpsId,
+              DataSource.NOMIS,
+            ).publication(it.dpsId) { false }
+          }
+        ).toSet(),
+    )
+  }
+
+  @Test
+  fun `200 ok - can remove all data`() {
+    val scheduled =
+      givenCourtAppearance(courtAppearance(movements = listOf(movement(CourtAppearanceMovement.Direction.OUT))))
+    val unscheduled = givenUnscheduledMovement(unscheduledMovement(scheduled.person.identifier, scheduled.prisonCode))
+    val res = resync(scheduled.person.identifier, resyncRequest()).successResponse<ResyncResponse>()
+    assertThat(res.courtEvents).isEmpty()
+    assertThat(res.unscheduledMovements).isEmpty()
+
+    assertThat(findCourtAppearance(scheduled.id)).isNull()
+    assertThat(findCourtMovement(unscheduled.id)).isNull()
+    assertThat(findPersonSummary(scheduled.person.identifier)).isNull()
+
+    verifyAudit(
+      scheduled,
+      RevisionType.DEL,
+      setOf(CourtAppearance::class.simpleName!!, CourtAppearanceMovement::class.simpleName!!),
+      SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS),
+    )
+  }
+
+  @Test
+  fun `200 ok - can merge, updating records`() {
+    val prisonCode = prisonCode()
+    val person = givenPersonSummary(personSummary(prisonCode = prisonCode))
+    val schedule = givenCourtAppearance(
+      courtAppearance(
+        personIdentifier = person.identifier,
+        prisonCode = prisonCode,
+        movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
+      ),
+    )
+    val scheduled = schedule.movements.first()
+    val unscheduled = givenUnscheduledMovement(unscheduledMovement(person.identifier, prisonCode))
+
+    val request = resyncRequest(
+      courtEvents = listOf(
+        resyncCourtEvent(
+          courtEvent = courtEvent(dpsId = schedule.id),
+          movements = listOf(resyncCourtEventMovement(movement = courtEventMovement(dpsId = scheduled.id))),
+        ),
+      ),
+      unscheduledMovements = listOf(resyncCourtEventMovement(movement = courtEventMovement(dpsId = unscheduled.id))),
+    )
+    val res = resync(person.identifier, request).successResponse<ResyncResponse>()
+    assertThat(res.courtEvents.first().dpsId).isEqualTo(schedule.id)
+    assertThat(res.courtEvents.first().movements.first().dpsId).isEqualTo(scheduled.id)
+    assertThat(res.unscheduledMovements.first().dpsId).isEqualTo(unscheduled.id)
+
+    verifyAudit(
+      scheduled,
+      RevisionType.MOD,
+      setOf(
+        HmppsDomainEvent::class.simpleName!!,
+        CourtAppearance::class.simpleName!!,
+        CourtAppearanceMovement::class.simpleName!!,
+      ),
+      SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS),
+    )
+
+    verifyEventPublications(
+      scheduled,
+      setOf(
+        CourtAppearanceRescheduled(person.identifier, schedule.id, DataSource.NOMIS).publication(schedule.id) { false },
+        CourtAppearanceRelocated(person.identifier, schedule.id, DataSource.NOMIS).publication(schedule.id) { false },
+        AppearanceMovementRelocated(person.identifier, scheduled.id, DataSource.NOMIS).publication(scheduled.id) { false },
+        AppearanceMovementRelocated(person.identifier, unscheduled.id, DataSource.NOMIS).publication(unscheduled.id) { false },
+        CourtAppearanceCommentsChanged(person.identifier, schedule.id, DataSource.NOMIS).publication(schedule.id) { false },
+        AppearanceMovementCommentsChanged(person.identifier, scheduled.id, DataSource.NOMIS).publication(scheduled.id) { false },
+        AppearanceMovementCommentsChanged(person.identifier, unscheduled.id, DataSource.NOMIS).publication(unscheduled.id) { false },
+      ),
+    )
+  }
+
+  @Test
+  fun `200 ok - can reverse scheduled and unscheduled movements`() {
+    val prisonCode = prisonCode()
+    val courtCode = courtCode()
+    val person = givenPersonSummary(personSummary(prisonCode = prisonCode))
+    val bookingId = newId()
+    val schedule = givenCourtAppearance(
+      courtAppearance(
+        personIdentifier = person.identifier,
+        prisonCode = prisonCode,
+        courtCode = courtCode,
+        movements = listOf(movement(CourtAppearanceMovement.Direction.OUT, legacyId = "${bookingId}_1")),
+        legacyId = newId(),
+      ),
+    )
+    val scheduled = schedule.movements.first()
+    val unscheduled =
+      givenUnscheduledMovement(
+        unscheduledMovement(
+          person.identifier,
+          prisonCode,
+          legacyId = "${bookingId}_2",
+          courtCode = courtCode,
+        ),
+      )
+
+    val request = resyncRequest(
+      courtEvents = listOf(
+        resyncCourtEvent(
+          courtEvent = courtEvent(
+            dpsId = schedule.id,
+            eventId = schedule.legacyId!!,
+            scheduledCourtCode = courtCode,
+            date = schedule.start.toLocalDate(),
+            startTime = schedule.start.toLocalTime(),
+            commentText = schedule.comments,
+          ),
+          movements = listOf(
+            resyncCourtEventMovement(
+              movement = courtEventMovement(
+                dpsId = unscheduled.id,
+                bookingId = unscheduled.bookingId!!,
+                sequenceNumber = unscheduled.sequenceNumber!!,
+                toAgencyId = unscheduled.courtCode,
+                date = unscheduled.occurredAt.toLocalDate(),
+                time = unscheduled.occurredAt.toLocalTime(),
+                commentText = unscheduled.comments,
+              ),
+            ),
+          ),
+        ),
+      ),
+      unscheduledMovements = listOf(
+        resyncCourtEventMovement(
+          movement = courtEventMovement(
+            dpsId = scheduled.id,
+            bookingId = scheduled.bookingId!!,
+            sequenceNumber = scheduled.sequenceNumber!!,
+            toAgencyId = scheduled.courtCode,
+            date = scheduled.occurredAt.toLocalDate(),
+            time = scheduled.occurredAt.toLocalTime(),
+            commentText = scheduled.comments,
+          ),
+        ),
+      ),
+    )
+    val res = resync(person.identifier, request).successResponse<ResyncResponse>()
+    assertThat(res.courtEvents.first().movements.first().dpsId).isEqualTo(unscheduled.id)
+    assertThat(res.unscheduledMovements.first().dpsId).isEqualTo(scheduled.id)
+
+    verifyAudit(
+      scheduled,
+      RevisionType.MOD,
+      setOf(
+        CourtAppearance::class.simpleName!!,
+        CourtAppearanceMovement::class.simpleName!!,
+      ),
+      SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS),
+    )
+
+    verifyEventPublications(scheduled, setOf())
+  }
+
+  private val CourtAppearanceMovement.bookingId get() = legacyId?.split('_')[0]?.toLong()
+  private val CourtAppearanceMovement.sequenceNumber get() = legacyId?.split('_')[1]?.toInt()
+
+  private fun resyncRequest(
+    courtEvents: List<ResyncCourtEvent> = listOf(),
+    unscheduledMovements: List<ResyncCourtEventMovement> = listOf(),
+  ) = ResyncCourtEvents(courtEvents, unscheduledMovements)
+
+  private fun resyncCourtEvent(
+    courtEvent: CourtEvent = courtEvent(),
+    created: AtAndBy = AtAndBy(LocalDateTime.now().minusDays(2).truncatedTo(ChronoUnit.SECONDS), username()),
+    modified: AtAndBy? = null,
+    movements: List<ResyncCourtEventMovement> = listOf(),
+  ) = ResyncCourtEvent(courtEvent, created, modified, movements)
+
+  private fun resyncCourtEventMovement(
+    movement: CourtEventMovement = courtEventMovement(),
+    created: AtAndBy = AtAndBy(LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS), username()),
+    modified: AtAndBy? = null,
+  ) = ResyncCourtEventMovement(movement, created, modified)
+
+  private fun resync(
+    personIdentifier: String,
+    request: ResyncCourtEvents,
+    role: String? = Roles.NOMIS_SYNC,
+  ) = webTestClient
+    .put()
+    .uri(URL_TO_TEST, personIdentifier)
+    .bodyValue(request)
+    .headers(setAuthorisation(username = "NOMIS_SYNC", roles = listOfNotNull(role)))
+    .exchange()
+
+  companion object {
+    const val URL_TO_TEST = "/resync/court-appearances/{personIdentifier}"
+  }
+}

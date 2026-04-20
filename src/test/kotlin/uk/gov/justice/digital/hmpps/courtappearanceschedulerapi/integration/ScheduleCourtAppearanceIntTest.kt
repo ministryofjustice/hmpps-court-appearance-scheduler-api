@@ -39,7 +39,7 @@ class ScheduleCourtAppearanceIntTest(
   @Test
   fun `401 unauthorised without a valid token`() {
     webTestClient
-      .get()
+      .post()
       .uri(URL_TO_TEST, newUuid())
       .exchange()
       .expectStatus()
