@@ -1,8 +1,9 @@
+migration_system_audit
 hmpps_domain_event_audit
 hmpps_domain_event
+court_appearance_movement
 court_appearance_audit
 court_appearance_movement_audit
-court_appearance_movement
 court_appearance
 court_appearance_status
 court_appearance_reason

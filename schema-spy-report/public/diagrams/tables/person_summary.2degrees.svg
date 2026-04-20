@@ -14,22 +14,22 @@
 <g id="node1" class="node">
 <title>court_appearance</title>
 <g id="a_node1"><a xlink:href="../../tables/court_appearance.html" xlink:title="court_appearance" target="_top">
-<polygon fill="#ffffff" stroke="transparent" points="268,-152.2 268,-213.2 427,-213.2 427,-152.2 268,-152.2"/>
-<polygon fill="#f5f5f5" stroke="transparent" points="268.5,-189.7 268.5,-212.7 427.5,-212.7 427.5,-189.7 268.5,-189.7"/>
-<polygon fill="none" stroke="#000000" points="268.5,-189.7 268.5,-212.7 427.5,-212.7 427.5,-189.7 268.5,-189.7"/>
-<text text-anchor="start" x="273.5" y="-198.3" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="11.00" fill="#000000">court_appearance</text>
-<text text-anchor="start" x="393.0219" y="-197.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">[table]</text>
-<polygon fill="none" stroke="#000000" points="268.5,-170.7 268.5,-189.7 427.5,-189.7 427.5,-170.7 268.5,-170.7"/>
-<text text-anchor="start" x="271.5" y="-176.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">...</text>
-<polygon fill="#ffffff" stroke="transparent" points="268.5,-151.7 268.5,-170.7 341.5,-170.7 341.5,-151.7 268.5,-151.7"/>
-<polygon fill="none" stroke="#000000" points="268.5,-151.7 268.5,-170.7 341.5,-170.7 341.5,-151.7 268.5,-151.7"/>
-<text text-anchor="start" x="271.5" y="-157.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">&lt; 3</text>
-<polygon fill="#ffffff" stroke="transparent" points="341.5,-151.7 341.5,-170.7 379.5,-170.7 379.5,-151.7 341.5,-151.7"/>
-<polygon fill="none" stroke="#000000" points="341.5,-151.7 341.5,-170.7 379.5,-170.7 379.5,-151.7 341.5,-151.7"/>
-<text text-anchor="start" x="370.3862" y="-157.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
-<polygon fill="#ffffff" stroke="transparent" points="379.5,-151.7 379.5,-170.7 427.5,-170.7 427.5,-151.7 379.5,-151.7"/>
-<polygon fill="none" stroke="#000000" points="379.5,-151.7 379.5,-170.7 427.5,-170.7 427.5,-151.7 379.5,-151.7"/>
-<text text-anchor="start" x="408.9053" y="-157.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">1 &gt;</text>
+<polygon fill="#ffffff" stroke="transparent" points="268,-117.2 268,-178.2 427,-178.2 427,-117.2 268,-117.2"/>
+<polygon fill="#f5f5f5" stroke="transparent" points="268.5,-154.7 268.5,-177.7 427.5,-177.7 427.5,-154.7 268.5,-154.7"/>
+<polygon fill="none" stroke="#000000" points="268.5,-154.7 268.5,-177.7 427.5,-177.7 427.5,-154.7 268.5,-154.7"/>
+<text text-anchor="start" x="273.5" y="-163.3" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="11.00" fill="#000000">court_appearance</text>
+<text text-anchor="start" x="393.0219" y="-162.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">[table]</text>
+<polygon fill="none" stroke="#000000" points="268.5,-135.7 268.5,-154.7 427.5,-154.7 427.5,-135.7 268.5,-135.7"/>
+<text text-anchor="start" x="271.5" y="-141.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">...</text>
+<polygon fill="#ffffff" stroke="transparent" points="268.5,-116.7 268.5,-135.7 341.5,-135.7 341.5,-116.7 268.5,-116.7"/>
+<polygon fill="none" stroke="#000000" points="268.5,-116.7 268.5,-135.7 341.5,-135.7 341.5,-116.7 268.5,-116.7"/>
+<text text-anchor="start" x="271.5" y="-122.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">&lt; 3</text>
+<polygon fill="#ffffff" stroke="transparent" points="341.5,-116.7 341.5,-135.7 379.5,-135.7 379.5,-116.7 341.5,-116.7"/>
+<polygon fill="none" stroke="#000000" points="341.5,-116.7 341.5,-135.7 379.5,-135.7 379.5,-116.7 341.5,-116.7"/>
+<text text-anchor="start" x="370.3862" y="-122.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
+<polygon fill="#ffffff" stroke="transparent" points="379.5,-116.7 379.5,-135.7 427.5,-135.7 427.5,-116.7 379.5,-116.7"/>
+<polygon fill="none" stroke="#000000" points="379.5,-116.7 379.5,-135.7 427.5,-135.7 427.5,-116.7 379.5,-116.7"/>
+<text text-anchor="start" x="408.9053" y="-122.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">1 &gt;</text>
 </a>
 </g>
 </g>
@@ -83,106 +83,113 @@
 <!-- court_appearance&#45;&gt;person_summary -->
 <g id="edge1" class="edge">
 <title>court_appearance:w&#45;&gt;person_summary:e</title>
-<path fill="none" stroke="#000000" d="M311.8754,-228.839C274.4916,-276.7254 220.0888,-344.7 212.5,-344.7"/>
-<polygon fill="#000000" stroke="#000000" points="315.8252,-223.7656 323.5804,-219.6646 318.2825,-220.6093 320.7397,-217.4531 320.7397,-217.4531 320.7397,-217.4531 318.2825,-220.6093 317.8991,-215.2415 315.8252,-223.7656 315.8252,-223.7656"/>
-<ellipse fill="none" stroke="#000000" cx="313.8594" cy="-226.2906" rx="3.2" ry="3.2"/>
+<path fill="none" stroke="#000000" d="M310.8852,-193.6744C294.7077,-214.6254 275.8135,-239.9958 260,-263.7 236.8396,-298.4171 254.2334,-344.7 212.5,-344.7"/>
+<polygon fill="#000000" stroke="#000000" points="314.8907,-188.5266 322.6448,-184.4236 317.3472,-185.3697 319.8036,-182.2128 319.8036,-182.2128 319.8036,-182.2128 317.3472,-185.3697 316.9624,-180.002 314.8907,-188.5266 314.8907,-188.5266"/>
+<ellipse fill="none" stroke="#000000" cx="312.9256" cy="-191.0521" rx="3.2" ry="3.2"/>
 </g>
 <!-- court_appearance_reason -->
 <g id="node3" class="node">
 <title>court_appearance_reason</title>
 <g id="a_node3"><a xlink:href="../../tables/court_appearance_reason.html" xlink:title="court_appearance_reason" target="_top">
-<polygon fill="#ffffff" stroke="transparent" points="8,-120.2 8,-181.2 219,-181.2 219,-120.2 8,-120.2"/>
-<polygon fill="#f5f5f5" stroke="transparent" points="8.5,-157.7 8.5,-180.7 219.5,-180.7 219.5,-157.7 8.5,-157.7"/>
-<polygon fill="none" stroke="#000000" points="8.5,-157.7 8.5,-180.7 219.5,-180.7 219.5,-157.7 8.5,-157.7"/>
-<text text-anchor="start" x="13.5" y="-166.3" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="11.00" fill="#000000">court_appearance_reason</text>
-<text text-anchor="start" x="185.0219" y="-165.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">[table]</text>
-<polygon fill="none" stroke="#000000" points="8.5,-138.7 8.5,-157.7 219.5,-157.7 219.5,-138.7 8.5,-138.7"/>
-<text text-anchor="start" x="11.5" y="-144.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">...</text>
-<polygon fill="#ffffff" stroke="transparent" points="8.5,-119.7 8.5,-138.7 103.5,-138.7 103.5,-119.7 8.5,-119.7"/>
-<polygon fill="none" stroke="#000000" points="8.5,-119.7 8.5,-138.7 103.5,-138.7 103.5,-119.7 8.5,-119.7"/>
-<text text-anchor="start" x="11.5" y="-125.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
-<polygon fill="#ffffff" stroke="transparent" points="103.5,-119.7 103.5,-138.7 156.5,-138.7 156.5,-119.7 103.5,-119.7"/>
-<polygon fill="none" stroke="#000000" points="103.5,-119.7 103.5,-138.7 156.5,-138.7 156.5,-119.7 103.5,-119.7"/>
-<text text-anchor="start" x="147.3862" y="-125.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
-<polygon fill="#ffffff" stroke="transparent" points="156.5,-119.7 156.5,-138.7 219.5,-138.7 219.5,-119.7 156.5,-119.7"/>
-<polygon fill="none" stroke="#000000" points="156.5,-119.7 156.5,-138.7 219.5,-138.7 219.5,-119.7 156.5,-119.7"/>
-<text text-anchor="start" x="200.9053" y="-125.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">1 &gt;</text>
+<polygon fill="#ffffff" stroke="transparent" points="8,-38.2 8,-99.2 219,-99.2 219,-38.2 8,-38.2"/>
+<polygon fill="#f5f5f5" stroke="transparent" points="8.5,-75.7 8.5,-98.7 219.5,-98.7 219.5,-75.7 8.5,-75.7"/>
+<polygon fill="none" stroke="#000000" points="8.5,-75.7 8.5,-98.7 219.5,-98.7 219.5,-75.7 8.5,-75.7"/>
+<text text-anchor="start" x="13.5" y="-84.3" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="11.00" fill="#000000">court_appearance_reason</text>
+<text text-anchor="start" x="185.0219" y="-83.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">[table]</text>
+<polygon fill="none" stroke="#000000" points="8.5,-56.7 8.5,-75.7 219.5,-75.7 219.5,-56.7 8.5,-56.7"/>
+<text text-anchor="start" x="11.5" y="-62.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">...</text>
+<polygon fill="#ffffff" stroke="transparent" points="8.5,-37.7 8.5,-56.7 103.5,-56.7 103.5,-37.7 8.5,-37.7"/>
+<polygon fill="none" stroke="#000000" points="8.5,-37.7 8.5,-56.7 103.5,-56.7 103.5,-37.7 8.5,-37.7"/>
+<text text-anchor="start" x="11.5" y="-43.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
+<polygon fill="#ffffff" stroke="transparent" points="103.5,-37.7 103.5,-56.7 156.5,-56.7 156.5,-37.7 103.5,-37.7"/>
+<polygon fill="none" stroke="#000000" points="103.5,-37.7 103.5,-56.7 156.5,-56.7 156.5,-37.7 103.5,-37.7"/>
+<text text-anchor="start" x="147.3862" y="-43.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
+<polygon fill="#ffffff" stroke="transparent" points="156.5,-37.7 156.5,-56.7 219.5,-56.7 219.5,-37.7 156.5,-37.7"/>
+<polygon fill="none" stroke="#000000" points="156.5,-37.7 156.5,-56.7 219.5,-56.7 219.5,-37.7 156.5,-37.7"/>
+<text text-anchor="start" x="200.9053" y="-43.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">2 &gt;</text>
 </a>
 </g>
 </g>
 <!-- court_appearance&#45;&gt;court_appearance_reason -->
 <g id="edge2" class="edge">
 <title>court_appearance:w&#45;&gt;court_appearance_reason:e</title>
-<path fill="none" stroke="#000000" d="M245.6643,-149.711C236.8926,-148.4424 228.0898,-147.7 219.5,-147.7"/>
-<polygon fill="#000000" stroke="#000000" points="251.9855,-150.8207 259.2425,-155.7498 255.9252,-151.5123 259.865,-152.204 259.865,-152.204 259.865,-152.204 255.9252,-151.5123 260.4874,-148.6582 251.9855,-150.8207 251.9855,-150.8207"/>
-<ellipse fill="none" stroke="#000000" cx="248.8337" cy="-150.2674" rx="3.2" ry="3.2"/>
+<path fill="none" stroke="#000000" d="M282.8096,-105.2195C252.0876,-85.2247 221.5605,-65.7 219.5,-65.7"/>
+<polygon fill="#000000" stroke="#000000" points="288.2873,-108.792 293.0215,-116.1777 291.6378,-110.9771 294.9882,-113.1623 294.9882,-113.1623 294.9882,-113.1623 291.6378,-110.9771 296.9548,-110.1469 288.2873,-108.792 288.2873,-108.792"/>
+<ellipse fill="none" stroke="#000000" cx="285.607" cy="-107.0439" rx="3.2" ry="3.2"/>
 </g>
 <!-- court_appearance_status -->
 <g id="node4" class="node">
 <title>court_appearance_status</title>
 <g id="a_node4"><a xlink:href="../../tables/court_appearance_status.html" xlink:title="court_appearance_status" target="_top">
-<polygon fill="#ffffff" stroke="transparent" points="9.5,-38.2 9.5,-99.2 217.5,-99.2 217.5,-38.2 9.5,-38.2"/>
-<polygon fill="#f5f5f5" stroke="transparent" points="9.5,-75.7 9.5,-98.7 217.5,-98.7 217.5,-75.7 9.5,-75.7"/>
-<polygon fill="none" stroke="#000000" points="9.5,-75.7 9.5,-98.7 217.5,-98.7 217.5,-75.7 9.5,-75.7"/>
-<text text-anchor="start" x="14.5" y="-84.3" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="11.00" fill="#000000">court_appearance_status</text>
-<text text-anchor="start" x="183.0219" y="-83.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">[table]</text>
-<polygon fill="none" stroke="#000000" points="9.5,-56.7 9.5,-75.7 217.5,-75.7 217.5,-56.7 9.5,-56.7"/>
-<text text-anchor="start" x="12.5" y="-62.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">...</text>
-<polygon fill="#ffffff" stroke="transparent" points="9.5,-37.7 9.5,-56.7 102.5,-56.7 102.5,-37.7 9.5,-37.7"/>
-<polygon fill="none" stroke="#000000" points="9.5,-37.7 9.5,-56.7 102.5,-56.7 102.5,-37.7 9.5,-37.7"/>
-<text text-anchor="start" x="12.5" y="-43.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
-<polygon fill="#ffffff" stroke="transparent" points="102.5,-37.7 102.5,-56.7 155.5,-56.7 155.5,-37.7 102.5,-37.7"/>
-<polygon fill="none" stroke="#000000" points="102.5,-37.7 102.5,-56.7 155.5,-56.7 155.5,-37.7 102.5,-37.7"/>
-<text text-anchor="start" x="146.3862" y="-43.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
-<polygon fill="#ffffff" stroke="transparent" points="155.5,-37.7 155.5,-56.7 217.5,-56.7 217.5,-37.7 155.5,-37.7"/>
-<polygon fill="none" stroke="#000000" points="155.5,-37.7 155.5,-56.7 217.5,-56.7 217.5,-37.7 155.5,-37.7"/>
-<text text-anchor="start" x="198.9053" y="-43.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">1 &gt;</text>
+<polygon fill="#ffffff" stroke="transparent" points="9.5,-120.2 9.5,-181.2 217.5,-181.2 217.5,-120.2 9.5,-120.2"/>
+<polygon fill="#f5f5f5" stroke="transparent" points="9.5,-157.7 9.5,-180.7 217.5,-180.7 217.5,-157.7 9.5,-157.7"/>
+<polygon fill="none" stroke="#000000" points="9.5,-157.7 9.5,-180.7 217.5,-180.7 217.5,-157.7 9.5,-157.7"/>
+<text text-anchor="start" x="14.5" y="-166.3" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="11.00" fill="#000000">court_appearance_status</text>
+<text text-anchor="start" x="183.0219" y="-165.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">[table]</text>
+<polygon fill="none" stroke="#000000" points="9.5,-138.7 9.5,-157.7 217.5,-157.7 217.5,-138.7 9.5,-138.7"/>
+<text text-anchor="start" x="12.5" y="-144.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">...</text>
+<polygon fill="#ffffff" stroke="transparent" points="9.5,-119.7 9.5,-138.7 102.5,-138.7 102.5,-119.7 9.5,-119.7"/>
+<polygon fill="none" stroke="#000000" points="9.5,-119.7 9.5,-138.7 102.5,-138.7 102.5,-119.7 9.5,-119.7"/>
+<text text-anchor="start" x="12.5" y="-125.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
+<polygon fill="#ffffff" stroke="transparent" points="102.5,-119.7 102.5,-138.7 155.5,-138.7 155.5,-119.7 102.5,-119.7"/>
+<polygon fill="none" stroke="#000000" points="102.5,-119.7 102.5,-138.7 155.5,-138.7 155.5,-119.7 102.5,-119.7"/>
+<text text-anchor="start" x="146.3862" y="-125.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
+<polygon fill="#ffffff" stroke="transparent" points="155.5,-119.7 155.5,-138.7 217.5,-138.7 217.5,-119.7 155.5,-119.7"/>
+<polygon fill="none" stroke="#000000" points="155.5,-119.7 155.5,-138.7 217.5,-138.7 217.5,-119.7 155.5,-119.7"/>
+<text text-anchor="start" x="198.9053" y="-125.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">1 &gt;</text>
 </a>
 </g>
 </g>
 <!-- court_appearance&#45;&gt;court_appearance_status -->
 <g id="edge3" class="edge">
 <title>court_appearance:w&#45;&gt;court_appearance_status:e</title>
-<path fill="none" stroke="#000000" d="M320.1952,-135.7713C297.3759,-103.2244 261.5214,-65.7 217.5,-65.7"/>
-<polygon fill="#000000" stroke="#000000" points="323.8537,-141.2572 325.2974,-149.9103 326.0731,-144.5851 328.2925,-147.9129 328.2925,-147.9129 328.2925,-147.9129 326.0731,-144.5851 331.2875,-145.9155 323.8537,-141.2572 323.8537,-141.2572"/>
-<ellipse fill="none" stroke="#000000" cx="322.0782" cy="-138.595" rx="3.2" ry="3.2"/>
+<path fill="none" stroke="#000000" d="M245.1013,-147.7C235.769,-147.7 226.4608,-147.7 217.5,-147.7"/>
+<polygon fill="#000000" stroke="#000000" points="251.7398,-147.7001 259.7398,-151.3 255.7398,-147.7 259.7398,-147.7 259.7398,-147.7 259.7398,-147.7 255.7398,-147.7 259.7398,-144.1 251.7398,-147.7001 251.7398,-147.7001"/>
+<ellipse fill="none" stroke="#000000" cx="248.5398" cy="-147.7001" rx="3.2" ry="3.2"/>
 </g>
 <!-- court_appearance_movement -->
 <g id="node5" class="node">
 <title>court_appearance_movement</title>
 <g id="a_node5"><a xlink:href="../../tables/court_appearance_movement.html" xlink:title="court_appearance_movement" target="_top">
-<polygon fill="#ffffff" stroke="transparent" points="476,-179.2 476,-240.2 713,-240.2 713,-179.2 476,-179.2"/>
-<polygon fill="#f5f5f5" stroke="transparent" points="476.5,-216.7 476.5,-239.7 713.5,-239.7 713.5,-216.7 476.5,-216.7"/>
-<polygon fill="none" stroke="#000000" points="476.5,-216.7 476.5,-239.7 713.5,-239.7 713.5,-216.7 476.5,-216.7"/>
-<text text-anchor="start" x="481.5" y="-225.3" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="11.00" fill="#000000">court_appearance_movement</text>
-<text text-anchor="start" x="679.0219" y="-224.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">[table]</text>
-<polygon fill="none" stroke="#000000" points="476.5,-197.7 476.5,-216.7 713.5,-216.7 713.5,-197.7 476.5,-197.7"/>
-<text text-anchor="start" x="479.5" y="-203.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">...</text>
-<polygon fill="#ffffff" stroke="transparent" points="476.5,-178.7 476.5,-197.7 593.5,-197.7 593.5,-178.7 476.5,-178.7"/>
-<polygon fill="none" stroke="#000000" points="476.5,-178.7 476.5,-197.7 593.5,-197.7 593.5,-178.7 476.5,-178.7"/>
-<text text-anchor="start" x="479.5" y="-184.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">&lt; 2</text>
-<polygon fill="#ffffff" stroke="transparent" points="593.5,-178.7 593.5,-197.7 653.5,-197.7 653.5,-178.7 593.5,-178.7"/>
-<polygon fill="none" stroke="#000000" points="593.5,-178.7 593.5,-197.7 653.5,-197.7 653.5,-178.7 593.5,-178.7"/>
-<text text-anchor="start" x="644.3862" y="-184.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
-<polygon fill="#ffffff" stroke="transparent" points="653.5,-178.7 653.5,-197.7 713.5,-197.7 713.5,-178.7 653.5,-178.7"/>
-<polygon fill="none" stroke="#000000" points="653.5,-178.7 653.5,-197.7 713.5,-197.7 713.5,-178.7 653.5,-178.7"/>
-<text text-anchor="start" x="704.3862" y="-184.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
+<polygon fill="#ffffff" stroke="transparent" points="476,-117.2 476,-178.2 713,-178.2 713,-117.2 476,-117.2"/>
+<polygon fill="#f5f5f5" stroke="transparent" points="476.5,-154.7 476.5,-177.7 713.5,-177.7 713.5,-154.7 476.5,-154.7"/>
+<polygon fill="none" stroke="#000000" points="476.5,-154.7 476.5,-177.7 713.5,-177.7 713.5,-154.7 476.5,-154.7"/>
+<text text-anchor="start" x="481.5" y="-163.3" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="11.00" fill="#000000">court_appearance_movement</text>
+<text text-anchor="start" x="679.0219" y="-162.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">[table]</text>
+<polygon fill="none" stroke="#000000" points="476.5,-135.7 476.5,-154.7 713.5,-154.7 713.5,-135.7 476.5,-135.7"/>
+<text text-anchor="start" x="479.5" y="-141.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">...</text>
+<polygon fill="#ffffff" stroke="transparent" points="476.5,-116.7 476.5,-135.7 593.5,-135.7 593.5,-116.7 476.5,-116.7"/>
+<polygon fill="none" stroke="#000000" points="476.5,-116.7 476.5,-135.7 593.5,-135.7 593.5,-116.7 476.5,-116.7"/>
+<text text-anchor="start" x="479.5" y="-122.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">&lt; 3</text>
+<polygon fill="#ffffff" stroke="transparent" points="593.5,-116.7 593.5,-135.7 653.5,-135.7 653.5,-116.7 593.5,-116.7"/>
+<polygon fill="none" stroke="#000000" points="593.5,-116.7 593.5,-135.7 653.5,-135.7 653.5,-116.7 593.5,-116.7"/>
+<text text-anchor="start" x="644.3862" y="-122.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
+<polygon fill="#ffffff" stroke="transparent" points="653.5,-116.7 653.5,-135.7 713.5,-135.7 713.5,-116.7 653.5,-116.7"/>
+<polygon fill="none" stroke="#000000" points="653.5,-116.7 653.5,-135.7 713.5,-135.7 713.5,-116.7 653.5,-116.7"/>
+<text text-anchor="start" x="704.3862" y="-122.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
 </a>
 </g>
 </g>
 <!-- court_appearance_movement&#45;&gt;court_appearance -->
 <g id="edge4" class="edge">
 <title>court_appearance_movement:w&#45;&gt;court_appearance:e</title>
-<path fill="none" stroke="#000000" d="M453.3351,-194.269C447.1935,-193.5977 441.1114,-192.9328 435.1513,-192.2813"/>
-<polygon fill="#000000" stroke="#000000" points="459.7914,-194.9747 467.3528,-199.4228 463.7677,-195.4094 467.744,-195.8441 467.744,-195.8441 467.744,-195.8441 463.7677,-195.4094 468.1352,-192.2654 459.7914,-194.9747 459.7914,-194.9747"/>
-<ellipse fill="none" stroke="#000000" cx="456.6103" cy="-194.627" rx="3.2" ry="3.2"/>
+<path fill="none" stroke="#000000" d="M453.3351,-147.7C447.1935,-147.7 441.1114,-147.7 435.1513,-147.7"/>
+<polygon fill="#000000" stroke="#000000" points="459.744,-147.7001 467.744,-151.3 463.744,-147.7 467.744,-147.7 467.744,-147.7 467.744,-147.7 463.744,-147.7 467.744,-144.1 459.744,-147.7001 459.744,-147.7001"/>
+<ellipse fill="none" stroke="#000000" cx="456.544" cy="-147.7001" rx="3.2" ry="3.2"/>
 </g>
 <!-- court_appearance_movement&#45;&gt;person_summary -->
 <g id="edge5" class="edge">
 <title>court_appearance_movement:w&#45;&gt;person_summary:e</title>
-<path fill="none" stroke="#000000" d="M523.2783,-251.269C448.4729,-290.9388 326.133,-344.7 212.5,-344.7"/>
-<polygon fill="#000000" stroke="#000000" points="529.184,-248.0861 537.9344,-247.4596 532.7052,-246.1883 536.2264,-244.2905 536.2264,-244.2905 536.2264,-244.2905 532.7052,-246.1883 534.5184,-241.1215 529.184,-248.0861 529.184,-248.0861"/>
-<ellipse fill="none" stroke="#000000" cx="526.3671" cy="-249.6043" rx="3.2" ry="3.2"/>
+<path fill="none" stroke="#000000" d="M546.1132,-191.9279C477.3476,-250.0116 344.9357,-344.7 212.5,-344.7"/>
+<polygon fill="#000000" stroke="#000000" points="551.3267,-187.4516 559.7415,-184.9716 554.3615,-184.8459 557.3964,-182.2402 557.3964,-182.2402 557.3964,-182.2402 554.3615,-184.8459 555.0512,-179.5088 551.3267,-187.4516 551.3267,-187.4516"/>
+<ellipse fill="none" stroke="#000000" cx="548.8988" cy="-189.5362" rx="3.2" ry="3.2"/>
+</g>
+<!-- court_appearance_movement&#45;&gt;court_appearance_reason -->
+<g id="edge6" class="edge">
+<title>court_appearance_movement:w&#45;&gt;court_appearance_reason:e</title>
+<path fill="none" stroke="#000000" d="M479.2529,-109.0688C405.7904,-87.8104 308.0896,-65.7 219.5,-65.7"/>
+<polygon fill="#000000" stroke="#000000" points="485.4719,-110.9012 492.1282,-116.6155 489.3088,-112.0317 493.1457,-113.1623 493.1457,-113.1623 493.1457,-113.1623 489.3088,-112.0317 494.1632,-109.7091 485.4719,-110.9012 485.4719,-110.9012"/>
+<ellipse fill="none" stroke="#000000" cx="482.4024" cy="-109.9967" rx="3.2" ry="3.2"/>
 </g>
 </g>
 </svg>
