@@ -25,11 +25,18 @@ class CourtAppearanceScheduler(
 ) {
   fun singleAppearance(personIdentifier: String, request: ScheduleCourtAppearance): ReferenceId {
     val person = personService.getWithSave(personIdentifier)
+    checkNotNull(person.prisonCode) {
+      "Unable to schedule a court appearance when current location is unknown"
+    }
     val saved = request.persistable(person, reasonRepository::getReasonByCode, statusRepository::getStatusByCode)
       .also { appearanceRepository.save(it) }
     return ReferenceId(saved.id)
   }
 
-  private fun ScheduleCourtAppearance.persistable(person: PersonSummary, reason: ReasonProvider, status: StatusProvider) = CourtAppearance(person, prisonCode, courtCode, reason(reasonCode), start, end, comments, null)
+  private fun ScheduleCourtAppearance.persistable(
+    person: PersonSummary,
+    reason: ReasonProvider,
+    status: StatusProvider,
+  ) = CourtAppearance(person, person.prisonCode!!, courtCode, reason(reasonCode), start, end, comments, null)
     .calculateStatus(status)
 }

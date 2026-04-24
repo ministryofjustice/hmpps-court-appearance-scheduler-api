@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.envers.RevisionType
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.CaseloadIdHeader
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
@@ -53,6 +54,21 @@ class ScheduleCourtAppearanceIntTest(
   }
 
   @Test
+  fun `400 bad request - cannot schedule a court appearance for a prisoner without a responsible prison`() {
+    val prisonCode = prisonCode()
+    val username = username()
+    val person = givenPersonSummary(personSummary(prisonCode = null))
+
+    val request = scheduleCourtAppearance(prisonCode, reasonCode = "CE")
+    val res = scheduleAppearance(person.identifier, request, username, prisonCode)
+      .errorResponse(HttpStatus.BAD_REQUEST)
+
+    assertThat(res.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
+    assertThat(res.userMessage).isEqualTo("Invalid request")
+    assertThat(res.developerMessage).isEqualTo("Unable to schedule a court appearance when current location is unknown")
+  }
+
+  @Test
   fun `200 can schedule a court appearance for an existing prisoner`() {
     val prisonCode = prisonCode()
     val username = username()
@@ -64,6 +80,7 @@ class ScheduleCourtAppearanceIntTest(
     val saved = requireNotNull(findCourtAppearance(res.id))
     saved.verifyAgainst(request)
     assertThat(saved.person.identifier).isEqualTo(person.identifier)
+    assertThat(saved.prisonCode).isEqualTo(prisonCode)
     assertThat(saved.external).isTrue
     assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
 
@@ -97,6 +114,7 @@ class ScheduleCourtAppearanceIntTest(
       assertThat(identifier).isEqualTo(prisoner.prisonerNumber)
       assertThat(firstName).isEqualTo(prisoner.firstName)
       assertThat(lastName).isEqualTo(prisoner.lastName)
+      assertThat(this.prisonCode).isEqualTo(prisoner.lastPrisonId)
     }
 
     verifyAudit(
@@ -113,7 +131,6 @@ class ScheduleCourtAppearanceIntTest(
   }
 
   private fun CourtAppearance.verifyAgainst(request: ScheduleCourtAppearance) {
-    assertThat(prisonCode).isEqualTo(request.prisonCode)
     assertThat(courtCode).isEqualTo(request.courtCode)
     assertThat(start).isEqualTo(request.start)
     assertThat(end).isEqualTo(request.end)
@@ -123,13 +140,12 @@ class ScheduleCourtAppearanceIntTest(
   }
 
   private fun scheduleCourtAppearance(
-    prisonCode: String = prisonCode(),
     courtCode: String = courtCode(),
     reasonCode: String = "CRT",
     start: LocalDateTime = LocalDateTime.of(LocalDate.now().plusDays(7), LocalTime.of(10, 0)),
     end: LocalDateTime? = LocalDateTime.of(LocalDate.now().plusDays(7), LocalTime.of(17, 0)),
     comments: String? = word(25),
-  ) = ScheduleCourtAppearance(prisonCode, courtCode, reasonCode, start, end, comments)
+  ) = ScheduleCourtAppearance(courtCode, reasonCode, start, end, comments)
 
   private fun scheduleAppearance(
     personIdentifier: String,
