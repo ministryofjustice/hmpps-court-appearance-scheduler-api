@@ -27,17 +27,13 @@ class PersonSummaryService(
       it.update(
         prisoner.firstName,
         prisoner.lastName,
-        prisoner.prisonId,
+        prisoner.lastPrisonId,
         prisoner.cellLocation,
       )
     }
   }
 
-  fun save(person: Prisoner): PersonSummary = personSummaryRepository.findByIdOrNull(person.prisonerNumber)
-    ?.update(person.firstName, person.lastName, person.prisonId, person.cellLocation)
-    ?: personSummaryRepository.save(person.summary())
-
   fun remove(personSummary: PersonSummary) = personSummaryRepository.delete(personSummary)
 
-  private fun Prisoner.summary() = PersonSummary(firstName, lastName, prisonId, cellLocation, prisonerNumber)
+  private fun Prisoner.summary() = PersonSummary(firstName, lastName, lastPrisonId, cellLocation, prisonerNumber)
 }
