@@ -37,6 +37,6 @@ class CourtAppearanceScheduler(
     person: PersonSummary,
     reason: ReasonProvider,
     status: StatusProvider,
-  ) = CourtAppearance(person, person.prisonCode!!, courtCode, reason(reasonCode), start, end, comments, null)
+  ) = CourtAppearance(person, person.prisonCode!!, courtCode, reason(reasonCode), start, end, comments, null, null)
     .calculateStatus(status)
 }

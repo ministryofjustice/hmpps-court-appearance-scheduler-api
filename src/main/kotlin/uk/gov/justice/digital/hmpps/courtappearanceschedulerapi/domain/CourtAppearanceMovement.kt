@@ -187,4 +187,13 @@ interface CourtAppearanceMovementRepository : JpaRepository<CourtAppearanceMovem
   fun findIdsForLegacyIds(legacyIds: Set<String>): List<UUID>
 
   fun findAllByPersonIdentifier(personIdentifier: String): List<CourtAppearanceMovement>
+
+  @Query(
+    """
+        select cam from CourtAppearanceMovement cam
+        where cam.person.identifier = :personIdentifier
+        and cam.courtAppearance is null
+    """,
+  )
+  fun findAllUnscheduledByPersonIdentifier(personIdentifier: String): List<CourtAppearanceMovement>
 }

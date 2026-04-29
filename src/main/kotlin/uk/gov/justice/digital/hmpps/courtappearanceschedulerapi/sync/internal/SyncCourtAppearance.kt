@@ -34,7 +34,8 @@ class SyncCourtAppearance(
     val person = personSummaryService.getWithSave(personIdentifier)
     val appearance = (
       request.courtEvent.dpsId?.let { appearanceRepository.findByIdOrNull(it) }
-        ?: appearanceRepository.findByLegacyId(request.courtEvent.eventId)
+        ?: request.courtEvent.eventId?.let { appearanceRepository.findByLegacyId(it) }
+        ?: request.courtEvent.externalReferenceUrn?.let { appearanceRepository.findByExternalReference(it) }
       )?.updateFrom(person, request.courtEvent, reasonRepository::getReasonByCode, statusRepository::getStatusByCode)
       ?: appearanceRepository.save(
         request.courtEvent.asEntity(

@@ -103,7 +103,7 @@ class CourtAppearanceModificationsIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(CourtAppearanceCommentsChanged(saved.person.identifier, saved.id).publication(saved.id)),
+      setOf(CourtAppearanceCommentsChanged(saved.person.identifier, saved.id, null).publication(saved.id)),
     )
   }
 
@@ -135,7 +135,7 @@ class CourtAppearanceModificationsIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(CourtAppearanceRescheduled(saved.person.identifier, saved.id).publication(saved.id)),
+      setOf(CourtAppearanceRescheduled(saved.person.identifier, saved.id, null).publication(saved.id)),
     )
   }
 
@@ -167,7 +167,7 @@ class CourtAppearanceModificationsIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(CourtAppearanceRescheduled(saved.person.identifier, saved.id).publication(saved.id)),
+      setOf(CourtAppearanceRescheduled(saved.person.identifier, saved.id, null).publication(saved.id)),
     )
   }
 
@@ -207,8 +207,8 @@ class CourtAppearanceModificationsIntTest(
     verifyEventPublications(
       saved,
       setOf(
-        CourtAppearanceRecategorised(saved.person.identifier, saved.id).publication(saved.id),
-        CourtAppearanceRequestedInPerson(saved.person.identifier, saved.id).publication(saved.id),
+        CourtAppearanceRecategorised(saved.person.identifier, saved.id, null).publication(saved.id),
+        CourtAppearanceRequestedInPerson(saved.person.identifier, saved.id, null).publication(saved.id),
       ),
     )
   }
@@ -243,7 +243,7 @@ class CourtAppearanceModificationsIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(CourtAppearanceRelocated(saved.person.identifier, saved.id).publication(saved.id)),
+      setOf(CourtAppearanceRelocated(saved.person.identifier, saved.id, null).publication(saved.id)),
     )
   }
 

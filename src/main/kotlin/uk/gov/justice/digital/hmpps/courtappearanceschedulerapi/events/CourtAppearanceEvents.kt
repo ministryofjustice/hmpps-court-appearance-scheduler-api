@@ -2,11 +2,12 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events
 
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
-import java.util.*
+import java.util.UUID
 
 data class AdditionalAppearanceInformation(
   override val id: UUID,
   override val source: DataSource,
+  val externalReferenceUrn: String?,
 ) : SourceInformation,
   IdInformation
 
@@ -23,9 +24,10 @@ data class CourtAppearanceMigrated(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
+      externalReference: String?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceMigrated(
-      AdditionalAppearanceInformation(id, dataSource),
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
       PersonReference.withIdentifier(personIdentifier),
     )
   }
@@ -44,9 +46,10 @@ data class CourtAppearanceScheduled(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
+      externalReference: String?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceScheduled(
-      AdditionalAppearanceInformation(id, dataSource),
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
       PersonReference.withIdentifier(personIdentifier),
     )
   }
@@ -65,9 +68,10 @@ data class CourtAppearanceExpired(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
+      externalReference: String?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceExpired(
-      AdditionalAppearanceInformation(id, dataSource),
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
       PersonReference.withIdentifier(personIdentifier),
     )
   }
@@ -86,9 +90,10 @@ data class CourtAppearanceRecorded(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
+      externalReference: String?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceRecorded(
-      AdditionalAppearanceInformation(id, dataSource),
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
       PersonReference.withIdentifier(personIdentifier),
     )
   }
@@ -107,9 +112,10 @@ data class CourtAppearanceRecategorised(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
+      externalReference: String?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceRecategorised(
-      AdditionalAppearanceInformation(id, dataSource),
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
       PersonReference.withIdentifier(personIdentifier),
     )
   }
@@ -128,9 +134,10 @@ data class CourtAppearanceRelocated(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
+      externalReference: String?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceRelocated(
-      AdditionalAppearanceInformation(id, dataSource),
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
       PersonReference.withIdentifier(personIdentifier),
     )
   }
@@ -149,9 +156,10 @@ data class CourtAppearanceRescheduled(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
+      externalReference: String?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceRescheduled(
-      AdditionalAppearanceInformation(id, dataSource),
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
       PersonReference.withIdentifier(personIdentifier),
     )
   }
@@ -170,9 +178,10 @@ data class CourtAppearanceCommentsChanged(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
+      externalReference: String?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceCommentsChanged(
-      AdditionalAppearanceInformation(id, dataSource),
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
       PersonReference.withIdentifier(personIdentifier),
     )
   }
@@ -191,9 +200,10 @@ data class CourtAppearanceRequestedInPerson(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
+      externalReference: String?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceRequestedInPerson(
-      AdditionalAppearanceInformation(id, dataSource),
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
       PersonReference.withIdentifier(personIdentifier),
     )
   }
@@ -212,9 +222,10 @@ data class CourtAppearanceRequestedByVideoLink(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
+      externalReference: String?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceRequestedByVideoLink(
-      AdditionalAppearanceInformation(id, dataSource),
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
       PersonReference.withIdentifier(personIdentifier),
     )
   }
@@ -233,9 +244,10 @@ data class CourtAppearanceStarted(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
+      externalReference: String?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceStarted(
-      AdditionalAppearanceInformation(id, dataSource),
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
       PersonReference.withIdentifier(personIdentifier),
     )
   }
@@ -254,9 +266,10 @@ data class CourtAppearanceCompleted(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
+      externalReference: String?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceCompleted(
-      AdditionalAppearanceInformation(id, dataSource),
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
       PersonReference.withIdentifier(personIdentifier),
     )
   }

@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration
 
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.atomic.AtomicLong
 
@@ -25,4 +26,6 @@ object DataGenerator {
   }
 
   fun courtCode(): String = (1..6).map { letters.random() }.joinToString("")
+
+  fun urn(namespace: String = "remand-and-sentencing", entity: String = "court-appearance") = "urn:$namespace:$entity:${newUuid()}"
 }

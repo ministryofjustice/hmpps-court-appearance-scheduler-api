@@ -8,14 +8,13 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.OpenApiTags
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal.SyncRetriever
 
 @Tag(name = OpenApiTags.SYNC)
 @RestController
 @RequestMapping("reconciliation")
 @PreAuthorize("hasRole('${Roles.NOMIS_SYNC}')")
-class ReconciliationController {
+class ReconciliationController(private val retrieve: SyncRetriever) {
   @GetMapping("/court-appearances/{personIdentifier}")
-  fun getCourtAppearances(@PathVariable personIdentifier: String): ReconciliationResponse {
-    TODO()
-  }
+  fun getCourtAppearances(@PathVariable personIdentifier: String): ReconciliationResponse = retrieve.allFor(personIdentifier)
 }

@@ -28,10 +28,10 @@ fun CourtEvent.asEntity(
   start,
   end,
   commentText,
+  externalReferenceUrn,
   eventId,
   dpsId ?: newUuid(),
-)
-  .calculateStatus(status)
+).calculateStatus(status)
 
 fun CourtAppearance.updateFrom(
   personSummary: PersonSummary,
@@ -40,6 +40,7 @@ fun CourtAppearance.updateFrom(
   status: StatusProvider,
 ): CourtAppearance = apply {
   movePerson(personSummary)
+  applyExternalIdentifiers(request.externalReferenceUrn, request.eventId)
   relocate(RelocateAppearance(request.scheduledCourtCode))
   recategorise(RecategoriseAppearance(request.type), reason)
   reschedule(RescheduleAppearance(request.start, null))
@@ -79,5 +80,5 @@ fun CourtAppearanceMovement.updateFrom(
   recategorise(RecategoriseMovement(request.reasonCode), reason)
   relocate(RelocateMovement(request.courtCode))
   applyComments(ChangeMovementComments(request.commentText))
-  applyLegacyId(request.legacyId)
+  request.legacyId?.also { applyLegacyId(it) }
 }

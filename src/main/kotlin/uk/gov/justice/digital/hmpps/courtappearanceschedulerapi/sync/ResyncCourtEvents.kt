@@ -10,14 +10,14 @@ data class ResyncCourtEvents(
   fun isEmpty(): Boolean = courtEvents.isEmpty() && unscheduledMovements.isEmpty()
 
   fun appearanceIds(): Pair<Set<Long>, Set<UUID>> {
-    val (legacyIds, ids) = courtEvents.map { re -> re.courtEvent.eventId to re.courtEvent.dpsId }.unzip()
+    val (legacyIds, ids) = courtEvents.map { re -> requireNotNull(re.courtEvent.eventId) to re.courtEvent.dpsId }.unzip()
     return legacyIds.toSet() to ids.filterNotNull().toSet()
   }
 
   fun movementIds(): Pair<Set<String>, Set<UUID>> {
     val (legacyIds, ids) = (
-      unscheduledMovements.map { it.movement.legacyId to it.movement.dpsId } +
-        courtEvents.flatMap { it.movements.map { e -> e.movement.legacyId to e.movement.dpsId } }
+      unscheduledMovements.map { requireNotNull(it.movement.legacyId) to it.movement.dpsId } +
+        courtEvents.flatMap { it.movements.map { e -> requireNotNull(e.movement.legacyId) to e.movement.dpsId } }
       ).unzip()
     return legacyIds.toSet() to ids.filterNotNull().toSet()
   }

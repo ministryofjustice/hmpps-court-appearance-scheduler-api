@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.urn
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
@@ -83,7 +84,7 @@ class SyncCourtAppearanceIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(CourtAppearanceScheduled(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id)),
+      setOf(CourtAppearanceScheduled(saved.person.identifier, saved.id, null, DataSource.NOMIS).publication(saved.id)),
     )
   }
 
@@ -109,7 +110,40 @@ class SyncCourtAppearanceIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(CourtAppearanceScheduled(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id)),
+      setOf(CourtAppearanceScheduled(saved.person.identifier, saved.id, null, DataSource.NOMIS).publication(saved.id)),
+    )
+  }
+
+  @Test
+  fun `200 ok - next court appearance scheduled for RaS`() {
+    val person = givenPersonSummary(personSummary())
+    val prisonCode = requireNotNull(person.prisonCode)
+
+    val request = syncRequest(courtEvent(prisonCode, externalReference = urn()))
+    val response = syncAppearance(person.identifier, request).successResponse<ReferenceId>()
+
+    val saved = requireNotNull(findCourtAppearance(response.id))
+    assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
+    saved verifyAgainst request.courtEvent
+
+    verifyAudit(
+      saved,
+      RevisionType.ADD,
+      setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearance::class.simpleName!!),
+      SchedulerContext.get()
+        .copy(username = request.user.username, caseloadId = request.user.activeCaseloadId, source = DataSource.NOMIS),
+    )
+
+    verifyEventPublications(
+      saved,
+      setOf(
+        CourtAppearanceScheduled(
+          saved.person.identifier,
+          saved.id,
+          saved.externalReference,
+          DataSource.NOMIS,
+        ).publication(saved.id),
+      ),
     )
   }
 
@@ -133,14 +167,47 @@ class SyncCourtAppearanceIntTest(
     val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
 
     assertThat(response.id).isEqualTo(appearance.id)
-    verifyAudit(appearance, RevisionType.ADD, setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearance::class.simpleName!!))
+    verifyAudit(
+      appearance,
+      RevisionType.ADD,
+      setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearance::class.simpleName!!),
+    )
+  }
+
+  @Test
+  fun `200 ok scheduled appearance id and legacy id returned if external reference already exists`() {
+    val appearance = givenCourtAppearance(courtAppearance(externalReference = urn()))
+    val request = with(appearance) {
+      syncRequest(
+        courtEvent(
+          prisonCode,
+          courtCode,
+          reason.code,
+          date = appearance.start.toLocalDate(),
+          startTime = appearance.start.toLocalTime(),
+          commentText = appearance.comments,
+          externalReference = appearance.externalReference!!,
+        ),
+      )
+    }
+
+    val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
+
+    assertThat(response.id).isEqualTo(appearance.id)
+    verifyAudit(
+      appearance,
+      RevisionType.MOD,
+      setOf(CourtAppearance::class.simpleName!!),
+      SchedulerContext.get().copy(username = request.user.username, caseloadId = request.user.activeCaseloadId, source = DataSource.NOMIS),
+    )
   }
 
   @Test
   fun `200 ok - court appearance updated`() {
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
 
-    val request = syncRequest(courtEvent(appearance.prisonCode, eventId = appearance.legacyId!!))
+    val request =
+      syncRequest(courtEvent(appearance.prisonCode, eventId = appearance.legacyId!!, externalReference = urn()))
     val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -158,9 +225,24 @@ class SyncCourtAppearanceIntTest(
     verifyEventPublications(
       saved,
       setOf(
-        CourtAppearanceRelocated(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id),
-        CourtAppearanceRescheduled(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id),
-        CourtAppearanceCommentsChanged(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id),
+        CourtAppearanceRelocated(
+          saved.person.identifier,
+          saved.id,
+          request.courtEvent.externalReferenceUrn,
+          DataSource.NOMIS,
+        ).publication(saved.id),
+        CourtAppearanceRescheduled(
+          saved.person.identifier,
+          saved.id,
+          request.courtEvent.externalReferenceUrn,
+          DataSource.NOMIS,
+        ).publication(saved.id),
+        CourtAppearanceCommentsChanged(
+          saved.person.identifier,
+          saved.id,
+          request.courtEvent.externalReferenceUrn,
+          DataSource.NOMIS,
+        ).publication(saved.id),
       ),
     )
   }

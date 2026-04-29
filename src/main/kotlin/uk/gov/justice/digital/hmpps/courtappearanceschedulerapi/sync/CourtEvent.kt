@@ -14,7 +14,7 @@ data class CourtEvent(
   val scheduledPrisonCode: String,
   @JsonProperty("agyLocId")
   val scheduledCourtCode: String,
-  val eventId: Long,
+  val eventId: Long?,
   @JsonProperty("eventDate")
   val date: LocalDate,
   val startTime: LocalTime,
@@ -23,6 +23,7 @@ data class CourtEvent(
   @JsonProperty("eventStatus")
   val status: String,
   val commentText: String?,
+  val externalReferenceUrn: String?,
 ) {
   @JsonIgnore
   val start: LocalDateTime = LocalDateTime.of(date, startTime)
@@ -40,9 +41,9 @@ data class CourtEventMovement(
   @JsonProperty("dpsCourtAppearanceScheduleId")
   val scheduleId: UUID?,
   @JsonProperty("offenderBookId")
-  val bookingId: Long,
+  val bookingId: Long?,
   @JsonProperty("movementSeq")
-  val sequenceNumber: Int,
+  val sequenceNumber: Int?,
   @JsonProperty("movementDate")
   val date: LocalDate,
   @JsonProperty("movementTime")
@@ -55,7 +56,7 @@ data class CourtEventMovement(
   val commentText: String?,
 ) {
   @JsonIgnore
-  val legacyId: String = "${bookingId}_$sequenceNumber"
+  val legacyId: String? = if (bookingId != null && sequenceNumber != null) "${bookingId}_$sequenceNumber" else null
 
   @JsonIgnore
   val occurredAt: LocalDateTime = LocalDateTime.of(date, time)

@@ -8,5 +8,5 @@ data class RelocateAppearance(
   val courtCode: String,
   override val reason: String? = null,
 ) : CourtAppearanceAction {
-  override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceRelocated(ca.person.identifier, ca.id)
+  override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceRelocated(ca.person.identifier, ca.id, ca.externalReference)
 }
