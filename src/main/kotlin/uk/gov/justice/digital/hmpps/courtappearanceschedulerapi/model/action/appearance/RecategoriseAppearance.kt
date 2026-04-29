@@ -8,5 +8,5 @@ data class RecategoriseAppearance(
   val reasonCode: String,
   override val reason: String? = null,
 ) : CourtAppearanceAction {
-  override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceRecategorised(ca.person.identifier, ca.id)
+  override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceRecategorised(ca.person.identifier, ca.id, ca.externalReference)
 }

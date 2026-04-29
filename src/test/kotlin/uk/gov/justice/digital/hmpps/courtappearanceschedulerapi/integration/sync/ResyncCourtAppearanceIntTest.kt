@@ -27,6 +27,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.Data
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.urn
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.username
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
@@ -84,7 +85,7 @@ class ResyncCourtAppearanceIntTest(
 
     val request = resyncRequest(
       listOf(
-        resyncCourtEvent(),
+        resyncCourtEvent(courtEvent(externalReference = urn())),
         resyncCourtEvent(
           movements = listOf(resyncCourtEventMovement()),
           modified = AtAndBy(LocalDateTime.now(), username()),
@@ -120,14 +121,16 @@ class ResyncCourtAppearanceIntTest(
       )
     }
 
+    val externalRef =
+      { legacyId: Long -> request.courtEvents.single { it.courtEvent.eventId == legacyId }.courtEvent.externalReferenceUrn }
+
     val ca = requireNotNull(findCourtAppearance(res.courtEvents.first().dpsId))
     verifyEventPublications(
       ca,
       (
         res.courtEvents.map {
-          CourtAppearanceMigrated(prisoner.prisonerNumber, it.dpsId, DataSource.NOMIS).publication(
-            it.dpsId,
-          ) { false }
+          CourtAppearanceMigrated(prisoner.prisonerNumber, it.dpsId, externalRef(it.eventId), DataSource.NOMIS)
+            .publication(it.dpsId) { false }
         } +
           res.courtEvents.flatMap { ce ->
             ce.movements.map {
@@ -184,10 +187,11 @@ class ResyncCourtAppearanceIntTest(
     val scheduled = schedule.movements.first()
     val unscheduled = givenUnscheduledMovement(unscheduledMovement(person.identifier, prisonCode))
 
+    val externalReference = urn()
     val request = resyncRequest(
       courtEvents = listOf(
         resyncCourtEvent(
-          courtEvent = courtEvent(dpsId = schedule.id),
+          courtEvent = courtEvent(dpsId = schedule.id, externalReference = externalReference),
           movements = listOf(resyncCourtEventMovement(movement = courtEventMovement(dpsId = scheduled.id))),
         ),
       ),
@@ -212,13 +216,44 @@ class ResyncCourtAppearanceIntTest(
     verifyEventPublications(
       scheduled,
       setOf(
-        CourtAppearanceRescheduled(person.identifier, schedule.id, DataSource.NOMIS).publication(schedule.id) { false },
-        CourtAppearanceRelocated(person.identifier, schedule.id, DataSource.NOMIS).publication(schedule.id) { false },
-        AppearanceMovementRelocated(person.identifier, scheduled.id, DataSource.NOMIS).publication(scheduled.id) { false },
-        AppearanceMovementRelocated(person.identifier, unscheduled.id, DataSource.NOMIS).publication(unscheduled.id) { false },
-        CourtAppearanceCommentsChanged(person.identifier, schedule.id, DataSource.NOMIS).publication(schedule.id) { false },
-        AppearanceMovementCommentsChanged(person.identifier, scheduled.id, DataSource.NOMIS).publication(scheduled.id) { false },
-        AppearanceMovementCommentsChanged(person.identifier, unscheduled.id, DataSource.NOMIS).publication(unscheduled.id) { false },
+        CourtAppearanceRescheduled(
+          person.identifier,
+          schedule.id,
+          externalReference,
+          DataSource.NOMIS,
+        ).publication(schedule.id) { false },
+        CourtAppearanceRelocated(
+          person.identifier,
+          schedule.id,
+          externalReference,
+          DataSource.NOMIS,
+        ).publication(schedule.id) { false },
+        CourtAppearanceCommentsChanged(
+          person.identifier,
+          schedule.id,
+          externalReference,
+          DataSource.NOMIS,
+        ).publication(schedule.id) { false },
+        AppearanceMovementRelocated(
+          person.identifier,
+          scheduled.id,
+          DataSource.NOMIS,
+        ).publication(scheduled.id) { false },
+        AppearanceMovementRelocated(
+          person.identifier,
+          unscheduled.id,
+          DataSource.NOMIS,
+        ).publication(unscheduled.id) { false },
+        AppearanceMovementCommentsChanged(
+          person.identifier,
+          scheduled.id,
+          DataSource.NOMIS,
+        ).publication(scheduled.id) { false },
+        AppearanceMovementCommentsChanged(
+          person.identifier,
+          unscheduled.id,
+          DataSource.NOMIS,
+        ).publication(unscheduled.id) { false },
       ),
     )
   }

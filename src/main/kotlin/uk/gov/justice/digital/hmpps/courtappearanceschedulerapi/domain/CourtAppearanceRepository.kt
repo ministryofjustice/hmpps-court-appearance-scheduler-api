@@ -16,6 +16,7 @@ interface CourtAppearanceRepository :
   JpaRepository<CourtAppearance, UUID>,
   JpaSpecificationExecutor<CourtAppearance> {
   fun findByLegacyId(legacyId: Long): CourtAppearance?
+  fun findByExternalReference(externalReference: String): CourtAppearance?
   fun countByPersonIdentifier(personIdentifier: String): Int
 
   @Query(

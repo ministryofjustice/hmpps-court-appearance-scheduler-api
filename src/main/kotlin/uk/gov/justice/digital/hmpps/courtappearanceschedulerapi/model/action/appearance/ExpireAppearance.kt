@@ -7,5 +7,5 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEve
 data class ExpireAppearance(
   override val reason: String? = null,
 ) : CourtAppearanceAction {
-  override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceExpired(ca.person.identifier, ca.id)
+  override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceExpired(ca.person.identifier, ca.id, ca.externalReference)
 }

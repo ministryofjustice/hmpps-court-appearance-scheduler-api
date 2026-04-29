@@ -39,6 +39,7 @@ interface CourtAppearanceOperations {
       start: LocalDateTime = LocalDate.now().plusDays(7).atTime(6, 0),
       end: LocalDateTime? = start.toLocalDate().atTime(23, 59, 59),
       comments: String? = word(25),
+      externalReference: String? = null,
       legacyId: Long? = null,
       movements: List<(CourtAppearance) -> CourtAppearanceMovement> = listOf(),
     ): CourtAppearanceProvider = { person, reason, status ->
@@ -50,6 +51,7 @@ interface CourtAppearanceOperations {
         start.truncatedTo(ChronoUnit.SECONDS),
         end?.truncatedTo(ChronoUnit.SECONDS),
         comments,
+        externalReference,
         legacyId,
       )
         .apply { movements.forEach { addMovement(it(this)) } }

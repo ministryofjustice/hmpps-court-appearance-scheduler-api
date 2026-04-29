@@ -169,6 +169,7 @@ class SyncCourtMovementIntTest(
         CourtAppearanceCompleted(
           updatedAppearance.person.identifier,
           updatedAppearance.id,
+          null,
           DataSource.NOMIS,
         ).publication(updatedAppearance.id),
       ),

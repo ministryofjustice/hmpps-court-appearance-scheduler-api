@@ -97,7 +97,7 @@ class ResyncForPerson(
     reasonProvider: ReasonProvider,
     statusProvider: StatusProvider,
   ): CourtEventMapping {
-    val appearance = appearanceProvider(courtEvent.dpsId, courtEvent.eventId)
+    val appearance = appearanceProvider(courtEvent.dpsId, requireNotNull(courtEvent.eventId))
       ?.updateFrom(person, courtEvent, reasonProvider, statusProvider)
       ?: appearanceRepository.save(courtEvent.asEntity(person, reasonProvider, statusProvider))
     val scheduledMovements = movements.map {
@@ -114,11 +114,11 @@ class ResyncForPerson(
     reasonProvider: ReasonProvider,
     statusProvider: StatusProvider,
   ): CourtMovementMapping {
-    val move = movementProvider(movement.dpsId, movement.legacyId)
+    val move = movementProvider(movement.dpsId, requireNotNull(movement.legacyId))
       ?.updateFrom(person, appearance, movement, reasonProvider, statusProvider)
       ?: movementRepository.save(movement.asEntity(person, appearance, reasonProvider, statusProvider))
     mergeMigrationAudit(move.id, created, modified)
-    return CourtMovementMapping(move.id, movement.bookingId, movement.sequenceNumber)
+    return CourtMovementMapping(move.id, requireNotNull(movement.bookingId), requireNotNull(movement.sequenceNumber))
   }
 
   private fun removeNotInResync(

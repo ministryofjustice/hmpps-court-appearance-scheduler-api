@@ -10,13 +10,19 @@ infix fun CourtAppearance.verifyAgainst(request: CourtEvent) {
   assertThat(prisonCode).isEqualTo(request.scheduledPrisonCode)
   assertThat(courtCode).isEqualTo(request.scheduledCourtCode)
   assertThat(legacyId).isEqualTo(request.eventId)
+  assertThat(externalReference).isEqualTo(request.externalReferenceUrn)
   assertThat(start.toLocalDate()).isEqualTo(request.date)
   assertThat(reason.code).isEqualTo(request.type)
   assertThat(comments).isEqualTo(request.commentText)
 }
 
 infix fun CourtAppearanceMovement.verifyAgainst(request: CourtEventMovement) {
-  assertThat(legacyId).isEqualTo("${request.bookingId}_${request.sequenceNumber}")
+  legacyId?.also {
+    assertThat(it).isEqualTo("${request.bookingId}_${request.sequenceNumber}")
+  } ?: run {
+    assertThat(request.bookingId).isNull()
+    assertThat(request.sequenceNumber).isNull()
+  }
   assertThat(courtCode).isEqualTo(request.courtCode)
   assertThat(prisonCode).isEqualTo(request.prisonCode)
   assertThat(comments).isEqualTo(request.commentText)

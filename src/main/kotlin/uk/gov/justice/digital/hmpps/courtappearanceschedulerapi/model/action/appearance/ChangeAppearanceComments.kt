@@ -9,7 +9,7 @@ data class ChangeAppearanceComments(
   val comments: String?,
   override val reason: String? = null,
 ) : CourtAppearanceAction {
-  override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceCommentsChanged(ca.person.identifier, ca.id)
+  override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceCommentsChanged(ca.person.identifier, ca.id, ca.externalReference)
 }
 
 infix fun ChangeAppearanceComments.changes(property: KMutableProperty0<String?>): Boolean = if (comments == property.get()) {

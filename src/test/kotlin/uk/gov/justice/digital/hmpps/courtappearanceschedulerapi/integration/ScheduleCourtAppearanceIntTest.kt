@@ -93,7 +93,7 @@ class ScheduleCourtAppearanceIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(CourtAppearanceScheduled(saved.person.identifier, saved.id).publication(saved.id)),
+      setOf(CourtAppearanceScheduled(saved.person.identifier, saved.id, null).publication(saved.id)),
     )
   }
 
@@ -126,7 +126,7 @@ class ScheduleCourtAppearanceIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(CourtAppearanceScheduled(saved.person.identifier, saved.id).publication(saved.id)),
+      setOf(CourtAppearanceScheduled(saved.person.identifier, saved.id, null).publication(saved.id)),
     )
   }
 

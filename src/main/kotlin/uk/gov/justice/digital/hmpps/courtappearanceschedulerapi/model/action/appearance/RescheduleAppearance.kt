@@ -21,7 +21,7 @@ data class RescheduleAppearance(
   override val reason: String? = null,
 ) : CourtAppearanceAction,
   StartAndEnd<LocalDateTime> {
-  override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceRescheduled(ca.person.identifier, ca.id)
+  override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceRescheduled(ca.person.identifier, ca.id, ca.externalReference)
 }
 
 fun RescheduleAppearance.changes(

@@ -37,7 +37,7 @@ class SyncCourtMovement(
     val schedule = request.movement.scheduleId?.let { appearanceRepository.getAppearance(it) }
     val movement = (
       request.movement.dpsId?.let { movementRepository.findByIdOrNull(it) }
-        ?: movementRepository.findByLegacyId(request.movement.legacyId)
+        ?: request.movement.legacyId?.let { movementRepository.findByLegacyId(it) }
       )
       ?.updateFrom(person, schedule, request.movement, reasonRepository::getReasonByCode, statusRepository::getStatusByCode)
       ?: movementRepository.save(

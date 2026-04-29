@@ -50,6 +50,7 @@ final class CourtAppearance(
   start: LocalDateTime,
   end: LocalDateTime?,
   comments: String?,
+  externalReference: String?,
   legacyId: Long?,
   @Id
   @Column(name = "id", nullable = false)
@@ -122,6 +123,10 @@ final class CourtAppearance(
   var comments: String? = comments?.trim()
     private set
 
+  @Column(name = "external_reference")
+  var externalReference: String? = externalReference
+    private set
+
   @Column(name = "legacy_id")
   var legacyId: Long? = legacyId
     private set
@@ -140,11 +145,11 @@ final class CourtAppearance(
   }
 
   override fun initialEvents(): Set<DomainEventPublication> = if (SchedulerContext.get().migratingData) {
-    setOf(CourtAppearanceMigrated(person.identifier, id).publication(id) { false })
+    setOf(CourtAppearanceMigrated(person.identifier, id, externalReference).publication(id) { false })
   } else {
     when (status.code) {
-      CourtAppearanceStatus.Code.SCHEDULED -> setOf(CourtAppearanceScheduled(person.identifier, id).publication(id))
-      else -> setOf(CourtAppearanceRecorded(person.identifier, id).publication(id))
+      CourtAppearanceStatus.Code.SCHEDULED -> setOf(CourtAppearanceScheduled(person.identifier, id, externalReference).publication(id))
+      else -> setOf(CourtAppearanceRecorded(person.identifier, id, externalReference).publication(id))
     }
   }
 
@@ -215,6 +220,11 @@ final class CourtAppearance(
     if (action changes ::comments) {
       appliedActions += action
     }
+  }
+
+  fun applyExternalIdentifiers(externalReference: String?, legacyId: Long?) {
+    this.externalReference = externalReference
+    this.legacyId = legacyId
   }
 
   companion object {
