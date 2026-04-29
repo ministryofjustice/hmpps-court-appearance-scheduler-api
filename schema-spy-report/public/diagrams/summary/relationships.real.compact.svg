@@ -14,47 +14,50 @@
 <g id="node1" class="node">
 <title>court_appearance</title>
 <g id="a_node1"><a xlink:href="../../tables/court_appearance.html" xlink:title="court_appearance" target="_top">
-<polygon fill="#ffffff" stroke="transparent" points="268,-164.2 268,-379.2 427,-379.2 427,-164.2 268,-164.2"/>
+<polygon fill="#ffffff" stroke="transparent" points="268,-142.2 268,-379.2 427,-379.2 427,-142.2 268,-142.2"/>
 <polygon fill="#f5f5f5" stroke="transparent" points="268.5,-355.7 268.5,-378.7 427.5,-378.7 427.5,-355.7 268.5,-355.7"/>
 <polygon fill="none" stroke="#000000" points="268.5,-355.7 268.5,-378.7 427.5,-378.7 427.5,-355.7 268.5,-355.7"/>
 <text text-anchor="start" x="273.5" y="-364.3" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="11.00" fill="#000000">court_appearance</text>
 <text text-anchor="start" x="393.0219" y="-363.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">[table]</text>
 <polygon fill="none" stroke="#000000" points="268.5,-333.7 268.5,-355.7 427.5,-355.7 427.5,-333.7 268.5,-333.7"/>
 <image xlink:href="../../images/primaryKeys.png" width="11px" height="12px" preserveAspectRatio="xMinYMin meet" x="273.5" y="-350.7"/>
-<text text-anchor="start" x="297.5" y="-340.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">id</text>
+<text text-anchor="start" x="294.5" y="-340.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">id</text>
 <polygon fill="#ffffff" stroke="transparent" points="268.5,-311.7 268.5,-333.7 427.5,-333.7 427.5,-311.7 268.5,-311.7"/>
 <polygon fill="none" stroke="#000000" points="268.5,-311.7 268.5,-333.7 427.5,-333.7 427.5,-311.7 268.5,-311.7"/>
 <image xlink:href="../../images/foreignKeys.png" width="11px" height="12px" preserveAspectRatio="xMinYMin meet" x="273.5" y="-328.7"/>
-<text text-anchor="start" x="297.5" y="-318.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">person_identifier</text>
+<text text-anchor="start" x="294.5" y="-318.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">person_identifier</text>
 <polygon fill="#ffffff" stroke="transparent" points="268.5,-289.7 268.5,-311.7 427.5,-311.7 427.5,-289.7 268.5,-289.7"/>
 <polygon fill="none" stroke="#000000" points="268.5,-289.7 268.5,-311.7 427.5,-311.7 427.5,-289.7 268.5,-289.7"/>
-<text text-anchor="start" x="297.5" y="-296.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">prison_code</text>
+<text text-anchor="start" x="294.5" y="-296.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">prison_code</text>
 <polygon fill="#ffffff" stroke="transparent" points="268.5,-267.7 268.5,-289.7 427.5,-289.7 427.5,-267.7 268.5,-267.7"/>
 <polygon fill="none" stroke="#000000" points="268.5,-267.7 268.5,-289.7 427.5,-289.7 427.5,-267.7 268.5,-267.7"/>
 <image xlink:href="../../images/foreignKeys.png" width="11px" height="12px" preserveAspectRatio="xMinYMin meet" x="273.5" y="-284.7"/>
-<text text-anchor="start" x="297.5" y="-274.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">reason_id</text>
+<text text-anchor="start" x="294.5" y="-274.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">reason_id</text>
 <polygon fill="#ffffff" stroke="transparent" points="268.5,-245.7 268.5,-267.7 427.5,-267.7 427.5,-245.7 268.5,-245.7"/>
 <polygon fill="none" stroke="#000000" points="268.5,-245.7 268.5,-267.7 427.5,-267.7 427.5,-245.7 268.5,-245.7"/>
 <image xlink:href="../../images/foreignKeys.png" width="11px" height="12px" preserveAspectRatio="xMinYMin meet" x="273.5" y="-262.7"/>
-<text text-anchor="start" x="297.5" y="-252.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">status_id</text>
+<text text-anchor="start" x="294.5" y="-252.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">status_id</text>
 <polygon fill="#ffffff" stroke="transparent" points="268.5,-223.7 268.5,-245.7 427.5,-245.7 427.5,-223.7 268.5,-223.7"/>
 <polygon fill="none" stroke="#000000" points="268.5,-223.7 268.5,-245.7 427.5,-245.7 427.5,-223.7 268.5,-223.7"/>
-<text text-anchor="start" x="297.5" y="-230.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">start</text>
+<text text-anchor="start" x="294.5" y="-230.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">start</text>
 <polygon fill="#ffffff" stroke="transparent" points="268.5,-201.7 268.5,-223.7 427.5,-223.7 427.5,-201.7 268.5,-201.7"/>
 <polygon fill="none" stroke="#000000" points="268.5,-201.7 268.5,-223.7 427.5,-223.7 427.5,-201.7 268.5,-201.7"/>
 <image xlink:href="../../images/foreignKeys.png" width="11px" height="12px" preserveAspectRatio="xMinYMin meet" x="273.5" y="-218.7"/>
-<text text-anchor="start" x="297.5" y="-208.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">legacy_id</text>
-<polygon fill="none" stroke="#000000" points="268.5,-182.7 268.5,-201.7 427.5,-201.7 427.5,-182.7 268.5,-182.7"/>
-<text text-anchor="start" x="271.5" y="-188.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">...</text>
-<polygon fill="#ffffff" stroke="transparent" points="268.5,-163.7 268.5,-182.7 341.5,-182.7 341.5,-163.7 268.5,-163.7"/>
-<polygon fill="none" stroke="#000000" points="268.5,-163.7 268.5,-182.7 341.5,-182.7 341.5,-163.7 268.5,-163.7"/>
-<text text-anchor="start" x="271.5" y="-169.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">&lt; 3</text>
-<polygon fill="#ffffff" stroke="transparent" points="341.5,-163.7 341.5,-182.7 379.5,-182.7 379.5,-163.7 341.5,-163.7"/>
-<polygon fill="none" stroke="#000000" points="341.5,-163.7 341.5,-182.7 379.5,-182.7 379.5,-163.7 341.5,-163.7"/>
-<text text-anchor="start" x="370.3862" y="-169.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
-<polygon fill="#ffffff" stroke="transparent" points="379.5,-163.7 379.5,-182.7 427.5,-182.7 427.5,-163.7 379.5,-163.7"/>
-<polygon fill="none" stroke="#000000" points="379.5,-163.7 379.5,-182.7 427.5,-182.7 427.5,-163.7 379.5,-163.7"/>
-<text text-anchor="start" x="408.9053" y="-169.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">1 &gt;</text>
+<text text-anchor="start" x="294.5" y="-208.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">legacy_id</text>
+<polygon fill="#ffffff" stroke="transparent" points="268.5,-179.7 268.5,-201.7 427.5,-201.7 427.5,-179.7 268.5,-179.7"/>
+<polygon fill="none" stroke="#000000" points="268.5,-179.7 268.5,-201.7 427.5,-201.7 427.5,-179.7 268.5,-179.7"/>
+<text text-anchor="start" x="294.5" y="-186.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">external_reference</text>
+<polygon fill="none" stroke="#000000" points="268.5,-160.7 268.5,-179.7 427.5,-179.7 427.5,-160.7 268.5,-160.7"/>
+<text text-anchor="start" x="271.5" y="-166.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">...</text>
+<polygon fill="#ffffff" stroke="transparent" points="268.5,-141.7 268.5,-160.7 341.5,-160.7 341.5,-141.7 268.5,-141.7"/>
+<polygon fill="none" stroke="#000000" points="268.5,-141.7 268.5,-160.7 341.5,-160.7 341.5,-141.7 268.5,-141.7"/>
+<text text-anchor="start" x="271.5" y="-147.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">&lt; 3</text>
+<polygon fill="#ffffff" stroke="transparent" points="341.5,-141.7 341.5,-160.7 379.5,-160.7 379.5,-141.7 341.5,-141.7"/>
+<polygon fill="none" stroke="#000000" points="341.5,-141.7 341.5,-160.7 379.5,-160.7 379.5,-141.7 341.5,-141.7"/>
+<text text-anchor="start" x="370.3862" y="-147.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000"> &#160;</text>
+<polygon fill="#ffffff" stroke="transparent" points="379.5,-141.7 379.5,-160.7 427.5,-160.7 427.5,-141.7 379.5,-141.7"/>
+<polygon fill="none" stroke="#000000" points="379.5,-141.7 379.5,-160.7 427.5,-160.7 427.5,-141.7 379.5,-141.7"/>
+<text text-anchor="start" x="408.9053" y="-147.8" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">1 &gt;</text>
 </a>
 </g>
 </g>
@@ -286,9 +289,9 @@
 <!-- court_appearance_movement&#45;&gt;court_appearance_reason -->
 <g id="edge7" class="edge">
 <title>court_appearance_movement:w&#45;&gt;court_appearance_reason:e</title>
-<path fill="none" stroke="#000000" d="M482.5012,-298.7168C436.1675,-283.8756 489.3518,-189.7645 435,-153.7 370.1915,-110.6972 322.9045,-107.9572 260,-153.7 212.7687,-188.0456 277.8988,-278.7 219.5,-278.7"/>
-<polygon fill="#000000" stroke="#000000" points="489.0738,-299.6158 496.5121,-304.2668 493.0369,-300.1579 497,-300.7 497,-300.7 497,-300.7 493.0369,-300.1579 497.4879,-297.1332 489.0738,-299.6158 489.0738,-299.6158"/>
-<ellipse fill="none" stroke="#000000" cx="485.9033" cy="-299.1821" rx="3.2" ry="3.2"/>
+<path fill="none" stroke="#000000" d="M482.4415,-298.9426C428.0127,-283.7584 495.9835,-174.2852 435,-131.7 371.2313,-87.1699 321.8716,-84.5694 260,-131.7 206.0915,-172.7648 287.2676,-278.7 219.5,-278.7"/>
+<polygon fill="#000000" stroke="#000000" points="489.0577,-299.7412 496.5685,-304.2741 493.0288,-300.2206 497,-300.7 497,-300.7 497,-300.7 493.0288,-300.2206 497.4315,-297.1259 489.0577,-299.7412 489.0577,-299.7412"/>
+<ellipse fill="none" stroke="#000000" cx="485.8807" cy="-299.3577" rx="3.2" ry="3.2"/>
 </g>
 <!-- court_appearance_movement&#45;&gt;person_summary -->
 <g id="edge6" class="edge">
