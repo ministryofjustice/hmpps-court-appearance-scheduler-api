@@ -24,6 +24,7 @@ interface AppearanceSearchRequest :
   StartAndEnd<LocalDate> {
   val status: Set<CourtAppearanceStatus.Code>
   val reason: Set<String>
+  val courtCodes: Set<String>
   val external: Boolean?
 
   override fun validSortFields(): Set<String> = setOf(START, END, STATUS, FIRST_NAME, LAST_NAME, REASON)

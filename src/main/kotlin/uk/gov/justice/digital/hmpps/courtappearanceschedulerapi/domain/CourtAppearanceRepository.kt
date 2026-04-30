@@ -42,6 +42,10 @@ fun appearanceMatchesPrisonCode(prisonCode: String) = Specification<CourtAppeara
   cb.equal(ca.get<String>(CourtAppearance::prisonCode.name), prisonCode)
 }
 
+fun appearanceMatchesCourtCodeIn(courtCodes: Set<String>) = Specification<CourtAppearance> { ca, _, _ ->
+  ca.get<String>(CourtAppearance::courtCode.name).`in`(courtCodes)
+}
+
 fun appearanceMatchesPersonPrisonCode(prisonCode: String) = Specification<CourtAppearance> { ca, _, cb ->
   ca.join<CourtAppearance, PersonSummary>(CourtAppearance::person.name, JoinType.INNER)
     .matchesPrisonCode(cb, prisonCode)
