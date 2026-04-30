@@ -13,6 +13,7 @@ data class AppearanceScheduleSearchRequest(
   override val end: LocalDate,
   override val status: Set<CourtAppearanceStatus.Code> = emptySet(),
   override val reason: Set<String> = emptySet(),
+  override val courtCodes: Set<String> = emptySet(),
   override val external: Boolean? = null,
   override val page: Int = 1,
   override val size: Int = Int.MAX_VALUE,

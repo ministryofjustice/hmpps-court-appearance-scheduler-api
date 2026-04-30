@@ -12,6 +12,7 @@ data class CourtAppearanceSearchRequest(
   override val end: LocalDate,
   override val status: Set<CourtAppearanceStatus.Code> = emptySet(),
   override val reason: Set<String> = emptySet(),
+  override val courtCodes: Set<String> = emptySet(),
   override val external: Boolean? = null,
   val query: String? = null,
   override val page: Int = 1,

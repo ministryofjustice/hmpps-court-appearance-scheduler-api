@@ -105,6 +105,22 @@ class AppearanceScheduleSearchIntTest(
   }
 
   @Test
+  fun `can filter appearances by court`() {
+    val prison = prisonRegister.givenPrison()
+    val court = courtRegister.givenCourt()
+
+    val toFind = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code))
+    givenCourtAppearance(courtAppearance(prisonCode = prison.code))
+
+    val res = searchAppearances(prison.code, searchRequest(courtCodes = setOf(court.code)))
+      .successResponse<CourtAppearanceSchedules>()
+
+    assertThat(res.content).hasSize(1)
+    assertThat(res.metadata.totalElements).isEqualTo(1)
+    assertThat(res.content.single().id).isEqualTo(toFind.id)
+  }
+
+  @Test
   fun `can filter and sort appearances by status`() {
     val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
@@ -294,11 +310,12 @@ class AppearanceScheduleSearchIntTest(
     end: LocalDate = start.plusDays(30),
     statuses: Set<CourtAppearanceStatus.Code> = emptySet(),
     reasons: Set<String> = emptySet(),
+    courtCodes: Set<String> = emptySet(),
     external: Boolean? = null,
     page: Int = 1,
     size: Int = 10,
     sort: String = "${CourtAppearance::start.name},asc",
-  ) = AppearanceScheduleSearchRequest(personIdentifiers, start, end, statuses, reasons, external, page, size, sort)
+  ) = AppearanceScheduleSearchRequest(personIdentifiers, start, end, statuses, reasons, courtCodes, external, page, size, sort)
 
   private fun searchAppearances(
     prisonCode: String,
