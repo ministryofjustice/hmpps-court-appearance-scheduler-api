@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.controller
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.CaseloadIdHeader
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.OpenApiTags.UI
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Appearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditHistory
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ReferenceId
@@ -22,6 +24,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.CourtApp
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.history.CourtAppearanceHistory
 import java.util.UUID
 
+@Tag(name = UI)
 @RestController
 @RequestMapping("/court-appearances")
 @PreAuthorize("hasAnyRole('${Roles.SCHEDULER_RO}', '${Roles.SCHEDULER_RW}', '${Roles.SCHEDULER_UI}')")

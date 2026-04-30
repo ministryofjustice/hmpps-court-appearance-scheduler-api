@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.controller
 
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.PathVariable
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.OpenApiTags.UI
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.AppearanceScheduleSearchRequest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.CourtAppearanceSchedules
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.CourtAppearanceSearchRequest
@@ -15,6 +17,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.Cour
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.PersonAppearanceSearchRequest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.SearchCourtAppearances
 
+@Tag(name = UI)
 @RestController
 @RequestMapping("/search")
 @PreAuthorize("hasRole('${Roles.SCHEDULER_UI}')")

@@ -6,9 +6,12 @@ import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.media.Schema
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
+import io.swagger.v3.oas.models.tags.Tag
+import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springdoc.core.customizers.OperationCustomizer
 import org.springframework.boot.info.BuildProperties
 import org.springframework.context.ApplicationContext
@@ -20,14 +23,42 @@ import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.expression.spel.support.StandardEvaluationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.method.HandlerMethod
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.OpenApiTags.SYNC
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.OpenApiTags.UI
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 object OpenApiTags {
   const val SYNC = "Sync"
+  const val UI = "UI"
 }
 
 @Configuration
 class OpenApiConfiguration(buildProperties: BuildProperties, private val context: ApplicationContext) {
   private val version: String? = buildProperties.version
+
+  @Bean
+  fun localDateTimeCustomiser(): OpenApiCustomizer = OpenApiCustomizer { openApi ->
+    openApi.components.schemas.values.forEach { schema ->
+      val props = schema.properties ?: return@forEach
+      props.forEach { (name, property) ->
+        if (property.type == "string" && property.format == "date-time") {
+          props[name] = Schema<String>().apply {
+            example = "${LocalDate.now()}T${DateTimeFormatter.ofPattern("HH:mm:ss").format(LocalTime.now())}"
+            type = property.type
+            format = property.format
+            nullable = property.nullable
+            deprecated = property.deprecated
+            readOnly = property.readOnly
+            writeOnly = property.writeOnly
+            extensions = property.extensions
+            title = property.title
+          }
+        }
+      }
+    }
+  }
 
   @Bean
   fun customOpenAPI(): OpenAPI = OpenAPI()
@@ -40,7 +71,10 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
       ),
     )
     .tags(
-      listOf(),
+      listOf(
+        Tag().name(UI).description("UI endpoints - not to be use by any other client"),
+        Tag().name(SYNC).description("Legacy sync endpoints - not to be use by any other client"),
+      ),
     )
     .info(
       Info().title("HMPPS Court Appearance Scheduler Api").version(version)
