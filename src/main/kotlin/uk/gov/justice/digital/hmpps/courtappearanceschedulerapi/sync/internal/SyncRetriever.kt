@@ -7,10 +7,13 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovementRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPersonIdentifier
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ReconciliationCourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ReconciliationResponse
+import java.util.UUID
 
 @Transactional(readOnly = true)
 @Service
@@ -22,28 +25,34 @@ class SyncRetriever(
     val courtEvents = appearanceRepository.findAll(appearanceMatchesPersonIdentifier(personIdentifier, null))
       .map(CourtAppearance::reconcile)
     val unscheduled = movementRepository.findAllUnscheduledByPersonIdentifier(personIdentifier)
-      .map(CourtAppearanceMovement::reconcile)
+      .map(CourtAppearanceMovement::asMovement)
     return ReconciliationResponse(courtEvents, unscheduled)
   }
+
+  fun courtAppearance(id: UUID): CourtEvent = appearanceRepository.getAppearance(id).asEvent()
+
+  fun courtAppearanceMovement(id: UUID): CourtEventMovement = movementRepository.getMovement(id).asMovement()
 }
 
 private fun CourtAppearance.reconcile() = ReconciliationCourtEvent(
-  CourtEvent(
-    id,
-    prisonCode,
-    courtCode,
-    legacyId,
-    start.toLocalDate(),
-    start.toLocalTime(),
-    reason.code,
-    status.code.name,
-    comments,
-    externalReference,
-  ),
-  movements.map(CourtAppearanceMovement::reconcile),
+  asEvent(),
+  movements.map(CourtAppearanceMovement::asMovement),
 )
 
-private fun CourtAppearanceMovement.reconcile(): CourtEventMovement {
+private fun CourtAppearance.asEvent() = CourtEvent(
+  id,
+  prisonCode,
+  courtCode,
+  legacyId,
+  start.toLocalDate(),
+  start.toLocalTime(),
+  reason.code,
+  status.code.name,
+  comments,
+  externalReference,
+)
+
+private fun CourtAppearanceMovement.asMovement(): CourtEventMovement {
   val legacyIdParts = legacyId?.split("_")
   val (from, to) = when (direction) {
     CourtAppearanceMovement.Direction.OUT -> prisonCode to courtCode

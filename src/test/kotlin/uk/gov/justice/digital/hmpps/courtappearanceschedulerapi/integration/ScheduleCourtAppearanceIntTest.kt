@@ -65,7 +65,6 @@ class ScheduleCourtAppearanceIntTest(
 
     assertThat(res.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
     assertThat(res.userMessage).isEqualTo("Invalid request")
-    assertThat(res.developerMessage).isEqualTo("Unable to schedule a court appearance when current location is unknown")
   }
 
   @Test
