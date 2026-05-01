@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception
 
+import io.sentry.Sentry
 import jakarta.validation.ValidationException
 import org.springframework.context.MessageSourceResolvable
 import org.springframework.dao.DataAccessException
@@ -120,7 +121,10 @@ class ApiExceptionHandler {
     )
 }
 
-private fun RuntimeException.devMessage(): String = message ?: "${this::class.simpleName}: ${cause?.message ?: ""}"
+private fun RuntimeException.devMessage(): String {
+  val sentryId = Sentry.captureException(this)
+  return "${this::class.simpleName}: $sentryId"
+}
 
 private fun List<MessageSourceResolvable>.mapErrors() = map { it.defaultMessage!! }.distinct().sorted().let {
   val validationFailure = "Validation failure"
