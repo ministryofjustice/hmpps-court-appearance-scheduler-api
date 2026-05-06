@@ -29,9 +29,6 @@ generic-service:
           return 401;
         }
         more_set_headers "Strict-Transport-Security: \"max-age=31536000; includeSubDomains; preload\"";
-        if ($server_protocol !~ "^HTTP/2") {
-          return 426;
-        }
 
   # Used to access resources like S3 buckets, SQS queues and SNS topics
   serviceAccountName: hmpps-court-appearance-scheduler-api
