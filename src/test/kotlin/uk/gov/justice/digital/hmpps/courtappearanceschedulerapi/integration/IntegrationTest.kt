@@ -22,9 +22,7 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 import org.springframework.transaction.support.TransactionTemplate
-import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
 import tools.jackson.databind.json.JsonMapper
-import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.AuditRevision
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DomainEventPublication
@@ -32,7 +30,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDoma
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.Identifiable
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEvent
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.Notification
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.TestConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.container.LocalStackContainer
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.container.LocalStackContainer.setLocalStackProperties
@@ -44,9 +41,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wire
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerRegisterExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchExtension
 import uk.gov.justice.hmpps.kotlin.common.ErrorResponse
-import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
-import uk.gov.justice.hmpps.sqs.MissingQueueException
 import uk.gov.justice.hmpps.sqs.MissingTopicException
 import uk.gov.justice.hmpps.sqs.publish
 import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
@@ -88,11 +83,6 @@ abstract class IntegrationTest {
   @Autowired
   protected lateinit var hmppsQueueService: HmppsQueueService
 
-  protected val hmppsEventsTestQueue by lazy {
-    hmppsQueueService.findByQueueId("hmppseventtestqueue")
-      ?: throw MissingQueueException("hmppseventtestqueue queue not found")
-  }
-
   protected val domainEventsTopic by lazy {
     hmppsQueueService.findByTopicId("hmppseventtesttopic")
       ?: throw MissingTopicException("hmppseventtesttopic not found")
@@ -101,12 +91,6 @@ abstract class IntegrationTest {
   protected fun sendDomainEvent(event: DomainEvent<*>) {
     domainEventsTopic.publish(event.eventType, jsonMapper.writeValueAsString(event))
   }
-
-  protected fun HmppsQueue.receiveDomainEventsOnQueue(maxMessages: Int = 10): List<DomainEvent<*>> = sqsClient.receiveMessage(
-    ReceiveMessageRequest.builder().queueUrl(queueUrl).maxNumberOfMessages(maxMessages).build(),
-  ).get().messages()
-    .map { jsonMapper.readValue<Notification>(it.body()) }
-    .map { jsonMapper.readValue<DomainEvent<*>>(it.message) }
 
   internal fun setAuthorisation(
     username: String? = DEFAULT_USERNAME,

@@ -15,8 +15,9 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.Data
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonersearch.Prisoner
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonersearch.PrisonerNumbers
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.WiremockConfig.mockServerConfig
 
-class PrisonerSearchServer : WireMockServer(9000) {
+class PrisonerSearchServer : WireMockServer(mockServerConfig(9000)) {
   fun givenPrisoner(prisoner: Prisoner): Prisoner = givenPrisoners(prisoner.prisonId!!, setOf(prisoner.prisonerNumber), listOf(prisoner)).first()
 
   fun givenPrisoners(

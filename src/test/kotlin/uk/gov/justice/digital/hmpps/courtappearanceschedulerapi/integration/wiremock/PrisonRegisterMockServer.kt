@@ -14,9 +14,10 @@ import tools.jackson.module.kotlin.jsonMapper
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonregister.PrisonsByIdsRequest
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.WiremockConfig.mockServerConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Prison
 
-class PrisonRegisterMockServer : WireMockServer(9005) {
+class PrisonRegisterMockServer : WireMockServer(mockServerConfig(9005)) {
   fun givenPrison(prison: Prison = prison()): Prison = givenPrisons(setOf(prison)).first()
 
   fun givenPrisons(

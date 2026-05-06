@@ -81,6 +81,8 @@ spring:
 
 server:
   port: 8080
+  http2:
+    enabled: true
   servlet:
     context-path: /
   forward-headers-strategy: native
@@ -127,3 +129,4 @@ service:
   domain-events:
     poll-interval: PT0s
     batch-size: 10
+  http-protocol: h2c
