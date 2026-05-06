@@ -13,9 +13,10 @@ import org.junit.jupiter.api.extension.ExtensionContext
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.WiremockConfig.mockServerConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Court
 
-class CourtRegisterMockServer : WireMockServer(9006) {
+class CourtRegisterMockServer : WireMockServer(mockServerConfig(9006)) {
   fun givenCourt(court: Court = court()): Court = givenCourts(setOf(court)).first()
 
   fun givenCourts(courts: Set<Court>, courtCodes: Set<String> = setOf()): Set<Court> {

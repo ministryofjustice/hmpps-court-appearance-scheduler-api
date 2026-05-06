@@ -12,8 +12,9 @@ import tools.jackson.module.kotlin.jsonMapper
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.username
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.manageusers.UserDetails
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.WiremockConfig.mockServerConfig
 
-class ManageUsersServer : WireMockServer(8095) {
+class ManageUsersServer : WireMockServer(mockServerConfig(8095)) {
 
   fun givenUser(userDetails: UserDetails = user(), status: HttpStatus = HttpStatus.OK): UserDetails {
     val response = aResponse().withHeader("Content-Type", "application/json")

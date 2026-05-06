@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.WiremockConfig.mockServerConfig
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
@@ -36,11 +37,7 @@ class HmppsAuthApiExtension :
   }
 }
 
-class HmppsAuthMockServer : WireMockServer(WIREMOCK_PORT) {
-  companion object {
-    private const val WIREMOCK_PORT = 8090
-  }
-
+class HmppsAuthMockServer : WireMockServer(mockServerConfig(8090)) {
   fun givenTokenGranted() {
     stubFor(
       post(urlEqualTo("/auth/oauth/token"))
