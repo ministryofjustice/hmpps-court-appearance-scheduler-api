@@ -64,4 +64,3 @@ hmpps.sqs:
 
 service:
   ui-base-url: "https://local-ui"
-  http-protocol: http11
