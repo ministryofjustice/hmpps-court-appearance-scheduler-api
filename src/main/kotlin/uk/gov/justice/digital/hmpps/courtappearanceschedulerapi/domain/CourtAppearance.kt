@@ -22,9 +22,11 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.Schedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction.IN
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction.OUT
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCompleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRecorded
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceScheduled
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceStarted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CompleteAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
@@ -148,13 +150,16 @@ final class CourtAppearance(
     setOf(CourtAppearanceMigrated(person.identifier, id, externalReference).publication(id) { false })
   } else {
     when (status.code) {
-      CourtAppearanceStatus.Code.SCHEDULED -> setOf(CourtAppearanceScheduled(person.identifier, id, externalReference).publication(id))
+      CourtAppearanceStatus.Code.SCHEDULED -> setOf(
+        CourtAppearanceScheduled(person.identifier, id, externalReference).publication(id),
+      )
+
       else -> setOf(CourtAppearanceRecorded(person.identifier, id, externalReference).publication(id))
     }
   }
 
   override fun domainEvents(): Set<DomainEventPublication> = appliedActions.mapNotNull { action ->
-    action.domainEvent(this)?.publication(id)
+    action.domainEvent(this)?.publication(id) { it.eventType !in EXCLUDE_FROM_PUBLISH }
   }.toSet()
 
   fun addMovement(movement: CourtAppearanceMovement) = apply {
@@ -172,6 +177,8 @@ final class CourtAppearance(
     movements.remove(movement)
     movement.courtAppearance = null
   }
+
+  fun latestMovement(direction: CourtAppearanceMovement.Direction): CourtAppearanceMovement? = movements.sortedByDescending { it.occurredAt }.firstOrNull { it.direction == direction }
 
   fun movePerson(person: PersonSummary) = apply {
     this.person = person
@@ -228,6 +235,8 @@ final class CourtAppearance(
   }
 
   companion object {
+    val EXCLUDE_FROM_PUBLISH: Set<String> = setOf(CourtAppearanceStarted.EVENT_TYPE, CourtAppearanceCompleted.EVENT_TYPE)
+
     fun changeableProperties() = listOf(
       CourtAppearance::prisonCode,
       CourtAppearance::courtCode,

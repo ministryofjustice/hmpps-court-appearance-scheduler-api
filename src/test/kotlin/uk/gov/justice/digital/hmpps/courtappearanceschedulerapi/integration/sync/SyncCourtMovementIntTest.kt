@@ -19,9 +19,9 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerat
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementCommentsChanged
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRecategorised
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRecorded
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRelocated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCompleted
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceStarted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
@@ -100,7 +100,15 @@ class SyncCourtMovementIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(AppearanceMovementRecorded(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id)),
+      setOf(
+        CourtAppearanceStarted(
+          saved.person.identifier,
+          saved.id,
+          null,
+          null,
+          DataSource.NOMIS,
+        ).publication(saved.id),
+      ),
     )
   }
 
@@ -128,7 +136,15 @@ class SyncCourtMovementIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(AppearanceMovementRecorded(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id)),
+      setOf(
+        CourtAppearanceStarted(
+          saved.person.identifier,
+          saved.id,
+          null,
+          null,
+          DataSource.NOMIS,
+        ).publication(saved.id),
+      ),
     )
   }
 
@@ -165,13 +181,20 @@ class SyncCourtMovementIntTest(
     verifyEventPublications(
       saved,
       setOf(
-        AppearanceMovementRecorded(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id),
         CourtAppearanceCompleted(
-          updatedAppearance.person.identifier,
+          saved.person.identifier,
+          saved.id,
           updatedAppearance.id,
           null,
           DataSource.NOMIS,
-        ).publication(updatedAppearance.id),
+        ).publication(saved.id),
+        CourtAppearanceCompleted(
+          updatedAppearance.person.identifier,
+          saved.id,
+          updatedAppearance.id,
+          null,
+          DataSource.NOMIS,
+        ).publication(updatedAppearance.id) { false },
       ),
     )
   }
