@@ -1,10 +1,11 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config
 
+import jakarta.annotation.PostConstruct
 import org.springframework.boot.actuate.info.Info
 import org.springframework.boot.actuate.info.InfoContributor
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
-import reactor.netty.http.HttpProtocol
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.integration.IntegrationUrlBuilder
 import java.time.Duration
 
 @Component
@@ -21,7 +22,15 @@ data class ServiceConfig(
   val activePrisons: Set<String>,
   val domainEvents: DomainEventConfig,
   val uiBaseUrl: String,
-  val httpProtocol: Set<HttpProtocol>,
+  val apiBaseUrl: String,
 ) {
   data class DomainEventConfig(val pollInterval: Duration, val batchSize: Int)
+}
+
+@Component
+class ServiceConfigLoader(private val serviceConfig: ServiceConfig) {
+  @PostConstruct
+  fun init() {
+    IntegrationUrlBuilder.baseUrl = serviceConfig.apiBaseUrl
+  }
 }

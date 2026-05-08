@@ -200,6 +200,14 @@ interface CourtAppearanceMovementRepository : JpaRepository<CourtAppearanceMovem
     """,
   )
   fun findAllUnscheduledByPersonIdentifier(personIdentifier: String): List<CourtAppearanceMovement>
+
+  @Query(
+    """
+    select cam from CourtAppearanceMovement cam
+    where cam.courtAppearance.id = :appearanceId
+  """,
+  )
+  fun findAllForAppearance(appearanceId: UUID): List<CourtAppearanceMovement>
 }
 
 fun CourtAppearanceMovementRepository.getMovement(id: UUID) = findByIdOrNull(id) ?: throw NotFoundException("Court movement not found")

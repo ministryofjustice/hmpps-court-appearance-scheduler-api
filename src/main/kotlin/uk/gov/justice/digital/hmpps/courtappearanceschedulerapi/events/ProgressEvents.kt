@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events
 
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.integration.IntegrationUrlBuilder.movementUrl
 import java.util.UUID
 
 data class ProgressInformation(
@@ -18,6 +19,7 @@ data class CourtAppearanceStarted(
 ) : DomainEvent<ProgressInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = movementUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.started"
@@ -41,6 +43,7 @@ data class CourtAppearanceCompleted(
 ) : DomainEvent<ProgressInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = movementUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.completed"

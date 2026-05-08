@@ -3,6 +3,8 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.envers.RevisionType
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
@@ -48,9 +50,10 @@ class CourtAppearanceModificationsIntTest(
       .isUnauthorized
   }
 
-  @Test
-  fun `403 forbidden without correct role`() {
-    applyAction(newUuid(), ChangeAppearanceComments("403"), role = Roles.SCHEDULER_RO)
+  @ParameterizedTest
+  @ValueSource(strings = [Roles.SCHEDULER_RO, Roles.SCHEDULER_RW])
+  fun `403 forbidden without correct role`(role: String) {
+    applyAction(newUuid(), ChangeAppearanceComments("403"), role = role)
       .expectStatus().isForbidden
   }
 
@@ -251,7 +254,7 @@ class CourtAppearanceModificationsIntTest(
     id: UUID,
     action: CourtAppearanceAction,
     username: String = username(),
-    role: String? = listOf(Roles.SCHEDULER_RW, Roles.SCHEDULER_UI).random(),
+    role: String? = Roles.SCHEDULER_UI,
   ) = webTestClient
     .put()
     .uri(URL_TO_TEST, id)

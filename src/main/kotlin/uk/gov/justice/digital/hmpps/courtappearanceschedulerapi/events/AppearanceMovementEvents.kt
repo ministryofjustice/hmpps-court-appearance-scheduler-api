@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events
 
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.integration.IntegrationUrlBuilder.movementUrl
 import java.util.UUID
 
 data class AdditionalMovementInformation(
@@ -16,6 +17,7 @@ data class AppearanceMovementMigrated(
 ) : DomainEvent<AdditionalMovementInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = movementUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance-movement.migrated"
@@ -37,6 +39,7 @@ data class AppearanceMovementRecorded(
 ) : DomainEvent<AdditionalMovementInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = movementUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance-movement.recorded"
@@ -58,6 +61,7 @@ data class AppearanceMovementRecategorised(
 ) : DomainEvent<AdditionalMovementInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = movementUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance-movement.recategorised"
@@ -79,6 +83,7 @@ data class AppearanceMovementRelocated(
 ) : DomainEvent<AdditionalMovementInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = movementUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance-movement.relocated"
@@ -100,6 +105,7 @@ data class AppearanceMovementCommentsChanged(
 ) : DomainEvent<AdditionalMovementInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = movementUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance-movement.comments-changed"

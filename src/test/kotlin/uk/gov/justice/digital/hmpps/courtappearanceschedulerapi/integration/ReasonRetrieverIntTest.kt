@@ -67,7 +67,7 @@ class ReasonRetrieverIntTest : IntegrationTest() {
   }
 
   private fun getReasons(
-    role: String? = listOf(Roles.SCHEDULER_RO, Roles.SCHEDULER_RW, Roles.SCHEDULER_UI).random(),
+    role: String? = Roles.SCHEDULER_UI,
   ) = webTestClient
     .get()
     .uri(URL_TO_TEST)
