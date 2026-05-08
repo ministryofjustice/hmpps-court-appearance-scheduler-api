@@ -68,35 +68,12 @@ class ApiExceptionHandler {
   @ExceptionHandler(AccessDeniedException::class)
   fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<ErrorResponse> = ResponseEntity
     .status(FORBIDDEN)
-    .body(
-      ErrorResponse(
-        status = FORBIDDEN,
-        userMessage = "Forbidden",
-        developerMessage = e.message,
-      ),
-    )
+    .body(ErrorResponse(status = FORBIDDEN))
 
-  @ExceptionHandler(NoResourceFoundException::class)
-  fun handleNoResourceFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse> = ResponseEntity
+  @ExceptionHandler(NotFoundException::class, NoResourceFoundException::class)
+  fun handleNotFoundException(): ResponseEntity<ErrorResponse> = ResponseEntity
     .status(NOT_FOUND)
-    .body(
-      ErrorResponse(
-        status = NOT_FOUND,
-        userMessage = "No resource found failure",
-        developerMessage = e.message,
-      ),
-    )
-
-  @ExceptionHandler(NotFoundException::class)
-  fun handleNotFoundException(e: NotFoundException): ResponseEntity<ErrorResponse> = ResponseEntity
-    .status(NOT_FOUND)
-    .body(
-      ErrorResponse(
-        status = NOT_FOUND,
-        userMessage = e.message,
-        developerMessage = e.devMessage(),
-      ),
-    )
+    .body(ErrorResponse(status = NOT_FOUND))
 
   @ExceptionHandler(DataIntegrityViolationException::class, DataAccessException::class)
   fun handleConflictException(e: RuntimeException): ResponseEntity<ErrorResponse> = ResponseEntity
@@ -116,12 +93,12 @@ class ApiExceptionHandler {
       ErrorResponse(
         status = INTERNAL_SERVER_ERROR,
         userMessage = "Unexpected error",
-        developerMessage = e.message,
+        developerMessage = e.devMessage(),
       ),
     )
 }
 
-private fun RuntimeException.devMessage(): String {
+private fun Exception.devMessage(): String {
   val sentryId = Sentry.captureException(this)
   return "${this::class.simpleName}: $sentryId"
 }

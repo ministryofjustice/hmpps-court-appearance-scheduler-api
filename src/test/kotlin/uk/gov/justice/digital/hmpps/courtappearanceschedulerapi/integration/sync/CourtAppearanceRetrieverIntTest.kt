@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync
 
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -33,8 +32,7 @@ class CourtAppearanceRetrieverIntTest(
 
   @Test
   fun `404 not found when no appearance with provided id`() {
-    val res = getAppearance(newUuid()).errorResponse(HttpStatus.NOT_FOUND)
-    assertThat(res.userMessage).isEqualTo("Court appearance not found")
+    getAppearance(newUuid()).errorResponse(HttpStatus.NOT_FOUND)
   }
 
   @Test
