@@ -11,7 +11,7 @@ plugins {
 }
 
 val hmppsKotlinVersion = "2.2.0"
-val sentryVersion = "8.40.0"
+val sentryVersion = "8.41.0"
 val springDocVersion = "3.0.3"
 val sqsStarterVersion = "7.3.1"
 val swaggerParserVersion = "2.1.41"
