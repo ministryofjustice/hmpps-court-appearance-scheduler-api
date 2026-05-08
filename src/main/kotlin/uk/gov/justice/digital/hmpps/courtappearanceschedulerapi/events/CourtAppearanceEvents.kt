@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events
 
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.integration.IntegrationUrlBuilder.appearanceUrl
 import java.util.UUID
 
 data class AdditionalAppearanceInformation(
@@ -17,6 +18,7 @@ data class CourtAppearanceMigrated(
 ) : DomainEvent<AdditionalAppearanceInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.migrated"
@@ -39,6 +41,7 @@ data class CourtAppearanceScheduled(
 ) : DomainEvent<AdditionalAppearanceInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.scheduled"
@@ -61,6 +64,7 @@ data class CourtAppearanceExpired(
 ) : DomainEvent<AdditionalAppearanceInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.expired"
@@ -83,6 +87,7 @@ data class CourtAppearanceRecorded(
 ) : DomainEvent<AdditionalAppearanceInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.recorded"
@@ -105,6 +110,7 @@ data class CourtAppearanceRecategorised(
 ) : DomainEvent<AdditionalAppearanceInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.recategorised"
@@ -127,6 +133,7 @@ data class CourtAppearanceRelocated(
 ) : DomainEvent<AdditionalAppearanceInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.relocated"
@@ -149,6 +156,7 @@ data class CourtAppearanceRescheduled(
 ) : DomainEvent<AdditionalAppearanceInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.rescheduled"
@@ -171,6 +179,7 @@ data class CourtAppearanceCommentsChanged(
 ) : DomainEvent<AdditionalAppearanceInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.comments-changed"
@@ -193,6 +202,7 @@ data class CourtAppearanceRequestedInPerson(
 ) : DomainEvent<AdditionalAppearanceInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.requested-in-person"
@@ -215,6 +225,7 @@ data class CourtAppearanceRequestedByVideoLink(
 ) : DomainEvent<AdditionalAppearanceInformation> {
   override val eventType: String = EVENT_TYPE
   override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.requested-by-video-link"

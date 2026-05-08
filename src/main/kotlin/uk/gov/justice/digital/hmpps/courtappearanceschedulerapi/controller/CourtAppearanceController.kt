@@ -27,7 +27,7 @@ import java.util.UUID
 @Tag(name = UI)
 @RestController
 @RequestMapping("/court-appearances")
-@PreAuthorize("hasAnyRole('${Roles.SCHEDULER_RO}', '${Roles.SCHEDULER_RW}', '${Roles.SCHEDULER_UI}')")
+@PreAuthorize("hasRole('${Roles.SCHEDULER_UI}')")
 class CourtAppearanceController(
   private val retrieve: CourtAppearanceRetriever,
   private val history: CourtAppearanceHistory,
@@ -35,7 +35,6 @@ class CourtAppearanceController(
   private val modify: CourtAppearanceModifications,
 ) {
   @CaseloadIdHeader
-  @PreAuthorize("hasAnyRole('${Roles.SCHEDULER_RW}', '${Roles.SCHEDULER_UI}')")
   @PostMapping("/{personIdentifier}")
   fun scheduleCourtAppearance(
     @PathVariable personIdentifier: String,
@@ -46,11 +45,9 @@ class CourtAppearanceController(
   fun getCourtAppearance(@PathVariable id: UUID): Appearance = retrieve.byId(id)
 
   @CaseloadIdHeader
-  @PreAuthorize("hasAnyRole('${Roles.SCHEDULER_RW}', '${Roles.SCHEDULER_UI}')")
   @PutMapping("/{id}")
   fun applyAction(@PathVariable id: UUID, @Valid @RequestBody request: CourtAppearanceAction): AuditHistory = modify.apply(id, request)
 
-  @PreAuthorize("hasRole('${Roles.SCHEDULER_UI}')")
   @GetMapping("/{id}/history")
   fun getAppearanceHistory(@PathVariable id: UUID): AuditHistory = history.changes(id)
 }

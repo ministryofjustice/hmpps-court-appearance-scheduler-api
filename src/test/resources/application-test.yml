@@ -64,3 +64,4 @@ hmpps.sqs:
 
 service:
   ui-base-url: "https://local-ui"
+  api-base-url: "http://local-api"

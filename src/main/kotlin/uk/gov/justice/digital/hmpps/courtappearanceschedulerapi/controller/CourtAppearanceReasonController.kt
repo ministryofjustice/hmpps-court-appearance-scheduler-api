@@ -13,7 +13,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.ReasonRe
 @Tag(name = UI)
 @RestController
 @RequestMapping("/court-appearance-reasons")
-@PreAuthorize("hasAnyRole('${Roles.SCHEDULER_RO}', '${Roles.SCHEDULER_RW}', '${Roles.SCHEDULER_UI}')")
+@PreAuthorize("hasRole('${Roles.SCHEDULER_UI}')")
 class CourtAppearanceReasonController(private val retrieve: ReasonRetriever) {
   @GetMapping
   fun getCourtAppearanceReasons(): CourtAppearanceReasons = retrieve.allReasons()

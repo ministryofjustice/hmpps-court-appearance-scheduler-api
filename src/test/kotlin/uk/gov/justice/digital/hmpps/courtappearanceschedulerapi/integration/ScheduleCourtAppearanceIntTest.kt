@@ -151,7 +151,7 @@ class ScheduleCourtAppearanceIntTest(
     request: ScheduleCourtAppearance,
     username: String = username(),
     caseloadId: String? = null,
-    role: String? = listOf(Roles.SCHEDULER_RW, Roles.SCHEDULER_UI).random(),
+    role: String? = Roles.SCHEDULER_UI,
   ) = webTestClient
     .post()
     .uri(URL_TO_TEST, personIdentifier)

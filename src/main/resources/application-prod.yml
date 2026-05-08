@@ -17,3 +17,4 @@ service:
   domain-events:
     poll-interval: PT10s
   ui-base-url: "https://court-appearance-scheduler-ui.hmpps.service.justice.gov.uk"
+  api-base-url: "https://court-appearance-scheduler-api.hmpps.service.justice.gov.uk"
