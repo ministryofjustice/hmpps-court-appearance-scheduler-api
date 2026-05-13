@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -7,6 +8,7 @@ data class ResyncCourtEvents(
   val courtEvents: List<ResyncCourtEvent>,
   val unscheduledMovements: List<ResyncCourtEventMovement>,
 ) {
+  @JsonIgnore
   fun isEmpty(): Boolean = courtEvents.isEmpty() && unscheduledMovements.isEmpty()
 
   fun appearanceIds(): Pair<Set<Long>, Set<UUID>> {
