@@ -18,6 +18,8 @@ service:
     poll-interval: PT10s
   ui-base-url: "https://court-appearance-scheduler-ui-dev.hmpps.service.justice.gov.uk"
   api-base-url: "https://court-appearance-scheduler-api-dev.hmpps.service.justice.gov.uk"
+  appearance-expiration:
+    cron: "0 0 7 * * *"
 
 springdoc:
   api-docs:

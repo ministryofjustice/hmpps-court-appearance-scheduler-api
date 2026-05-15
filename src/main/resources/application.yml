@@ -129,3 +129,5 @@ service:
   domain-events:
     poll-interval: PT0s
     batch-size: 10
+  appearance-expiration:
+    cron:

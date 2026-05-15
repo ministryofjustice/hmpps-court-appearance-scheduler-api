@@ -30,6 +30,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CompleteAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ExpireAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RequestAppearanceByVideoLink
@@ -185,13 +186,16 @@ final class CourtAppearance(
   }
 
   fun calculateStatus(statusProvider: StatusProvider) = apply {
-    val statusCode = when {
-      isCompleted() -> CourtAppearanceStatus.Code.COMPLETED
-      isInProgress() -> CourtAppearanceStatus.Code.IN_PROGRESS
-      isExpired() -> CourtAppearanceStatus.Code.EXPIRED
-      else -> CourtAppearanceStatus.Code.SCHEDULED
+    val (statusCode, action) = when {
+      isCompleted() -> CourtAppearanceStatus.Code.COMPLETED to CompleteAppearance()
+      isInProgress() -> CourtAppearanceStatus.Code.IN_PROGRESS to StartAppearance()
+      isExpired() -> CourtAppearanceStatus.Code.EXPIRED to ExpireAppearance()
+      else -> CourtAppearanceStatus.Code.SCHEDULED to null
     }
-    status = statusProvider(statusCode)
+    if (::status.isInitialized.not() || status.code != statusCode) {
+      status = statusProvider(statusCode)
+      action?.also { appliedActions += it }
+    }
   }
 
   private fun isCompleted() = movements.any { it.direction == IN } ||

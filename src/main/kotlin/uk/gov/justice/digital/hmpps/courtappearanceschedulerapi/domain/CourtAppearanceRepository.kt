@@ -10,6 +10,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSum
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.PRISON_CODE
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 interface CourtAppearanceRepository :
@@ -34,6 +35,8 @@ interface CourtAppearanceRepository :
   """,
   )
   fun findIdsForLegacyIds(legacyIds: Set<Long>): List<UUID>
+
+  fun findByStatusIdAndStartBefore(statusId: UUID, date: LocalDateTime): List<CourtAppearance>
 }
 
 fun CourtAppearanceRepository.getAppearance(id: UUID) = findByIdOrNull(id) ?: throw NotFoundException("Court appearance not found")
