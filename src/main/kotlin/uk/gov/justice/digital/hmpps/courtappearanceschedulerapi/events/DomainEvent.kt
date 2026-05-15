@@ -13,6 +13,7 @@ import java.util.UUID
   value = [
     JsonSubTypes.Type(value = CourtAppearanceMigrated::class, name = CourtAppearanceMigrated.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceScheduled::class, name = CourtAppearanceScheduled.EVENT_TYPE),
+    JsonSubTypes.Type(value = CourtAppearanceCancelled::class, name = CourtAppearanceCancelled.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceExpired::class, name = CourtAppearanceExpired.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceRecorded::class, name = CourtAppearanceRecorded.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceRecategorised::class, name = CourtAppearanceRecategorised.EVENT_TYPE),

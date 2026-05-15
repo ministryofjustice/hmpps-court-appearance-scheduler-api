@@ -10,9 +10,12 @@ import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCancelled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCommentsChanged
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRecategorised
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRelocated
@@ -25,11 +28,13 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.conf
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditHistory
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditedAction
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CancelAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -74,6 +79,67 @@ class CourtAppearanceModificationsIntTest(
     val res = applyAction(newUuid(), action).errorResponse(HttpStatus.BAD_REQUEST)
     assertThat(res.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
     assertThat(res.userMessage).isEqualTo("Validation failure: End must be after start.")
+  }
+
+  @Test
+  fun `409 - cannot cancel expired`() {
+    val ca = givenCourtAppearance(
+      courtAppearance(
+        start = LocalDate.now().minusDays(1).atTime(10, 0),
+        end = LocalDate.now().minusDays(1).atTime(17, 0),
+      ),
+    )
+    assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.EXPIRED)
+
+    applyAction(ca.id, CancelAppearance()).errorResponse(HttpStatus.CONFLICT)
+  }
+
+  @Test
+  fun `409 - cannot cancel in progress`() {
+    val ca = givenCourtAppearance(
+      courtAppearance(movements = listOf(movement(Direction.OUT))),
+    )
+    assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.IN_PROGRESS)
+
+    applyAction(ca.id, CancelAppearance()).errorResponse(HttpStatus.CONFLICT)
+  }
+
+  @Test
+  fun `409 - cannot cancel completed`() {
+    val ca = givenCourtAppearance(
+      courtAppearance(
+        movements = listOf(movement(Direction.OUT), movement(Direction.IN)),
+      ),
+    )
+    assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.COMPLETED)
+
+    applyAction(ca.id, CancelAppearance()).errorResponse(HttpStatus.CONFLICT)
+  }
+
+  @Test
+  fun `200 - cancel scheduled appearance`() {
+    val ca = givenCourtAppearance(courtAppearance())
+    assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
+    val action = CancelAppearance(reason = word(20))
+    val username = username()
+
+    val res = applyAction(ca.id, action, username).successResponse<AuditHistory>()
+    assertThat(res.content).isEmpty()
+
+    val saved = findCourtAppearance(ca.id)
+    assertThat(saved).isNull()
+
+    verifyAudit(
+      ca,
+      RevisionType.DEL,
+      setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
+      SchedulerContext.get().copy(username = username, reason = action.reason),
+    )
+
+    verifyEventPublications(
+      ca,
+      setOf(CourtAppearanceCancelled(ca.person.identifier, ca.id, null).publication(ca.id)),
+    )
   }
 
   @Test

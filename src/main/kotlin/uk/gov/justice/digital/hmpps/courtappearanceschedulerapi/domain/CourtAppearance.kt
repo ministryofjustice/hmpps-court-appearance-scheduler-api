@@ -22,6 +22,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.Schedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction.IN
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction.OUT
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCancelled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCompleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRecorded
@@ -173,6 +174,10 @@ final class CourtAppearance(
     action?.also { appliedActions += it }
     movement.courtAppearance = this
   }
+
+  override fun deletionEvents(): Set<DomainEventPublication> = setOf(
+    CourtAppearanceCancelled(person.identifier, id, externalReference).publication(id),
+  )
 
   fun removeMovement(movement: CourtAppearanceMovement) = apply {
     movements.remove(movement)
