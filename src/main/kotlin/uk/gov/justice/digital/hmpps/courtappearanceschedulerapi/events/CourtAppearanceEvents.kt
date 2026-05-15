@@ -22,7 +22,7 @@ data class CourtAppearanceMigrated(
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.migrated"
-    const val DESCRIPTION = "A court appearance schedule has been migrated"
+    const val DESCRIPTION = "A court appearance has been migrated"
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
@@ -58,6 +58,28 @@ data class CourtAppearanceScheduled(
   }
 }
 
+data class CourtAppearanceCancelled(
+  override val additionalInformation: AdditionalAppearanceInformation,
+  override val personReference: PersonReference,
+) : DomainEvent<AdditionalAppearanceInformation> {
+  override val eventType: String = EVENT_TYPE
+  override val description: String = DESCRIPTION
+
+  companion object {
+    const val EVENT_TYPE = "person.court-appearance.cancelled"
+    const val DESCRIPTION = "A court appearance has been cancelled"
+    operator fun invoke(
+      personIdentifier: String,
+      id: UUID,
+      externalReference: String?,
+      dataSource: DataSource = SchedulerContext.get().source,
+    ) = CourtAppearanceCancelled(
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
+      PersonReference.withIdentifier(personIdentifier),
+    )
+  }
+}
+
 data class CourtAppearanceExpired(
   override val additionalInformation: AdditionalAppearanceInformation,
   override val personReference: PersonReference,
@@ -68,7 +90,7 @@ data class CourtAppearanceExpired(
 
   companion object {
     const val EVENT_TYPE = "person.court-appearance.expired"
-    const val DESCRIPTION = "A court appearance schedule has been expired"
+    const val DESCRIPTION = "A court appearance has expired"
     operator fun invoke(
       personIdentifier: String,
       id: UUID,

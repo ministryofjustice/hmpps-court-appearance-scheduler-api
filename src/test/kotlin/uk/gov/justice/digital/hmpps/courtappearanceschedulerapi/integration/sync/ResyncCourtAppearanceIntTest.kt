@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publicati
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementCommentsChanged
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRelocated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCancelled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCommentsChanged
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRelocated
@@ -168,8 +169,24 @@ class ResyncCourtAppearanceIntTest(
     verifyAudit(
       scheduled,
       RevisionType.DEL,
-      setOf(CourtAppearance::class.simpleName!!, CourtAppearanceMovement::class.simpleName!!),
+      setOf(
+        CourtAppearance::class.simpleName!!,
+        CourtAppearanceMovement::class.simpleName!!,
+        HmppsDomainEvent::class.simpleName!!,
+      ),
       SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS),
+    )
+
+    verifyEventPublications(
+      scheduled,
+      setOf(
+        CourtAppearanceCancelled(
+          scheduled.person.identifier,
+          scheduled.id,
+          scheduled.externalReference,
+          DataSource.NOMIS,
+        ).publication(scheduled.id) { false },
+      ),
     )
   }
 

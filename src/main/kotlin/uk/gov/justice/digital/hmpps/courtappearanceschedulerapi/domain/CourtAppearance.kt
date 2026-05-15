@@ -22,6 +22,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.Schedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction.IN
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction.OUT
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCancelled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCompleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRecorded
@@ -30,6 +31,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CompleteAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ExpireAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RequestAppearanceByVideoLink
@@ -173,6 +175,10 @@ final class CourtAppearance(
     movement.courtAppearance = this
   }
 
+  override fun deletionEvents(): Set<DomainEventPublication> = setOf(
+    CourtAppearanceCancelled(person.identifier, id, externalReference).publication(id),
+  )
+
   fun removeMovement(movement: CourtAppearanceMovement) = apply {
     movements.remove(movement)
     movement.courtAppearance = null
@@ -185,13 +191,16 @@ final class CourtAppearance(
   }
 
   fun calculateStatus(statusProvider: StatusProvider) = apply {
-    val statusCode = when {
-      isCompleted() -> CourtAppearanceStatus.Code.COMPLETED
-      isInProgress() -> CourtAppearanceStatus.Code.IN_PROGRESS
-      isExpired() -> CourtAppearanceStatus.Code.EXPIRED
-      else -> CourtAppearanceStatus.Code.SCHEDULED
+    val (statusCode, action) = when {
+      isCompleted() -> CourtAppearanceStatus.Code.COMPLETED to CompleteAppearance()
+      isInProgress() -> CourtAppearanceStatus.Code.IN_PROGRESS to StartAppearance()
+      isExpired() -> CourtAppearanceStatus.Code.EXPIRED to ExpireAppearance()
+      else -> CourtAppearanceStatus.Code.SCHEDULED to null
     }
-    status = statusProvider(statusCode)
+    if (::status.isInitialized.not() || status.code != statusCode) {
+      status = statusProvider(statusCode)
+      action?.also { appliedActions += it }
+    }
   }
 
   private fun isCompleted() = movements.any { it.direction == IN } ||
