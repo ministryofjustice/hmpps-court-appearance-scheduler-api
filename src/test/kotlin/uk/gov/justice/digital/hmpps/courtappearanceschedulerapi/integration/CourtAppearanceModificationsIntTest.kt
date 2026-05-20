@@ -124,7 +124,11 @@ class CourtAppearanceModificationsIntTest(
     val username = username()
 
     val res = applyAction(ca.id, action, username).successResponse<AuditHistory>()
-    assertThat(res.content).isEmpty()
+    with(res.content.single()) {
+      assertThat(reason).isEqualTo(action.reason)
+      assertThat(domainEvents).containsExactly("person.court-appearance.cancelled")
+      assertThat(changes).isEmpty()
+    }
 
     val saved = findCourtAppearance(ca.id)
     assertThat(saved).isNull()
