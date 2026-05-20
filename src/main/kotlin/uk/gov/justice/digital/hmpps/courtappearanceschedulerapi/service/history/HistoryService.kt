@@ -55,7 +55,7 @@ abstract class HistoryService<T : Identifiable>(
     val entityRevisions: List<Array<*>> =
       auditReader
         .createQuery()
-        .forRevisionsOfEntity(entityClass, false, false)
+        .forRevisionsOfEntity(entityClass, false, true)
         .add(AuditEntity.id().eq(id))
         .resultList.filterIsInstance<Array<*>>()
 
