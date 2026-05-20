@@ -10,8 +10,8 @@ plugins {
   id("de.undercouch.download") version "5.7.0"
 }
 
-val hmppsKotlinVersion = "2.2.0"
-val sentryVersion = "8.41.0"
+val hmppsKotlinVersion = "2.4.0"
+val sentryVersion = "8.42.0"
 val springDocVersion = "3.0.3"
 val sqsStarterVersion = "7.3.2"
 val swaggerParserVersion = "2.1.42"
