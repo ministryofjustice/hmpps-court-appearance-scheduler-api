@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.Schedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext.Companion.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
@@ -49,6 +50,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ResyncCourt
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ResyncCourtEvents
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ResyncResponse
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal.MigrationSystemAuditRepository
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
@@ -148,6 +150,62 @@ class ResyncCourtAppearanceIntTest(
               it.dpsId,
               DataSource.NOMIS,
             ).publication(it.dpsId) { false }
+          }
+        ).toSet(),
+    )
+  }
+
+  @Test
+  fun `200 ok - can migrate completed appearance without IN movement`() {
+    val prisonCode = prisonCode()
+    val person = givenPersonSummary(personSummary(prisonCode = prisonCode))
+
+    val request = resyncRequest(
+      listOf(
+        resyncCourtEvent(
+          courtEvent(externalReference = urn(), date = LocalDate.now().minusDays(1)),
+          movements = listOf(resyncCourtEventMovement()),
+        ),
+      ),
+    )
+    val res = resync(person.identifier, request).successResponse<ResyncResponse>()
+
+    res.courtEvents.single().also { ce ->
+      val saved = requireNotNull(findCourtAppearance(ce.dpsId))
+      assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.COMPLETED)
+      val ceDetail = request.courtEvents.first { it.courtEvent.eventId == ce.eventId }
+      saved verifyAgainst ceDetail.courtEvent
+      verifyAudit(
+        saved,
+        RevisionType.ADD,
+        setOf(
+          HmppsDomainEvent::class.simpleName!!,
+          CourtAppearance::class.simpleName!!,
+          CourtAppearanceMovement::class.simpleName!!,
+        ),
+        SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS),
+      )
+    }
+
+    val externalRef =
+      { legacyId: Long -> request.courtEvents.single { it.courtEvent.eventId == legacyId }.courtEvent.externalReferenceUrn }
+
+    val ca = requireNotNull(findCourtAppearance(res.courtEvents.first().dpsId))
+    verifyEventPublications(
+      ca,
+      (
+        res.courtEvents.map {
+          CourtAppearanceMigrated(person.identifier, it.dpsId, externalRef(it.eventId), DataSource.NOMIS)
+            .publication(it.dpsId) { false }
+        } +
+          res.courtEvents.flatMap { ce ->
+            ce.movements.map {
+              AppearanceMovementMigrated(
+                person.identifier,
+                it.dpsId,
+                DataSource.NOMIS,
+              ).publication(it.dpsId) { false }
+            }
           }
         ).toSet(),
     )

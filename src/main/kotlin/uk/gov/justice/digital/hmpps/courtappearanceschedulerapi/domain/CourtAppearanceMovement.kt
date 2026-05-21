@@ -23,8 +23,6 @@ import org.springframework.data.repository.findByIdOrNull
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementMigrated
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCompleted
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceStarted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.AppearanceMovementAction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementComments
@@ -124,10 +122,7 @@ final class CourtAppearanceMovement(
   override fun initialEvents(): Set<DomainEventPublication> = if (SchedulerContext.get().migratingData) {
     setOf(AppearanceMovementMigrated(person.identifier, id).publication(id) { false })
   } else {
-    when (direction) {
-      Direction.OUT -> CourtAppearanceStarted(person.identifier, id, courtAppearance?.id, courtAppearance?.externalReference)
-      Direction.IN -> CourtAppearanceCompleted(person.identifier, id, courtAppearance?.id, courtAppearance?.externalReference)
-    }.let { setOf(it.publication(id)) }
+    setOf()
   }
 
   override fun domainEvents(): Set<DomainEventPublication> = appliedActions.mapNotNull { action ->

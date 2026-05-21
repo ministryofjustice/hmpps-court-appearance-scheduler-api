@@ -263,3 +263,49 @@ data class CourtAppearanceRequestedByVideoLink(
     )
   }
 }
+
+data class CourtAppearanceStarted(
+  override val additionalInformation: AdditionalAppearanceInformation,
+  override val personReference: PersonReference,
+) : DomainEvent<AdditionalAppearanceInformation> {
+  override val eventType: String = EVENT_TYPE
+  override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
+
+  companion object {
+    const val EVENT_TYPE = "person.court-appearance.started"
+    const val DESCRIPTION = "A court appearance has been started"
+    operator fun invoke(
+      personIdentifier: String,
+      id: UUID,
+      externalReference: String?,
+      dataSource: DataSource = SchedulerContext.get().source,
+    ) = CourtAppearanceStarted(
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
+      PersonReference.withIdentifier(personIdentifier),
+    )
+  }
+}
+
+data class CourtAppearanceCompleted(
+  override val additionalInformation: AdditionalAppearanceInformation,
+  override val personReference: PersonReference,
+) : DomainEvent<AdditionalAppearanceInformation> {
+  override val eventType: String = EVENT_TYPE
+  override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
+
+  companion object {
+    const val EVENT_TYPE = "person.court-appearance.completed"
+    const val DESCRIPTION = "A court appearance has been completed"
+    operator fun invoke(
+      personIdentifier: String,
+      id: UUID,
+      externalReference: String?,
+      dataSource: DataSource = SchedulerContext.get().source,
+    ) = CourtAppearanceCompleted(
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
+      PersonReference.withIdentifier(personIdentifier),
+    )
+  }
+}

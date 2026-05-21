@@ -21,7 +21,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.Appearanc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRecategorised
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRelocated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCompleted
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceStarted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
@@ -90,7 +89,7 @@ class SyncCourtMovementIntTest(
     verifyAudit(
       saved,
       RevisionType.ADD,
-      setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearanceMovement::class.simpleName!!),
+      setOf(CourtAppearanceMovement::class.simpleName!!),
       SchedulerContext.get().copy(
         username = request.user.username,
         caseloadId = request.user.activeCaseloadId,
@@ -100,15 +99,7 @@ class SyncCourtMovementIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(
-        CourtAppearanceStarted(
-          saved.person.identifier,
-          saved.id,
-          null,
-          null,
-          DataSource.NOMIS,
-        ).publication(saved.id),
-      ),
+      setOf(),
     )
   }
 
@@ -126,7 +117,7 @@ class SyncCourtMovementIntTest(
     verifyAudit(
       saved,
       RevisionType.ADD,
-      setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearanceMovement::class.simpleName!!),
+      setOf(CourtAppearanceMovement::class.simpleName!!),
       SchedulerContext.get().copy(
         username = request.user.username,
         caseloadId = request.user.activeCaseloadId,
@@ -136,15 +127,7 @@ class SyncCourtMovementIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(
-        CourtAppearanceStarted(
-          saved.person.identifier,
-          saved.id,
-          null,
-          null,
-          DataSource.NOMIS,
-        ).publication(saved.id),
-      ),
+      setOf(),
     )
   }
 
@@ -183,18 +166,10 @@ class SyncCourtMovementIntTest(
       setOf(
         CourtAppearanceCompleted(
           saved.person.identifier,
-          saved.id,
           updatedAppearance.id,
           null,
           DataSource.NOMIS,
-        ).publication(saved.id),
-        CourtAppearanceCompleted(
-          updatedAppearance.person.identifier,
-          saved.id,
-          updatedAppearance.id,
-          null,
-          DataSource.NOMIS,
-        ).publication(updatedAppearance.id) { false },
+        ).publication(updatedAppearance.id),
       ),
     )
   }

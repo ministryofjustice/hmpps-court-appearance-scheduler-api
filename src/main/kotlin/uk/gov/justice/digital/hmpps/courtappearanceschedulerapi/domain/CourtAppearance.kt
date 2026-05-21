@@ -23,11 +23,9 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction.OUT
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCancelled
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCompleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRecorded
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceScheduled
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceStarted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CompleteAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
@@ -161,7 +159,7 @@ final class CourtAppearance(
   }
 
   override fun domainEvents(): Set<DomainEventPublication> = appliedActions.mapNotNull { action ->
-    action.domainEvent(this)?.publication(id) { it.eventType !in EXCLUDE_FROM_PUBLISH }
+    action.domainEvent(this)?.publication(id)
   }.toSet()
 
   fun addMovement(movement: CourtAppearanceMovement) = apply {
@@ -244,8 +242,6 @@ final class CourtAppearance(
   }
 
   companion object {
-    val EXCLUDE_FROM_PUBLISH: Set<String> = setOf(CourtAppearanceStarted.EVENT_TYPE, CourtAppearanceCompleted.EVENT_TYPE)
-
     fun changeableProperties() = listOf(
       CourtAppearance::prisonCode,
       CourtAppearance::courtCode,
