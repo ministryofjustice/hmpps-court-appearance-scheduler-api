@@ -64,6 +64,7 @@ final class CourtAppearance(
   override var version: Int? = null
     private set
 
+  @Fetch(FetchMode.JOIN)
   @Audited(targetAuditMode = NOT_AUDITED)
   @NotNull
   @ManyToOne(optional = false)
