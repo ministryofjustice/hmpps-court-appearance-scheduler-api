@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.User
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
 
@@ -24,7 +25,7 @@ object SyncGenerator {
     eventId: Long = newId(),
     externalReference: String? = null,
     dpsId: UUID? = null,
-  ): CourtEvent = CourtEvent(dpsId, scheduledPrisonCode, scheduledCourtCode, eventId, date, startTime, type, status, commentText, externalReference)
+  ): CourtEvent = CourtEvent(dpsId, scheduledPrisonCode, scheduledCourtCode, eventId, LocalDateTime.of(date, startTime), type, status, commentText, externalReference)
 
   fun courtEventMovement(
     scheduleId: UUID? = null,
