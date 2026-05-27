@@ -25,7 +25,7 @@ fun CourtEvent.asEntity(
   scheduledPrisonCode,
   scheduledCourtCode,
   reason(type),
-  start,
+  startDateTime,
   end,
   commentText,
   externalReferenceUrn,
@@ -43,7 +43,7 @@ fun CourtAppearance.updateFrom(
   applyExternalIdentifiers(request.externalReferenceUrn, request.eventId)
   relocate(RelocateAppearance(request.scheduledCourtCode))
   recategorise(RecategoriseAppearance(request.type), reason)
-  reschedule(RescheduleAppearance(request.start, null))
+  reschedule(RescheduleAppearance(request.startDateTime, null))
   applyComments(ChangeAppearanceComments(request.commentText))
   calculateStatus(status)
 }

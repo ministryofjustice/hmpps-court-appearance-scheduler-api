@@ -15,9 +15,7 @@ data class CourtEvent(
   @JsonProperty("agyLocId")
   val scheduledCourtCode: String,
   val eventId: Long?,
-  @JsonProperty("eventDate")
-  val date: LocalDate,
-  val startTime: LocalTime,
+  val startDateTime: LocalDateTime,
   @JsonProperty("courtEventType")
   val type: String,
   @JsonProperty("eventStatus")
@@ -26,10 +24,7 @@ data class CourtEvent(
   val externalReferenceUrn: String?,
 ) {
   @JsonIgnore
-  val start: LocalDateTime = LocalDateTime.of(date, startTime)
-
-  @JsonIgnore
-  val end: LocalDateTime = LocalDateTime.of(date, DEFAULT_END_TIME)
+  val end: LocalDateTime = LocalDateTime.of(startDateTime.toLocalDate(), DEFAULT_END_TIME)
 
   companion object {
     private val DEFAULT_END_TIME = LocalTime.of(17, 0)

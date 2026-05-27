@@ -11,7 +11,7 @@ infix fun CourtAppearance.verifyAgainst(request: CourtEvent) {
   assertThat(courtCode).isEqualTo(request.scheduledCourtCode)
   assertThat(legacyId).isEqualTo(request.eventId)
   assertThat(externalReference).isEqualTo(request.externalReferenceUrn)
-  assertThat(start.toLocalDate()).isEqualTo(request.date)
+  assertThat(start.toLocalDate()).isEqualTo(request.startDateTime.toLocalDate())
   assertThat(reason.code).isEqualTo(request.type)
   assertThat(comments).isEqualTo(request.commentText)
 }
