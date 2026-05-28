@@ -5,6 +5,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventMovement
+import java.time.temporal.ChronoUnit
 
 infix fun CourtAppearance.verifyAgainst(request: CourtEvent) {
   assertThat(prisonCode).isEqualTo(request.scheduledPrisonCode)
@@ -27,5 +28,5 @@ infix fun CourtAppearanceMovement.verifyAgainst(request: CourtEventMovement) {
   assertThat(prisonCode).isEqualTo(request.prisonCode)
   assertThat(comments).isEqualTo(request.commentText)
   assertThat(reason.code).isEqualTo(request.reasonCode)
-  assertThat(occurredAt.toLocalDate()).isEqualTo(request.date)
+  assertThat(occurredAt.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(request.occurredAt.truncatedTo(ChronoUnit.SECONDS))
 }
