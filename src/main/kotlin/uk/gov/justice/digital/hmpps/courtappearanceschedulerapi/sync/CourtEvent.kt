@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
@@ -15,7 +14,7 @@ data class CourtEvent(
   @JsonProperty("agyLocId")
   val scheduledCourtCode: String,
   val eventId: Long?,
-  val startDateTime: LocalDateTime,
+  val start: LocalDateTime,
   @JsonProperty("courtEventType")
   val type: String,
   @JsonProperty("eventStatus")
@@ -24,7 +23,7 @@ data class CourtEvent(
   val externalReferenceUrn: String?,
 ) {
   @JsonIgnore
-  val end: LocalDateTime = LocalDateTime.of(startDateTime.toLocalDate(), DEFAULT_END_TIME)
+  val end: LocalDateTime = LocalDateTime.of(start.toLocalDate(), DEFAULT_END_TIME)
 
   companion object {
     private val DEFAULT_END_TIME = LocalTime.of(17, 0)
@@ -39,10 +38,7 @@ data class CourtEventMovement(
   val bookingId: Long?,
   @JsonProperty("movementSeq")
   val sequenceNumber: Int?,
-  @JsonProperty("movementDate")
-  val date: LocalDate,
-  @JsonProperty("movementTime")
-  val time: LocalTime,
+  val occurredAt: LocalDateTime,
   @JsonProperty("movementReasonCode")
   val reasonCode: String,
   val directionCode: String,
@@ -52,9 +48,6 @@ data class CourtEventMovement(
 ) {
   @JsonIgnore
   val legacyId: String? = if (bookingId != null && sequenceNumber != null) "${bookingId}_$sequenceNumber" else null
-
-  @JsonIgnore
-  val occurredAt: LocalDateTime = LocalDateTime.of(date, time)
 
   @JsonIgnore
   val direction: Direction = Direction.valueOf(directionCode)
