@@ -1,0 +1,1 @@
+create index if not exists idx_court_appearance_movement_appearance_id on court_appearance_movement(court_appearance_id);
