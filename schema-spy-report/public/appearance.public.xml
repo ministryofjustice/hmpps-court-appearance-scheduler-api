@@ -125,6 +125,9 @@
          <index name="pk_court_appearance_movement" unique="true">
             <column ascending="true" name="id"/>
          </index>
+         <index name="idx_court_appearance_movement_appearance_id" unique="false">
+            <column ascending="true" name="court_appearance_id"/>
+         </index>
          <index name="idx_court_appearance_movement_person_identifier" unique="false">
             <column ascending="true" name="person_identifier"/>
          </index>
