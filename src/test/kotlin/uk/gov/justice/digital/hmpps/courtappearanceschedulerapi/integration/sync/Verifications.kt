@@ -15,6 +15,7 @@ infix fun CourtAppearance.verifyAgainst(request: CourtEvent) {
   assertThat(start.toLocalDate()).isEqualTo(request.start.toLocalDate())
   assertThat(reason.code).isEqualTo(request.type)
   assertThat(comments).isEqualTo(request.commentText)
+  request.isExternal?.also { assertThat(external).isEqualTo(it) }
 }
 
 infix fun CourtAppearanceMovement.verifyAgainst(request: CourtEventMovement) {

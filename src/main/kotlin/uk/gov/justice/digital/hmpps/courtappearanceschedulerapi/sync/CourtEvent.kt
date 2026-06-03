@@ -21,6 +21,7 @@ data class CourtEvent(
   val status: String,
   val commentText: String?,
   val externalReferenceUrn: String?,
+  val isExternal: Boolean?,
 ) {
   @JsonIgnore
   val end: LocalDateTime = LocalDateTime.of(start.toLocalDate(), DEFAULT_END_TIME)

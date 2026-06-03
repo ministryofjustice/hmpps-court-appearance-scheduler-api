@@ -25,7 +25,7 @@ object SyncGenerator {
     eventId: Long = newId(),
     externalReference: String? = null,
     dpsId: UUID? = null,
-  ): CourtEvent = CourtEvent(dpsId, scheduledPrisonCode, scheduledCourtCode, eventId, LocalDateTime.of(date, startTime), type, status, commentText, externalReference)
+  ): CourtEvent = CourtEvent(dpsId, scheduledPrisonCode, scheduledCourtCode, eventId, LocalDateTime.of(date, startTime), type, status, commentText, externalReference, null)
 
   fun courtEventMovement(
     scheduleId: UUID? = null,

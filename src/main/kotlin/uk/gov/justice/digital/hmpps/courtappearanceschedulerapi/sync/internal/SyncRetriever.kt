@@ -49,6 +49,7 @@ private fun CourtAppearance.asEvent() = CourtEvent(
   status.code.name,
   comments,
   externalReference,
+  external,
 )
 
 private fun CourtAppearanceMovement.asMovement(): CourtEventMovement {
