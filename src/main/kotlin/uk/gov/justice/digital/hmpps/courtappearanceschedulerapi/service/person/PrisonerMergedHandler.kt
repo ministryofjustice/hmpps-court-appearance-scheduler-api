@@ -32,9 +32,8 @@ class PrisonerMergedHandler(
         movementRepository.findAllByPersonIdentifier(pmi.removedNomsNumber).forEach { it.movePerson(toPerson) }
         personSummaryService.remove(person)
       }
-      // migrationClient.requestRepair(pmi.removedNomsNumber)
+      migrationClient.requestRepair(pmi.removedNomsNumber)
     }
-    // migrationClient.requestRepair(pmi.nomsNumber)
-    // TODO: reactivate the request repair when endpoint available
+    migrationClient.requestRepair(pmi.nomsNumber)
   }
 }
