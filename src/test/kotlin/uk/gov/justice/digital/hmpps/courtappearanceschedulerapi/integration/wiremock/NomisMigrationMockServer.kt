@@ -15,7 +15,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wire
 class NomisMigrationServer : WireMockServer(mockServerConfig(9990)) {
   fun requestRepair(status: HttpStatus = HttpStatus.OK) {
     stubFor(
-      put(urlMatching("/migrate/court-appearance/repair/${Prisoner.PATTERN}"))
+      put(urlMatching("/migrate/court-scheduler/repair/${Prisoner.PATTERN}"))
         .willReturn(aResponse().withStatus(status.value())),
     )
   }
