@@ -416,6 +416,84 @@ class ResyncCourtAppearanceIntTest(
     verifyEventPublications(scheduled, setOf())
   }
 
+  @Test
+  fun `200 ok - can switch external reference`() {
+    val prisonCode = prisonCode()
+    val courtCode = courtCode()
+    val person = givenPersonSummary(personSummary(prisonCode = prisonCode))
+    val existing = givenCourtAppearance(
+      courtAppearance(
+        personIdentifier = person.identifier,
+        prisonCode = prisonCode,
+        courtCode = courtCode,
+        legacyId = newId(),
+        externalReference = urn(),
+      ),
+    )
+
+    val request = resyncRequest(
+      courtEvents = listOf(
+        resyncCourtEvent(
+          courtEvent = courtEvent(
+            dpsId = existing.id,
+            eventId = existing.legacyId!!,
+            scheduledPrisonCode = prisonCode,
+            scheduledCourtCode = courtCode,
+            date = existing.start.toLocalDate(),
+            startTime = existing.start.toLocalTime(),
+            commentText = existing.comments,
+            externalReference = urn(),
+          ),
+        ),
+        resyncCourtEvent(
+          courtEvent = courtEvent(
+            scheduledPrisonCode = prisonCode,
+            scheduledCourtCode = courtCode,
+            date = existing.start.toLocalDate(),
+            startTime = existing.start.toLocalTime(),
+            commentText = existing.comments,
+            externalReference = existing.externalReference,
+          ),
+        ),
+      ),
+    )
+    val res = resync(person.identifier, request).successResponse<ResyncResponse>()
+    assertThat(res.courtEvents.size).isEqualTo(2)
+
+    val updated = requireNotNull(findCourtAppearance(existing.id))
+    updated verifyAgainst request.courtEvents.first { rq -> rq.courtEvent.eventId == updated.legacyId }.courtEvent
+    assertThat(updated.externalReference).isNotEqualTo(existing.externalReference)
+    verifyAudit(
+      updated,
+      RevisionType.MOD,
+      setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
+      SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS),
+    )
+
+    val newId = res.courtEvents.first { it.dpsId != existing.id }.dpsId
+    val newAppearance = requireNotNull(findCourtAppearance(newId))
+    newAppearance verifyAgainst request.courtEvents.first { rq -> rq.courtEvent.eventId == newAppearance.legacyId }.courtEvent
+    assertThat(newAppearance.externalReference).isEqualTo(existing.externalReference)
+    verifyAudit(
+      newAppearance,
+      RevisionType.ADD,
+      setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
+      SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS),
+    )
+
+    verifyEventPublications(
+      newAppearance,
+      setOf(
+        CourtAppearanceMigrated(
+          newAppearance.person.identifier,
+          newAppearance.id,
+          newAppearance.externalReference,
+          DataSource.NOMIS,
+        ).publication(newAppearance.id) { false },
+      ),
+    )
+  }
+
   private val CourtAppearanceMovement.bookingId get() = legacyId?.split('_')[0]?.toLong()
   private val CourtAppearanceMovement.sequenceNumber get() = legacyId?.split('_')[1]?.toInt()
 
