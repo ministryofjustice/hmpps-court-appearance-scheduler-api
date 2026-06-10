@@ -232,7 +232,8 @@ final class CourtAppearance(
   }
 
   fun applyComments(action: ChangeAppearanceComments) = apply {
-    if (action changes ::comments) {
+    if (action changes comments) {
+      comments = action.comments
       appliedActions += action
     }
   }

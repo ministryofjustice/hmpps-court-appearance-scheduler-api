@@ -28,7 +28,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.mov
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementComments
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.RecategoriseMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.RelocateMovement
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.changes
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -159,7 +158,8 @@ final class CourtAppearanceMovement(
   }
 
   fun applyComments(action: ChangeMovementComments) = apply {
-    if (action changes ::comments) {
+    if (action changes comments) {
+      comments = action.comments
       appliedActions += action
     }
   }
