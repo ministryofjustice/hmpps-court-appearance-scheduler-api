@@ -31,7 +31,11 @@ fun CourtEvent.asEntity(
   externalReferenceUrn,
   eventId,
   dpsId ?: newUuid(),
-).calculateStatus(status)
+).calculateStatus(status).also {
+  if (shouldBeCompleted()) {
+    it.complete(status)
+  }
+}
 
 fun CourtAppearance.updateFrom(
   personSummary: PersonSummary,
@@ -46,6 +50,9 @@ fun CourtAppearance.updateFrom(
   reschedule(RescheduleAppearance(request.start, null))
   applyComments(ChangeAppearanceComments(request.commentText))
   calculateStatus(status)
+  if (request.shouldBeCompleted()) {
+    complete(status)
+  }
 }
 
 fun CourtEventMovement.asEntity(

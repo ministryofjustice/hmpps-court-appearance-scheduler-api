@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerat
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementCommentsChanged
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRecategorised
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRecorded
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRelocated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCompleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
@@ -89,7 +90,7 @@ class SyncCourtMovementIntTest(
     verifyAudit(
       saved,
       RevisionType.ADD,
-      setOf(CourtAppearanceMovement::class.simpleName!!),
+      setOf(CourtAppearanceMovement::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
       SchedulerContext.get().copy(
         username = request.user.username,
         caseloadId = request.user.activeCaseloadId,
@@ -99,7 +100,7 @@ class SyncCourtMovementIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(),
+      setOf(AppearanceMovementRecorded(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id)),
     )
   }
 
@@ -117,7 +118,7 @@ class SyncCourtMovementIntTest(
     verifyAudit(
       saved,
       RevisionType.ADD,
-      setOf(CourtAppearanceMovement::class.simpleName!!),
+      setOf(CourtAppearanceMovement::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
       SchedulerContext.get().copy(
         username = request.user.username,
         caseloadId = request.user.activeCaseloadId,
@@ -127,7 +128,7 @@ class SyncCourtMovementIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(),
+      setOf(AppearanceMovementRecorded(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id)),
     )
   }
 
@@ -161,6 +162,7 @@ class SyncCourtMovementIntTest(
     )
 
     val updatedAppearance = requireNotNull(saved.courtAppearance)
+    val movement = updatedAppearance.movements.first { it.direction == CourtAppearanceMovement.Direction.IN }
     verifyEventPublications(
       saved,
       setOf(
@@ -170,6 +172,7 @@ class SyncCourtMovementIntTest(
           null,
           DataSource.NOMIS,
         ).publication(updatedAppearance.id),
+        AppearanceMovementRecorded(movement.person.identifier, movement.id, DataSource.NOMIS).publication(movement.id),
       ),
     )
   }
