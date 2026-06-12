@@ -27,6 +27,7 @@ import java.util.UUID
 
     JsonSubTypes.Type(value = AppearanceMovementMigrated::class, name = AppearanceMovementMigrated.EVENT_TYPE),
     JsonSubTypes.Type(value = AppearanceMovementRecorded::class, name = AppearanceMovementRecorded.EVENT_TYPE),
+    JsonSubTypes.Type(value = AppearanceMovementDeleted::class, name = AppearanceMovementDeleted.EVENT_TYPE),
     JsonSubTypes.Type(value = AppearanceMovementRecategorised::class, name = AppearanceMovementRecategorised.EVENT_TYPE),
     JsonSubTypes.Type(value = AppearanceMovementRelocated::class, name = AppearanceMovementRelocated.EVENT_TYPE),
     JsonSubTypes.Type(value = AppearanceMovementCommentsChanged::class, name = AppearanceMovementCommentsChanged.EVENT_TYPE),

@@ -8,7 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementDeleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
@@ -55,6 +58,17 @@ class DeleteCourtMovementIntTest(
     val ca = requireNotNull(findCourtAppearance(appearance.id))
     assertThat(ca.movements).isEmpty()
     assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
+
+    verifyEventPublications(
+      movement,
+      setOf(
+        AppearanceMovementDeleted(
+          movement.person.identifier,
+          movement.id,
+          DataSource.NOMIS,
+        ).publication(movement.id),
+      ),
+    )
   }
 
   @Test
@@ -64,6 +78,17 @@ class DeleteCourtMovementIntTest(
 
     deleteMovement(movement.id).expectStatus().isNoContent
     assertThat(findCourtMovement(movement.id)).isNull()
+
+    verifyEventPublications(
+      movement,
+      setOf(
+        AppearanceMovementDeleted(
+          movement.person.identifier,
+          movement.id,
+          DataSource.NOMIS,
+        ).publication(movement.id),
+      ),
+    )
   }
 
   private fun deleteMovement(

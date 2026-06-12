@@ -55,6 +55,28 @@ data class AppearanceMovementRecorded(
   }
 }
 
+data class AppearanceMovementDeleted(
+  override val additionalInformation: AdditionalMovementInformation,
+  override val personReference: PersonReference,
+) : DomainEvent<AdditionalMovementInformation> {
+  override val eventType: String = EVENT_TYPE
+  override val description: String = DESCRIPTION
+  override val detailUrl: String = movementUrl(id)
+
+  companion object {
+    const val EVENT_TYPE = "person.court-appearance-movement.deleted"
+    const val DESCRIPTION = "A court appearance movement has been deleted"
+    operator fun invoke(
+      personIdentifier: String,
+      id: UUID,
+      dataSource: DataSource = SchedulerContext.get().source,
+    ) = AppearanceMovementDeleted(
+      AdditionalMovementInformation(id, dataSource),
+      PersonReference.withIdentifier(personIdentifier),
+    )
+  }
+}
+
 data class AppearanceMovementRecategorised(
   override val additionalInformation: AdditionalMovementInformation,
   override val personReference: PersonReference,
