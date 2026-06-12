@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDoma
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementCommentsChanged
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementDeleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRelocated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCancelled
@@ -262,19 +263,20 @@ class ResyncCourtAppearanceIntTest(
 
   @Test
   fun `200 ok - can remove all data`() {
-    val scheduled =
+    val schedule =
       givenCourtAppearance(courtAppearance(movements = listOf(movement(CourtAppearanceMovement.Direction.OUT))))
-    val unscheduled = givenUnscheduledMovement(unscheduledMovement(scheduled.person.identifier, scheduled.prisonCode))
-    val res = resync(scheduled.person.identifier, resyncRequest()).successResponse<ResyncResponse>()
+    val scheduled = schedule.movements.single()
+    val unscheduled = givenUnscheduledMovement(unscheduledMovement(schedule.person.identifier, schedule.prisonCode))
+    val res = resync(schedule.person.identifier, resyncRequest()).successResponse<ResyncResponse>()
     assertThat(res.courtEvents).isEmpty()
     assertThat(res.unscheduledMovements).isEmpty()
 
-    assertThat(findCourtAppearance(scheduled.id)).isNull()
+    assertThat(findCourtAppearance(schedule.id)).isNull()
     assertThat(findCourtMovement(unscheduled.id)).isNull()
-    assertThat(findPersonSummary(scheduled.person.identifier)).isNull()
+    assertThat(findPersonSummary(schedule.person.identifier)).isNull()
 
     verifyAudit(
-      scheduled,
+      schedule,
       RevisionType.DEL,
       setOf(
         CourtAppearance::class.simpleName!!,
@@ -285,14 +287,24 @@ class ResyncCourtAppearanceIntTest(
     )
 
     verifyEventPublications(
-      scheduled,
+      schedule,
       setOf(
         CourtAppearanceCancelled(
+          schedule.person.identifier,
+          schedule.id,
+          schedule.externalReference,
+          DataSource.NOMIS,
+        ).publication(schedule.id) { false },
+        AppearanceMovementDeleted(
           scheduled.person.identifier,
           scheduled.id,
-          scheduled.externalReference,
           DataSource.NOMIS,
         ).publication(scheduled.id) { false },
+        AppearanceMovementDeleted(
+          unscheduled.person.identifier,
+          unscheduled.id,
+          DataSource.NOMIS,
+        ).publication(unscheduled.id) { false },
       ),
     )
   }

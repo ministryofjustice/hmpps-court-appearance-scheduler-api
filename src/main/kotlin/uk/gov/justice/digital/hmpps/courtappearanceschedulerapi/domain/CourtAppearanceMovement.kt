@@ -22,6 +22,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.findByIdOrNull
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementDeleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRecorded
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
@@ -128,6 +129,10 @@ final class CourtAppearanceMovement(
   override fun domainEvents(): Set<DomainEventPublication> = appliedActions.mapNotNull { action ->
     action.domainEvent(this)?.publication(id)
   }.toSet()
+
+  override fun deletionEvents(): Set<DomainEventPublication> = setOf(
+    AppearanceMovementDeleted(person.identifier, id).publication(id),
+  )
 
   fun movePerson(person: PersonSummary) {
     this.person = person
