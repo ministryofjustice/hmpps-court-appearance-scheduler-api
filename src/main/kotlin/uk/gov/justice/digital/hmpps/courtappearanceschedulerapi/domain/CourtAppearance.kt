@@ -183,10 +183,15 @@ final class CourtAppearance(
     movement.courtAppearance = null
   }
 
-  fun latestMovement(direction: CourtAppearanceMovement.Direction): CourtAppearanceMovement? = movements.sortedByDescending { it.occurredAt }.firstOrNull { it.direction == direction }
-
   fun movePerson(person: PersonSummary) = apply {
     this.person = person
+  }
+
+  fun complete(statusProvider: StatusProvider) = apply {
+    if (status.code != CourtAppearanceStatus.Code.COMPLETED) {
+      status = statusProvider(CourtAppearanceStatus.Code.COMPLETED)
+      appliedActions += CompleteAppearance()
+    }
   }
 
   fun calculateStatus(statusProvider: StatusProvider) = apply {

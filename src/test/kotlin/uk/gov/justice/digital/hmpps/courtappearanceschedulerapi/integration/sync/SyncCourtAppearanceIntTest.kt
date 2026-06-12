@@ -15,6 +15,8 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDoma
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCommentsChanged
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCompleted
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRecorded
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRelocated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRescheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceScheduled
@@ -238,6 +240,75 @@ class SyncCourtAppearanceIntTest(
           DataSource.NOMIS,
         ).publication(saved.id),
         CourtAppearanceCommentsChanged(
+          saved.person.identifier,
+          saved.id,
+          request.courtEvent.externalReferenceUrn,
+          DataSource.NOMIS,
+        ).publication(saved.id),
+      ),
+    )
+  }
+
+  @Test
+  fun `200 ok - court appearance sent as complete`() {
+    val person = givenPersonSummary(personSummary())
+    val prisonCode = requireNotNull(person.prisonCode)
+
+    val request = syncRequest(courtEvent(prisonCode, status = "COMP", externalReference = urn()))
+    val response = syncAppearance(person.identifier, request).successResponse<ReferenceId>()
+
+    val saved = requireNotNull(findCourtAppearance(response.id))
+    assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.COMPLETED)
+    saved verifyAgainst request.courtEvent
+
+    verifyAudit(
+      saved,
+      RevisionType.ADD,
+      setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearance::class.simpleName!!),
+      SchedulerContext.get()
+        .copy(username = request.user.username, caseloadId = request.user.activeCaseloadId, source = DataSource.NOMIS),
+    )
+
+    verifyEventPublications(
+      saved,
+      setOf(CourtAppearanceRecorded(saved.person.identifier, saved.id, saved.externalReference, DataSource.NOMIS).publication(saved.id)),
+    )
+  }
+
+  @Test
+  fun `200 ok - court appearance completed by sync`() {
+    val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
+
+    val request = syncRequest(
+      courtEvent(
+        scheduledPrisonCode = appearance.prisonCode,
+        scheduledCourtCode = appearance.courtCode,
+        eventId = appearance.legacyId!!,
+        status = "COMP",
+        externalReference = urn(),
+        date = appearance.start.toLocalDate(),
+        startTime = appearance.start.toLocalTime(),
+        commentText = appearance.comments,
+      ),
+    )
+    val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
+
+    val saved = requireNotNull(findCourtAppearance(response.id))
+    assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.COMPLETED)
+    saved verifyAgainst request.courtEvent
+
+    verifyAudit(
+      saved,
+      RevisionType.MOD,
+      setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearance::class.simpleName!!),
+      SchedulerContext.get()
+        .copy(username = request.user.username, caseloadId = request.user.activeCaseloadId, source = DataSource.NOMIS),
+    )
+
+    verifyEventPublications(
+      saved,
+      setOf(
+        CourtAppearanceCompleted(
           saved.person.identifier,
           saved.id,
           request.courtEvent.externalReferenceUrn,
