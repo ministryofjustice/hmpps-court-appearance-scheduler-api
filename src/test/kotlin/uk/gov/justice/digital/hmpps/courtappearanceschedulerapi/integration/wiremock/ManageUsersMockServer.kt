@@ -21,7 +21,11 @@ class ManageUsersServer : WireMockServer(mockServerConfig(8095)) {
     if (status == HttpStatus.OK) {
       response.withBody(jsonMapper().writeValueAsString(userDetails))
     }
-    stubFor(get("/users/${userDetails.username}").willReturn(response.withStatus(status.value())))
+    stubFor(
+      get("/users/${userDetails.username}")
+        .withBearerToken()
+        .willReturn(response.withStatus(status.value())),
+    )
     return userDetails
   }
 

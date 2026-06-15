@@ -16,6 +16,7 @@ class NomisMigrationServer : WireMockServer(mockServerConfig(9990)) {
   fun requestRepair(status: HttpStatus = HttpStatus.OK) {
     stubFor(
       put(urlMatching("/migrate/court-scheduler/repair/${Prisoner.PATTERN}"))
+        .withBearerToken()
         .willReturn(aResponse().withStatus(status.value())),
     )
   }

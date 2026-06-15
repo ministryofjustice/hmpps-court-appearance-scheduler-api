@@ -27,6 +27,7 @@ class PrisonerSearchServer : WireMockServer(mockServerConfig(9000)) {
   ): List<Prisoner> {
     stubFor(
       post(urlPathEqualTo("/prisoner-search/prisoner-numbers"))
+        .withBearerToken()
         .withRequestBody(equalToJson(jsonMapper().writeValueAsString(PrisonerNumbers(prisonNumbers)), true, true))
         .willReturn(
           aResponse()

@@ -24,6 +24,7 @@ class CourtRegisterMockServer : WireMockServer(mockServerConfig(9006)) {
     stubFor(
       get(urlPathEqualTo("/courts/id/multiple"))
         .withQueryParam("courtIds", havingExactly(*codes.toTypedArray()))
+        .withBearerToken()
         .willReturn(
           aResponse()
             .withHeader("Content-Type", "application/json")
