@@ -3,7 +3,7 @@ import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25
 
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.3.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.5.0"
   kotlin("plugin.spring") version "2.4.0"
   kotlin("plugin.jpa") version "2.4.0"
   id("com.google.cloud.tools.jib") version "3.5.3"
@@ -51,10 +51,6 @@ tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions {
       jvmTarget = JVM_25
-      freeCompilerArgs.addAll(
-        "-Xannotation-default-target=param-property",
-        "-Xexplicit-backing-fields",
-      )
     }
   }
   test {
