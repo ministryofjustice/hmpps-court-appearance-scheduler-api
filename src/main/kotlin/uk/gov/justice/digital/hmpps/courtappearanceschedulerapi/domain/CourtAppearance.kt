@@ -163,6 +163,10 @@ final class CourtAppearance(
     action.domainEvent(this)?.publication(id)
   }.toSet()
 
+  override fun deletionEvents(): Set<DomainEventPublication> = setOf(
+    CourtAppearanceCancelled(person.identifier, id, externalReference).publication(id),
+  )
+
   fun addMovement(movement: CourtAppearanceMovement) = apply {
     val action = when (movement.direction) {
       OUT if (movements.isEmpty()) -> StartAppearance()
@@ -173,10 +177,6 @@ final class CourtAppearance(
     action?.also { appliedActions += it }
     movement.courtAppearance = this
   }
-
-  override fun deletionEvents(): Set<DomainEventPublication> = setOf(
-    CourtAppearanceCancelled(person.identifier, id, externalReference).publication(id),
-  )
 
   fun removeMovement(movement: CourtAppearanceMovement) = apply {
     movements.remove(movement)

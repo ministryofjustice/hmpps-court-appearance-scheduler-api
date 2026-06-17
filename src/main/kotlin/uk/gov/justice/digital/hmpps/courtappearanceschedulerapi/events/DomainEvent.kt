@@ -31,6 +31,9 @@ import java.util.UUID
     JsonSubTypes.Type(value = AppearanceMovementRecategorised::class, name = AppearanceMovementRecategorised.EVENT_TYPE),
     JsonSubTypes.Type(value = AppearanceMovementRelocated::class, name = AppearanceMovementRelocated.EVENT_TYPE),
     JsonSubTypes.Type(value = AppearanceMovementCommentsChanged::class, name = AppearanceMovementCommentsChanged.EVENT_TYPE),
+    JsonSubTypes.Type(value = AppearanceMovementOccurredAtChanged::class, name = AppearanceMovementOccurredAtChanged.EVENT_TYPE),
+    JsonSubTypes.Type(value = AppearanceMovementAppearanceChanged::class, name = AppearanceMovementAppearanceChanged.EVENT_TYPE),
+    JsonSubTypes.Type(value = AppearanceMovementReversed::class, name = AppearanceMovementReversed.EVENT_TYPE),
 
     JsonSubTypes.Type(value = PrisonerMerged::class, name = PrisonerMerged.EVENT_TYPE),
     JsonSubTypes.Type(value = PrisonerUpdated::class, name = PrisonerUpdated.EVENT_TYPE),
