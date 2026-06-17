@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.urn
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourterRegisterExtension.Companion.courtRegister
@@ -72,6 +73,18 @@ class CourtAppearanceRetrieverIntTest(
     res.verifyAgainst(ca)
     assertThat(res.prison.name).isEqualTo(prisonCode)
     assertThat(res.court.name).isEqualTo(courtCode)
+  }
+
+  @Test
+  fun `200 can retrieve court appearance with external reference`() {
+    val prison = prisonRegister.givenPrison()
+    val court = courtRegister.givenCourt()
+    val ca = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code, externalReference = urn()))
+
+    val res = getAppearance(ca.id).successResponse<Appearance>()
+    res.verifyAgainst(ca)
+    assertThat(res.prison).isEqualTo(prison)
+    assertThat(res.court).isEqualTo(court)
   }
 
   private fun Appearance.verifyAgainst(ca: CourtAppearance) {
