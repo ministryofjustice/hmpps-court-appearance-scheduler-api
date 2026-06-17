@@ -28,6 +28,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.Appearanc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.AppearanceMovementAction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementComments
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementDirection
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementOccurredAt
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.RecategoriseMovement
@@ -148,6 +149,13 @@ final class CourtAppearanceMovement(
     if (courtAppearance?.id != action.appearance?.id) {
       courtAppearance?.removeMovement(this)?.calculateStatus(statusProvider)
       action.appearance?.addMovement(this)?.calculateStatus(statusProvider)
+      appliedActions += action
+    }
+  }
+
+  fun applyDirection(action: ChangeMovementDirection) = apply {
+    if (action.direction != direction) {
+      direction = action.direction
       appliedActions += action
     }
   }

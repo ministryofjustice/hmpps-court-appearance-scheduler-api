@@ -22,10 +22,11 @@ object SyncGenerator {
     date: LocalDate = LocalDate.now().plusDays(1),
     startTime: LocalTime = LocalTime.of(10, 0),
     commentText: String? = word(10) + " " + word(8),
+    currentTerm: Boolean = true,
     eventId: Long = newId(),
     externalReference: String? = null,
     dpsId: UUID? = null,
-  ): CourtEvent = CourtEvent(dpsId, scheduledPrisonCode, scheduledCourtCode, eventId, LocalDateTime.of(date, startTime), type, status, commentText, externalReference, null)
+  ): CourtEvent = CourtEvent(dpsId, scheduledPrisonCode, scheduledCourtCode, eventId, LocalDateTime.of(date, startTime), type, status, commentText, externalReference, null, currentTerm)
 
   fun courtEventMovement(
     scheduleId: UUID? = null,
