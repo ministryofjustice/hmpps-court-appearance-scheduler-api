@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
@@ -13,6 +14,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.conf
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourterRegisterExtension.Companion.courtRegister
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerRegisterExtension.Companion.prisonRegister
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Appearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.toUuid
 import java.util.UUID
 
 class CourtAppearanceRetrieverIntTest(
@@ -33,6 +35,17 @@ class CourtAppearanceRetrieverIntTest(
   @Test
   fun `403 forbidden without correct role`() {
     getAppearance(newUuid(), "ROLE_ANY__OTHER_RW").expectStatus().isForbidden
+  }
+
+  @Test
+  fun `404 not found if not record exists`() {
+    getAppearance(newUuid()).expectStatus().isNotFound
+  }
+
+  @Test
+  fun `400 bad request if id is not a valid uuid`() {
+    val res = getAppearance("invalid-uuid").errorResponse(HttpStatus.BAD_REQUEST)
+    assertThat(res.userMessage).isEqualTo("Method argument type mismatch, expecting class java.util.UUID")
   }
 
   @Test
@@ -72,10 +85,18 @@ class CourtAppearanceRetrieverIntTest(
     assertThat(reason.code).isEqualTo(ca.reason.code)
     assertThat(external).isEqualTo(ca.external)
     assertThat(comments).isEqualTo(ca.comments)
+    val urnParts = ca.externalReference?.split(":")
+    assertThat(origin?.id).isEqualTo(urnParts?.last()?.toUuid())
+    assertThat(origin?.source?.code).isEqualTo(urnParts?.get(1))
   }
 
   private fun getAppearance(
     id: UUID,
+    role: String? = Roles.SCHEDULER_UI,
+  ) = getAppearance(id.toString(), role)
+
+  private fun getAppearance(
+    id: String,
     role: String? = Roles.SCHEDULER_UI,
   ) = webTestClient
     .get()

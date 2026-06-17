@@ -9,4 +9,4 @@ object WiremockConfig {
   fun mockServerConfig(port: Int): WireMockConfiguration = wireMockConfig().port(port)
 }
 
-fun MappingBuilder.withBearerToken() = withHeader("Authorization", containing("Bearer "))
+fun MappingBuilder.withBearerToken(): MappingBuilder = withHeader("Authorization", containing("Bearer "))
