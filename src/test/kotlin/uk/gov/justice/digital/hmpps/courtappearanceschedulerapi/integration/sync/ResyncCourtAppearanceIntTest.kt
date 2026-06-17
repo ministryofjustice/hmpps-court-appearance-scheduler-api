@@ -17,9 +17,11 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSourc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementAppearanceChanged
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementCommentsChanged
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementDeleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementMigrated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementOccurredAtChanged
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRelocated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCancelled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCommentsChanged
@@ -390,6 +392,16 @@ class ResyncCourtAppearanceIntTest(
           unscheduled.id,
           DataSource.NOMIS,
         ).publication(unscheduled.id) { false },
+        AppearanceMovementOccurredAtChanged(
+          person.identifier,
+          scheduled.id,
+          DataSource.NOMIS,
+        ).publication(scheduled.id) { false },
+        AppearanceMovementOccurredAtChanged(
+          person.identifier,
+          unscheduled.id,
+          DataSource.NOMIS,
+        ).publication(unscheduled.id) { false },
       ),
     )
   }
@@ -468,13 +480,28 @@ class ResyncCourtAppearanceIntTest(
       scheduled,
       RevisionType.MOD,
       setOf(
+        HmppsDomainEvent::class.simpleName!!,
         CourtAppearance::class.simpleName!!,
         CourtAppearanceMovement::class.simpleName!!,
       ),
       SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS),
     )
 
-    verifyEventPublications(scheduled, setOf())
+    verifyEventPublications(
+      scheduled,
+      setOf(
+        AppearanceMovementAppearanceChanged(
+          scheduled.person.identifier,
+          scheduled.id,
+          DataSource.NOMIS,
+        ).publication(scheduled.id) { false },
+        AppearanceMovementAppearanceChanged(
+          unscheduled.person.identifier,
+          unscheduled.id,
+          DataSource.NOMIS,
+        ).publication(unscheduled.id) { false },
+      ),
+    )
   }
 
   @Test

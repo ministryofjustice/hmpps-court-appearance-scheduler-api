@@ -11,6 +11,9 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.app
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementComments
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementDirection
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementOccurredAt
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.RecategoriseMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.RelocateMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
@@ -83,7 +86,9 @@ fun CourtAppearanceMovement.updateFrom(
   status: StatusProvider,
 ) = apply {
   movePerson(person)
-  moveSchedule(schedule, status)
+  moveSchedule(ChangeMovementSchedule(schedule), status)
+  applyDirection(ChangeMovementDirection(direction))
+  applyOccurredAt(ChangeMovementOccurredAt(request.occurredAt))
   recategorise(RecategoriseMovement(request.reasonCode), reason)
   relocate(RelocateMovement(request.courtCode))
   applyComments(ChangeMovementComments(request.commentText))

@@ -142,3 +142,69 @@ data class AppearanceMovementCommentsChanged(
     )
   }
 }
+
+data class AppearanceMovementOccurredAtChanged(
+  override val additionalInformation: AdditionalMovementInformation,
+  override val personReference: PersonReference,
+) : DomainEvent<AdditionalMovementInformation> {
+  override val eventType: String = EVENT_TYPE
+  override val description: String = DESCRIPTION
+  override val detailUrl: String = movementUrl(id)
+
+  companion object {
+    const val EVENT_TYPE = "person.court-appearance-movement.occurred-at-changed"
+    const val DESCRIPTION = "When a court movement occurred has been changed"
+    operator fun invoke(
+      personIdentifier: String,
+      id: UUID,
+      dataSource: DataSource = SchedulerContext.get().source,
+    ) = AppearanceMovementOccurredAtChanged(
+      AdditionalMovementInformation(id, dataSource),
+      PersonReference.withIdentifier(personIdentifier),
+    )
+  }
+}
+
+data class AppearanceMovementAppearanceChanged(
+  override val additionalInformation: AdditionalMovementInformation,
+  override val personReference: PersonReference,
+) : DomainEvent<AdditionalMovementInformation> {
+  override val eventType: String = EVENT_TYPE
+  override val description: String = DESCRIPTION
+  override val detailUrl: String = movementUrl(id)
+
+  companion object {
+    const val EVENT_TYPE = "person.court-appearance-movement.appearance-changed"
+    const val DESCRIPTION = "The appearance for a movement has changed"
+    operator fun invoke(
+      personIdentifier: String,
+      id: UUID,
+      dataSource: DataSource = SchedulerContext.get().source,
+    ) = AppearanceMovementAppearanceChanged(
+      AdditionalMovementInformation(id, dataSource),
+      PersonReference.withIdentifier(personIdentifier),
+    )
+  }
+}
+
+data class AppearanceMovementReversed(
+  override val additionalInformation: AdditionalMovementInformation,
+  override val personReference: PersonReference,
+) : DomainEvent<AdditionalMovementInformation> {
+  override val eventType: String = EVENT_TYPE
+  override val description: String = DESCRIPTION
+  override val detailUrl: String = movementUrl(id)
+
+  companion object {
+    const val EVENT_TYPE = "person.court-appearance-movement.reversed"
+    const val DESCRIPTION = "The court movement direction has been reversed"
+    operator fun invoke(
+      personIdentifier: String,
+      id: UUID,
+      dataSource: DataSource = SchedulerContext.get().source,
+    ) = AppearanceMovementReversed(
+      AdditionalMovementInformation(id, dataSource),
+      PersonReference.withIdentifier(personIdentifier),
+    )
+  }
+}

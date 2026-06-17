@@ -28,6 +28,9 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.Appearanc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.AppearanceMovementAction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementComments
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementDirection
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementOccurredAt
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.RecategoriseMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.RelocateMovement
 import java.time.LocalDateTime
@@ -142,10 +145,25 @@ final class CourtAppearanceMovement(
     this.legacyId = legacyId
   }
 
-  fun moveSchedule(appearance: CourtAppearance?, statusProvider: StatusProvider) {
-    if (this.courtAppearance?.id != appearance?.id) {
+  fun moveSchedule(action: ChangeMovementSchedule, statusProvider: StatusProvider) {
+    if (courtAppearance?.id != action.appearance?.id) {
       courtAppearance?.removeMovement(this)?.calculateStatus(statusProvider)
-      appearance?.addMovement(this)?.calculateStatus(statusProvider)
+      action.appearance?.addMovement(this)?.calculateStatus(statusProvider)
+      appliedActions += action
+    }
+  }
+
+  fun applyDirection(action: ChangeMovementDirection) = apply {
+    if (action.direction != direction) {
+      direction = action.direction
+      appliedActions += action
+    }
+  }
+
+  fun applyOccurredAt(action: ChangeMovementOccurredAt) = apply {
+    if (action changes occurredAt) {
+      occurredAt = action.occurredAt
+      appliedActions += action
     }
   }
 

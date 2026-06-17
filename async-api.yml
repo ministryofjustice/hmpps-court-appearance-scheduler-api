@@ -1,0 +1,141 @@
+asyncapi: 3.0.0
+info:
+  title: HMPPS Court Appearance Scheduler
+  version: 1.0.0
+  description: Reflect changes to Court Appearances
+
+servers:
+  development:
+    host: "hmpps-domain-events-dev.live-1.cloud-platform.service.justice.gov.uk"
+    protocol: sqs
+    description: Development Environment
+  preproduction:
+    host: "hmpps-domain-events-preprod.live-1.cloud-platform.service.justice.gov.uk"
+    protocol: sqs
+    description: Pre-production Environment
+  production:
+    host: "hmpps-domain-events-prod.live-1.cloud-platform.service.justice.gov.uk"
+    protocol: sqs
+    description: Production Environment
+
+components:
+  messages:
+    person.court-appearance.cancelled:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-cancelled.yaml
+    person.court-appearance.comments-changed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-comments-changed.yaml
+    person.court-appearance.completed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-completed.yaml
+    person.court-appearance.expired:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-expired.yaml
+    person.court-appearance.recategorised:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-recategorised.yaml
+    person.court-appearance.recorded:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-recorded.yaml
+    person.court-appearance.relocated:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-relocated.yaml
+    person.court-appearance.requested-by-video-link:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-requested-by-video-link.yaml
+    person.court-appearance.requested-in-person:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-requested-in-person.yaml
+    person.court-appearance.rescheduled:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-rescheduled.yaml
+    person.court-appearance.scheduled:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-scheduled.yaml
+    person.court-appearance.started:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-started.yaml
+
+    person.court-appearance-movement.appearance-changed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/movement/court-appearance-movement-appearance-changed.yaml
+    person.court-appearance-movement.comments-changed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/movement/court-appearance-movement-comments-changed.yaml
+    person.court-appearance-movement.deleted:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/movement/court-appearance-movement-deleted.yaml
+    person.court-appearance-movement.occurred-at-changed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/movement/court-appearance-movement-occurred-at-changed.yaml
+    person.court-appearance-movement.recategorised:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/movement/court-appearance-movement-recategorised.yaml
+    person.court-appearance-movement.recorded:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/movement/court-appearance-movement-recorded.yaml
+    person.court-appearance-movement.relocated:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/movement/court-appearance-movement-relocated.yaml
+    person.court-appearance-movement.reversed:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/movement/court-appearance-movement-reversed.yaml
+
+channels:
+  hmpps-domain-events:
+    description: HMPPS domain events SNS topic
+    bindings:
+      sns:
+        name: domainevents
+    messages:
+      person.court-appearance.cancelled:
+        $ref: '#/components/messages/person.court-appearance.cancelled'
+      person.court-appearance.comments-changed:
+        $ref: '#/components/messages/person.court-appearance.comments-changed'
+      person.court-appearance.completed:
+        $ref: '#/components/messages/person.court-appearance.completed'
+      person.court-appearance.expired:
+        $ref: '#/components/messages/person.court-appearance.expired'
+      person.court-appearance.recategorised:
+        $ref: '#/components/messages/person.court-appearance.recategorised'
+      person.court-appearance.recorded:
+        $ref: '#/components/messages/person.court-appearance.recorded'
+      person.court-appearance.relocated:
+        $ref: '#/components/messages/person.court-appearance.relocated'
+      person.court-appearance.requested-by-video-link:
+        $ref: '#/components/messages/person.court-appearance.requested-by-video-link'
+      person.court-appearance.requested-in-person:
+        $ref: '#/components/messages/person.court-appearance.requested-in-person'
+      person.court-appearance.rescheduled:
+        $ref: '#/components/messages/person.court-appearance.cancelled'
+      person.court-appearance.scheduled:
+        $ref: '#/components/messages/person.court-appearance.cancelled'
+      person.court-appearance.started:
+        $ref: '#/components/messages/person.court-appearance.cancelled'
+
+      person.court-appearance-movement.appearance-changed:
+        $ref: '#/components/messages/person.court-appearance-movement.appearance-changed'
+      person.court-appearance-movement.comments-changed:
+        $ref: '#/components/messages/person.court-appearance-movement.comments-changed'
+      person.court-appearance-movement.deleted:
+        $ref: '#/components/messages/person.court-appearance-movement.deleted'
+      person.court-appearance-movement.occurred-at-changed:
+        $ref: '#/components/messages/person.court-appearance-movement.occurred-at-changed'
+      person.court-appearance-movement.recategorised:
+        $ref: '#/components/messages/person.court-appearance-movement.recategorised'
+      person.court-appearance-movement.recorded:
+        $ref: '#/components/messages/person.court-appearance-movement.recorded'
+      person.court-appearance-movement.relocated:
+        $ref: '#/components/messages/person.court-appearance-movement.relocated'
+      person.court-appearance-movement.reversed:
+        $ref: '#/components/messages/person.court-appearance-movement.reversed'
+
+operations:
+  publish-event:
+    action: send
+    channel:
+      $ref: '#/channels/hmpps-domain-events'
+    messages:
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.cancelled'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.comments-changed'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.completed'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.expired'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.recategorised'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.recorded'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.relocated'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.requested-by-video-link'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.requested-in-person'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.rescheduled'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.scheduled'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.started'
+
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance-movement.appearance-changed'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance-movement.comments-changed'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance-movement.deleted'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance-movement.occurred-at-changed'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance-movement.recategorised'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance-movement.recorded'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance-movement.relocated'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance-movement.reversed'
+
