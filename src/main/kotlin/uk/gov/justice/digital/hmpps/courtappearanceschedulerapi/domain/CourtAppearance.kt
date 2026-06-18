@@ -35,6 +35,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.app
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RequestAppearanceByVideoLink
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RequestAppearanceInPerson
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ScheduleAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.StartAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.UnscheduleAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.changes
@@ -200,11 +201,11 @@ final class CourtAppearance(
       completeOverride || isCompleted() -> CourtAppearanceStatus.Code.COMPLETED to CompleteAppearance()
       isInProgress() -> CourtAppearanceStatus.Code.IN_PROGRESS to StartAppearance()
       isExpired() -> CourtAppearanceStatus.Code.EXPIRED to ExpireAppearance()
-      else -> CourtAppearanceStatus.Code.SCHEDULED to null
+      else -> CourtAppearanceStatus.Code.SCHEDULED to ScheduleAppearance()
     }
     if (::status.isInitialized.not() || status.code != statusCode) {
       status = statusProvider(statusCode)
-      action?.also { appliedActions += it }
+      appliedActions += action
     }
   }
 
