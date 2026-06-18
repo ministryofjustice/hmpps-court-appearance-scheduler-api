@@ -34,11 +34,7 @@ fun CourtEvent.asEntity(
   externalReferenceUrn,
   eventId,
   dpsId ?: newUuid(),
-).calculateStatus(status).also {
-  if (shouldBeCompleted()) {
-    it.complete(status)
-  }
-}
+).syncStatus(status, shouldBeCompleted(), currentTerm)
 
 fun CourtAppearance.updateFrom(
   personSummary: PersonSummary,
@@ -52,9 +48,13 @@ fun CourtAppearance.updateFrom(
   recategorise(RecategoriseAppearance(request.type), reason)
   reschedule(RescheduleAppearance(request.start, null))
   applyComments(ChangeAppearanceComments(request.commentText))
-  calculateStatus(status)
-  if (request.shouldBeCompleted()) {
-    complete(status)
+  syncStatus(status, request.shouldBeCompleted(), request.currentTerm)
+}
+
+fun CourtAppearance.syncStatus(statusProvider: StatusProvider, complete: Boolean, currentTerm: Boolean) = apply {
+  calculateStatus(statusProvider, complete)
+  if (!currentTerm) {
+    unscheduleIfScheduled(statusProvider)
   }
 }
 

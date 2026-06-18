@@ -44,6 +44,8 @@ components:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-scheduled.yaml
     person.court-appearance.started:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-started.yaml
+    person.court-appearance.unscheduled:
+      $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/appearance/court-appearance-unscheduled.yaml
 
     person.court-appearance-movement.appearance-changed:
       $ref: https://raw.githubusercontent.com/ministryofjustice/hmpps-domain-events/main/spec/schemas/court-appearances/movement/court-appearance-movement-appearance-changed.yaml
@@ -88,11 +90,13 @@ channels:
       person.court-appearance.requested-in-person:
         $ref: '#/components/messages/person.court-appearance.requested-in-person'
       person.court-appearance.rescheduled:
-        $ref: '#/components/messages/person.court-appearance.cancelled'
+        $ref: '#/components/messages/person.court-appearance.rescheduled'
       person.court-appearance.scheduled:
-        $ref: '#/components/messages/person.court-appearance.cancelled'
+        $ref: '#/components/messages/person.court-appearance.scheduled'
       person.court-appearance.started:
-        $ref: '#/components/messages/person.court-appearance.cancelled'
+        $ref: '#/components/messages/person.court-appearance.started'
+      person.court-appearance.unscheduled:
+        $ref: '#/components/messages/person.court-appearance.unscheduled'
 
       person.court-appearance-movement.appearance-changed:
         $ref: '#/components/messages/person.court-appearance-movement.appearance-changed'
@@ -129,6 +133,7 @@ operations:
       - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.rescheduled'
       - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.scheduled'
       - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.started'
+      - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance.unscheduled'
 
       - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance-movement.appearance-changed'
       - $ref: '#/channels/hmpps-domain-events/messages/person.court-appearance-movement.comments-changed'

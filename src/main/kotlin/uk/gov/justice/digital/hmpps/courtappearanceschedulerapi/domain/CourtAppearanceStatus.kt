@@ -9,7 +9,7 @@ import jakarta.persistence.Table
 import org.hibernate.annotations.Immutable
 import org.springframework.data.jpa.repository.JpaRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
-import java.util.*
+import java.util.UUID
 
 @Immutable
 @Entity
@@ -35,6 +35,7 @@ class CourtAppearanceStatus(
     IN_PROGRESS,
     COMPLETED,
     EXPIRED,
+    UNSCHEDULED,
     ;
 
     companion object {

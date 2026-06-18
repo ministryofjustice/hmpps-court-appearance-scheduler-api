@@ -42,6 +42,7 @@ interface CourtAppearanceOperations {
       externalReference: String? = null,
       legacyId: Long? = null,
       movements: List<(CourtAppearance) -> CourtAppearanceMovement> = listOf(),
+      unschedule: Boolean = false,
     ): CourtAppearanceProvider = { person, reason, status ->
       CourtAppearance(
         person(personIdentifier, prisonCode),
@@ -56,6 +57,7 @@ interface CourtAppearanceOperations {
       )
         .apply { movements.forEach { addMovement(it(this)) } }
         .calculateStatus(status)
+        .also { if (unschedule) it.unscheduleIfScheduled(status) }
     }
   }
 

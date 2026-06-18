@@ -20,6 +20,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRelocated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRescheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceScheduled
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceUnscheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
@@ -309,6 +310,50 @@ class SyncCourtAppearanceIntTest(
       saved,
       setOf(
         CourtAppearanceCompleted(
+          saved.person.identifier,
+          saved.id,
+          request.courtEvent.externalReferenceUrn,
+          DataSource.NOMIS,
+        ).publication(saved.id),
+      ),
+    )
+  }
+
+  @Test
+  fun `200 ok - court appearance unscheduled by sync`() {
+    val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
+
+    val request = syncRequest(
+      courtEvent(
+        scheduledPrisonCode = appearance.prisonCode,
+        scheduledCourtCode = appearance.courtCode,
+        eventId = appearance.legacyId!!,
+        status = "SCHED",
+        externalReference = urn(),
+        date = appearance.start.toLocalDate(),
+        startTime = appearance.start.toLocalTime(),
+        commentText = appearance.comments,
+        currentTerm = false
+      ),
+    )
+    val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
+
+    val saved = requireNotNull(findCourtAppearance(response.id))
+    assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.UNSCHEDULED)
+    saved verifyAgainst request.courtEvent
+
+    verifyAudit(
+      saved,
+      RevisionType.MOD,
+      setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearance::class.simpleName!!),
+      SchedulerContext.get()
+        .copy(username = request.user.username, caseloadId = request.user.activeCaseloadId, source = DataSource.NOMIS),
+    )
+
+    verifyEventPublications(
+      saved,
+      setOf(
+        CourtAppearanceUnscheduled(
           saved.person.identifier,
           saved.id,
           request.courtEvent.externalReferenceUrn,
