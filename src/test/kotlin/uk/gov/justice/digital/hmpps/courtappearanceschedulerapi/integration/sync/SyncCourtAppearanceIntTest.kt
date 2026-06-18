@@ -333,7 +333,7 @@ class SyncCourtAppearanceIntTest(
         date = appearance.start.toLocalDate(),
         startTime = appearance.start.toLocalTime(),
         commentText = appearance.comments,
-        currentTerm = false
+        currentTerm = false,
       ),
     )
     val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()

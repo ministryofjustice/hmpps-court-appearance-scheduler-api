@@ -219,7 +219,7 @@ class ResyncCourtAppearanceIntTest(
             date = LocalDate.now().plusDays(7),
             externalReference = urn(),
             status = "SCHED",
-            currentTerm = false
+            currentTerm = false,
           ),
         ),
       ),

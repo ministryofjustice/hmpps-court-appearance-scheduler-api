@@ -197,7 +197,7 @@ final class CourtAppearance(
 
   fun calculateStatus(statusProvider: StatusProvider, completeOverride: Boolean = false) = apply {
     val (statusCode, action) = when {
-      isCompleted() || completeOverride -> CourtAppearanceStatus.Code.COMPLETED to CompleteAppearance()
+      completeOverride || isCompleted() -> CourtAppearanceStatus.Code.COMPLETED to CompleteAppearance()
       isInProgress() -> CourtAppearanceStatus.Code.IN_PROGRESS to StartAppearance()
       isExpired() -> CourtAppearanceStatus.Code.EXPIRED to ExpireAppearance()
       else -> CourtAppearanceStatus.Code.SCHEDULED to null
