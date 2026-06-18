@@ -29,10 +29,10 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRelocated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRescheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.urn
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.username
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
@@ -91,7 +91,7 @@ class ResyncCourtAppearanceIntTest(
 
     val request = resyncRequest(
       listOf(
-        resyncCourtEvent(courtEvent(externalReference = urn())),
+        resyncCourtEvent(courtEvent(externalReference = externalReference())),
         resyncCourtEvent(
           movements = listOf(resyncCourtEventMovement()),
           modified = AtAndBy(LocalDateTime.now(), username()),
@@ -168,7 +168,7 @@ class ResyncCourtAppearanceIntTest(
         resyncCourtEvent(
           courtEvent(
             date = LocalDate.now().plusDays(7),
-            externalReference = urn(),
+            externalReference = externalReference(),
             status = "COMP",
           ),
         ),
@@ -217,7 +217,7 @@ class ResyncCourtAppearanceIntTest(
         resyncCourtEvent(
           courtEvent(
             date = LocalDate.now().plusDays(7),
-            externalReference = urn(),
+            externalReference = externalReference(),
             status = "SCHED",
             currentTerm = false,
           ),
@@ -266,7 +266,7 @@ class ResyncCourtAppearanceIntTest(
     val request = resyncRequest(
       listOf(
         resyncCourtEvent(
-          courtEvent(externalReference = urn(), date = LocalDate.now().minusDays(1)),
+          courtEvent(externalReference = externalReference(), date = LocalDate.now().minusDays(1)),
           movements = listOf(resyncCourtEventMovement()),
         ),
       ),
@@ -376,7 +376,7 @@ class ResyncCourtAppearanceIntTest(
     val scheduled = schedule.movements.first()
     val unscheduled = givenUnscheduledMovement(unscheduledMovement(person.identifier, prisonCode))
 
-    val externalReference = urn()
+    val externalReference = externalReference()
     val request = resyncRequest(
       courtEvents = listOf(
         resyncCourtEvent(
@@ -566,7 +566,7 @@ class ResyncCourtAppearanceIntTest(
         prisonCode = prisonCode,
         courtCode = courtCode,
         legacyId = newId(),
-        externalReference = urn(),
+        externalReference = externalReference(),
       ),
     )
 
@@ -581,7 +581,7 @@ class ResyncCourtAppearanceIntTest(
             date = existing.start.toLocalDate(),
             startTime = existing.start.toLocalTime(),
             commentText = existing.comments,
-            externalReference = urn(),
+            externalReference = externalReference(),
           ),
         ),
         resyncCourtEvent(

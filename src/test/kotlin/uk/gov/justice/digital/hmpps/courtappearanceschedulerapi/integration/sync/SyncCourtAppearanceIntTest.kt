@@ -4,8 +4,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.envers.RevisionType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
@@ -21,10 +25,10 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRescheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceScheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceUnscheduled
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.urn
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
@@ -63,6 +67,21 @@ class SyncCourtAppearanceIntTest(
   fun `403 forbidden without correct role`(role: String) {
     syncAppearance(personIdentifier(), syncRequest(), role = role)
       .expectStatus().isForbidden
+  }
+
+  @ParameterizedTest
+  @MethodSource("invalidExternalReferenceValues")
+  fun `400 bad request if external reference is not valid`(urn: String) {
+    val request: ObjectNode = jsonMapper.valueToTree(syncRequest())
+    val courtEvent: ObjectNode = (request.get("courtEvent") as ObjectNode)
+    courtEvent.put("externalReferenceUrn", urn)
+
+    val response = syncAppearanceForExternalReferenceValidation(personIdentifier(), request)
+      .errorResponse(HttpStatus.BAD_REQUEST)
+
+    assertThat(response.status).isEqualTo(HttpStatus.BAD_REQUEST.value())
+    assertThat(response.userMessage).isEqualTo("Invalid request")
+    assertThat(response.developerMessage).startsWith("HttpMessageNotReadableException:")
   }
 
   @Test
@@ -122,7 +141,7 @@ class SyncCourtAppearanceIntTest(
     val person = givenPersonSummary(personSummary())
     val prisonCode = requireNotNull(person.prisonCode)
 
-    val request = syncRequest(courtEvent(prisonCode, externalReference = urn()))
+    val request = syncRequest(courtEvent(prisonCode, externalReference = externalReference()))
     val response = syncAppearance(person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -179,7 +198,7 @@ class SyncCourtAppearanceIntTest(
 
   @Test
   fun `200 ok scheduled appearance id and legacy id returned if external reference already exists`() {
-    val appearance = givenCourtAppearance(courtAppearance(externalReference = urn()))
+    val appearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
     val request = with(appearance) {
       syncRequest(
         courtEvent(
@@ -210,7 +229,7 @@ class SyncCourtAppearanceIntTest(
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
 
     val request =
-      syncRequest(courtEvent(appearance.prisonCode, eventId = appearance.legacyId!!, externalReference = urn()))
+      syncRequest(courtEvent(appearance.prisonCode, eventId = appearance.legacyId!!, externalReference = externalReference()))
     val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -255,7 +274,7 @@ class SyncCourtAppearanceIntTest(
     val person = givenPersonSummary(personSummary())
     val prisonCode = requireNotNull(person.prisonCode)
 
-    val request = syncRequest(courtEvent(prisonCode, status = "COMP", externalReference = urn()))
+    val request = syncRequest(courtEvent(prisonCode, status = "COMP", externalReference = externalReference()))
     val response = syncAppearance(person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -286,7 +305,7 @@ class SyncCourtAppearanceIntTest(
         scheduledCourtCode = appearance.courtCode,
         eventId = appearance.legacyId!!,
         status = "COMP",
-        externalReference = urn(),
+        externalReference = externalReference(),
         date = appearance.start.toLocalDate(),
         startTime = appearance.start.toLocalTime(),
         commentText = appearance.comments,
@@ -330,7 +349,7 @@ class SyncCourtAppearanceIntTest(
         scheduledCourtCode = appearance.courtCode,
         eventId = appearance.legacyId!!,
         status = "SCHED",
-        externalReference = urn(),
+        externalReference = externalReference(),
         date = appearance.start.toLocalDate(),
         startTime = appearance.start.toLocalTime(),
         commentText = appearance.comments,
@@ -375,7 +394,7 @@ class SyncCourtAppearanceIntTest(
         scheduledCourtCode = appearance.courtCode,
         eventId = appearance.legacyId!!,
         status = "SCHED",
-        externalReference = urn(),
+        externalReference = externalReference(),
         date = appearance.start.toLocalDate(),
         startTime = appearance.start.toLocalTime(),
         commentText = appearance.comments,
@@ -426,7 +445,27 @@ class SyncCourtAppearanceIntTest(
     .headers(setAuthorisation(username = "NOMIS_SYNC", roles = listOfNotNull(role)))
     .exchange()
 
+  private fun syncAppearanceForExternalReferenceValidation(
+    personIdentifier: String,
+    request: JsonNode,
+    role: String? = Roles.NOMIS_SYNC,
+  ) = webTestClient
+    .put()
+    .uri(URL_TO_TEST, personIdentifier)
+    .bodyValue(request)
+    .headers(setAuthorisation(username = "NOMIS_SYNC", roles = listOfNotNull(role)))
+    .exchange()
+
   companion object {
     const val URL_TO_TEST = "/sync/court-appearances/{personIdentifier}"
+
+    @JvmStatic
+    fun invalidExternalReferenceValues() = listOf(
+      "urn:some-other-service:some-other-entity:${newUuid()}",
+      "urn:some-other-service:court-appearance:${newUuid()}",
+      "urn:remand-and-sentencing:some-other-entity:${newUuid()}",
+      "urn:remand-and-sentencing:court-appearance:invalid-uuid",
+      "remand-and-sentencing:court-appearance:${newUuid()}",
+    )
   }
 }

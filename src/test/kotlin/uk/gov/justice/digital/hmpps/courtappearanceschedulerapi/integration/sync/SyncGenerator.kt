@@ -5,6 +5,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.Data
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.username
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.User
@@ -24,7 +25,7 @@ object SyncGenerator {
     commentText: String? = word(10) + " " + word(8),
     currentTerm: Boolean = true,
     eventId: Long = newId(),
-    externalReference: String? = null,
+    externalReference: ExternalReference? = null,
     dpsId: UUID? = null,
   ): CourtEvent = CourtEvent(dpsId, scheduledPrisonCode, scheduledCourtCode, eventId, LocalDateTime.of(date, startTime), type, status, commentText, externalReference, null, currentTerm)
 

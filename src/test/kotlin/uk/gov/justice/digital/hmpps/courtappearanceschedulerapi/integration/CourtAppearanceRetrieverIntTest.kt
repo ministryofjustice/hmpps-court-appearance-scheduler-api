@@ -8,14 +8,13 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.urn
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourterRegisterExtension.Companion.courtRegister
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerRegisterExtension.Companion.prisonRegister
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Appearance
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.toUuid
 import java.util.UUID
 
 class CourtAppearanceRetrieverIntTest(
@@ -79,7 +78,7 @@ class CourtAppearanceRetrieverIntTest(
   fun `200 can retrieve court appearance with external reference`() {
     val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
-    val ca = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code, externalReference = urn()))
+    val ca = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code, externalReference = externalReference()))
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
@@ -98,9 +97,8 @@ class CourtAppearanceRetrieverIntTest(
     assertThat(reason.code).isEqualTo(ca.reason.code)
     assertThat(external).isEqualTo(ca.external)
     assertThat(comments).isEqualTo(ca.comments)
-    val urnParts = ca.externalReference?.split(":")
-    assertThat(origin?.id).isEqualTo(urnParts?.last()?.toUuid())
-    assertThat(origin?.source?.code).isEqualTo(urnParts?.get(1))
+    assertThat(origin?.id).isEqualTo(ca.externalReference?.uuid)
+    assertThat(origin?.source?.code).isEqualTo(ca.externalReference?.service?.code)
   }
 
   private fun getAppearance(

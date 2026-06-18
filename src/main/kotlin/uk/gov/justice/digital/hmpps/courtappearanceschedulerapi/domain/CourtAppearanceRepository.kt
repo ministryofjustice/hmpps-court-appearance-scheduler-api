@@ -9,6 +9,7 @@ import org.springframework.data.repository.findByIdOrNull
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.IDENTIFIER
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.PRISON_CODE
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -17,7 +18,7 @@ interface CourtAppearanceRepository :
   JpaRepository<CourtAppearance, UUID>,
   JpaSpecificationExecutor<CourtAppearance> {
   fun findByLegacyId(legacyId: Long): CourtAppearance?
-  fun findByExternalReference(externalReference: String): CourtAppearance?
+  fun findByExternalReference(externalReference: ExternalReference): CourtAppearance?
   fun countByPersonIdentifier(personIdentifier: String): Int
 
   @Query(

@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain
 
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
+import jakarta.persistence.Convert
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.Id
@@ -26,6 +27,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRecorded
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceScheduled
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CompleteAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
@@ -54,7 +56,7 @@ final class CourtAppearance(
   start: LocalDateTime,
   end: LocalDateTime?,
   comments: String?,
-  externalReference: String?,
+  externalReference: ExternalReference?,
   legacyId: Long?,
   @Id
   @Column(name = "id", nullable = false)
@@ -128,8 +130,9 @@ final class CourtAppearance(
   var comments: String? = comments?.trim()
     private set
 
+  @Convert(converter = ExternalReferenceConverter::class)
   @Column(name = "external_reference")
-  var externalReference: String? = externalReference
+  var externalReference: ExternalReference? = externalReference
     private set
 
   @Column(name = "legacy_id")
@@ -245,7 +248,7 @@ final class CourtAppearance(
     }
   }
 
-  fun applyExternalIdentifiers(externalReference: String?, legacyId: Long?) {
+  fun applyExternalIdentifiers(externalReference: ExternalReference?, legacyId: Long?) {
     this.externalReference = externalReference
     this.legacyId = legacyId
   }
