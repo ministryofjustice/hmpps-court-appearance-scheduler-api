@@ -8,10 +8,10 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getAppear
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.courtregister.CourtRegisterClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonregister.PrisonRegisterClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Appearance
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AppearanceOrigin
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Court
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Person
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Prison
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.asAppearanceOrigin
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.asReason
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.asStatus
 import java.util.UUID
@@ -32,7 +32,7 @@ class CourtAppearanceRetriever(
   }
 
   private fun CourtAppearance.toModel(prison: Prison, court: Court) = Appearance(
-    id, person(), prison, court, reason.asReason(), external, start, end, comments, status.asStatus(), externalReference?.let { AppearanceOrigin(it) },
+    id, person(), prison, court, reason.asReason(), external, start, end, comments, status.asStatus(), externalReference?.asAppearanceOrigin(),
   )
 
   private fun CourtAppearance.person(): Person = with(person) {

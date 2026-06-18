@@ -2,13 +2,14 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events
 
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.integration.IntegrationUrlBuilder.appearanceUrl
 import java.util.UUID
 
 data class AdditionalAppearanceInformation(
   override val id: UUID,
   override val source: DataSource,
-  val externalReferenceUrn: String?,
+  val externalReferenceUrn: ExternalReference?,
 ) : SourceInformation,
   IdInformation
 
@@ -26,7 +27,7 @@ data class CourtAppearanceMigrated(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceMigrated(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -49,7 +50,7 @@ data class CourtAppearanceScheduled(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceScheduled(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -72,7 +73,7 @@ data class CourtAppearanceUnscheduled(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceUnscheduled(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -94,7 +95,7 @@ data class CourtAppearanceCancelled(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceCancelled(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -117,7 +118,7 @@ data class CourtAppearanceExpired(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceExpired(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -140,7 +141,7 @@ data class CourtAppearanceRecorded(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceRecorded(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -163,7 +164,7 @@ data class CourtAppearanceRecategorised(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceRecategorised(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -186,7 +187,7 @@ data class CourtAppearanceRelocated(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceRelocated(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -209,7 +210,7 @@ data class CourtAppearanceRescheduled(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceRescheduled(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -232,7 +233,7 @@ data class CourtAppearanceCommentsChanged(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceCommentsChanged(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -255,7 +256,7 @@ data class CourtAppearanceRequestedInPerson(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceRequestedInPerson(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -278,7 +279,7 @@ data class CourtAppearanceRequestedByVideoLink(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceRequestedByVideoLink(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -301,7 +302,7 @@ data class CourtAppearanceStarted(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceStarted(
       AdditionalAppearanceInformation(id, dataSource, externalReference),
@@ -324,7 +325,7 @@ data class CourtAppearanceCompleted(
     operator fun invoke(
       personIdentifier: String,
       id: UUID,
-      externalReference: String?,
+      externalReference: ExternalReference?,
       dataSource: DataSource = SchedulerContext.get().source,
     ) = CourtAppearanceCompleted(
       AdditionalAppearanceInformation(id, dataSource, externalReference),

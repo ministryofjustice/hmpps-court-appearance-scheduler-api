@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.Data
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -39,7 +40,7 @@ interface CourtAppearanceOperations {
       start: LocalDateTime = LocalDate.now().plusDays(7).atTime(6, 0),
       end: LocalDateTime? = start.toLocalDate().atTime(23, 59, 59),
       comments: String? = word(25),
-      externalReference: String? = null,
+      externalReference: ExternalReference? = null,
       legacyId: Long? = null,
       movements: List<(CourtAppearance) -> CourtAppearanceMovement> = listOf(),
       unschedule: Boolean = false,

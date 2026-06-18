@@ -2,7 +2,10 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.media.Schema.RequiredMode.NOT_REQUIRED
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
@@ -20,7 +23,8 @@ data class CourtEvent(
   @JsonProperty("eventStatus")
   val status: String,
   val commentText: String?,
-  val externalReferenceUrn: String?,
+  @Schema(type = "string", nullable = true, requiredMode = NOT_REQUIRED)
+  val externalReferenceUrn: ExternalReference?,
   val externalCourtEventType: Boolean?,
   val currentTerm: Boolean = true,
 ) {

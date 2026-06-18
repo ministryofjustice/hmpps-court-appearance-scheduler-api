@@ -83,8 +83,6 @@ class CourtAppearanceSearchIntTest(
     ).successResponse<CourtAppearanceSearchResponse>()
     assertThat(res.content).hasSize(4)
     assertThat(res.metadata.totalElements).isEqualTo(4)
-    println(appearances.map { it.start })
-    println(res.content.map { it.start })
     assertThat(res.content.map { it.id }).containsExactlyElementsOf(appearances.subList(1, 5).map { it.id })
   }
 
