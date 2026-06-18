@@ -80,6 +80,11 @@ fun appearanceStatusCodeIn(statusCodes: Set<CourtAppearanceStatus.Code>) = Speci
   status.get<CourtAppearanceStatus.Code>(CourtAppearanceStatus::code.name).`in`(statusCodes)
 }
 
+fun appearanceNotUnscheduled() = Specification<CourtAppearance> { ca, _, cb ->
+  val status = ca.join<CourtAppearanceStatus, CourtAppearanceStatus>(CourtAppearance::status.name, JoinType.INNER)
+  cb.notEqual(status.get<CourtAppearanceStatus.Code>(CourtAppearanceStatus::code.name), CourtAppearanceStatus.Code.UNSCHEDULED)
+}
+
 fun appearanceReasonCodeIn(reasonCodes: Set<String>) = Specification<CourtAppearance> { ca, _, _ ->
   val status = ca.join<CourtAppearanceStatus, CourtAppearanceReason>(CourtAppearance::reason.name, JoinType.INNER)
   status.get<String>(CourtAppearanceReason::code.name).`in`(reasonCodes)

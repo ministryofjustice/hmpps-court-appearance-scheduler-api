@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSourc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementDeleted
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceScheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
@@ -67,6 +68,12 @@ class DeleteCourtMovementIntTest(
           movement.id,
           DataSource.NOMIS,
         ).publication(movement.id),
+        CourtAppearanceScheduled(
+          ca.person.identifier,
+          ca.id,
+          ca.externalReference,
+          DataSource.NOMIS,
+        ).publication(ca.id),
       ),
     )
   }

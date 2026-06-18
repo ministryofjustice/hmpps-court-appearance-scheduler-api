@@ -50,7 +50,6 @@ private fun CourtAppearance.asEvent() = CourtEvent(
   comments,
   externalReference,
   external,
-  null,
 )
 
 private fun CourtAppearanceMovement.asMovement(): CourtEventMovement {

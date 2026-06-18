@@ -208,6 +208,57 @@ class ResyncCourtAppearanceIntTest(
   }
 
   @Test
+  fun `200 ok - can migrate unscheduled appearance`() {
+    val prisonCode = prisonCode()
+    val prisoner = prisonerSearch.givenPrisoner(prisoner(prisonCode))
+
+    val request = resyncRequest(
+      listOf(
+        resyncCourtEvent(
+          courtEvent(
+            date = LocalDate.now().plusDays(7),
+            externalReference = urn(),
+            status = "SCHED",
+            currentTerm = false,
+          ),
+        ),
+      ),
+    )
+    val res = resync(prisoner.prisonerNumber, request).successResponse<ResyncResponse>()
+
+    res.courtEvents.single().also { ce ->
+      val saved = requireNotNull(findCourtAppearance(ce.dpsId))
+      assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.UNSCHEDULED)
+      val ceDetail = request.courtEvents.first { it.courtEvent.eventId == ce.eventId }
+      saved verifyAgainst ceDetail.courtEvent
+      val msa = requireNotNull(msaRepository.findByIdOrNull(saved.id))
+      assertThat(msa.createdBy).isEqualTo(ceDetail.created.by)
+      ceDetail.modified?.also { assertThat(msa.modifiedBy).isEqualTo(it.by) }
+      verifyAudit(
+        saved,
+        RevisionType.ADD,
+        setOf(
+          HmppsDomainEvent::class.simpleName!!,
+          CourtAppearance::class.simpleName!!,
+        ),
+        SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS),
+      )
+    }
+
+    val externalRef =
+      { legacyId: Long -> request.courtEvents.single { it.courtEvent.eventId == legacyId }.courtEvent.externalReferenceUrn }
+
+    val ca = requireNotNull(findCourtAppearance(res.courtEvents.first().dpsId))
+    verifyEventPublications(
+      ca,
+      res.courtEvents.map {
+        CourtAppearanceMigrated(prisoner.prisonerNumber, it.dpsId, externalRef(it.eventId), DataSource.NOMIS)
+          .publication(it.dpsId) { false }
+      }.toSet(),
+    )
+  }
+
+  @Test
   fun `200 ok - can migrate completed appearance without IN movement`() {
     val prisonCode = prisonCode()
     val person = givenPersonSummary(personSummary(prisonCode = prisonCode))

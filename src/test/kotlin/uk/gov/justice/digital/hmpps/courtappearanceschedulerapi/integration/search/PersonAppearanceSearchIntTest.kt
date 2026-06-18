@@ -76,6 +76,23 @@ class PersonAppearanceSearchIntTest(
   }
 
   @Test
+  fun `unscheduled not found by default`() {
+    val prison = prisonRegister.givenPrison()
+    val court = courtRegister.givenCourt()
+
+    val scheduled = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code))
+    val unscheduled = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code, unschedule = true))
+    assertThat(unscheduled.status.code).isEqualTo(CourtAppearanceStatus.Code.UNSCHEDULED)
+
+    val res = searchAppearances(scheduled.person.identifier, searchRequest())
+      .successResponse<CourtAppearanceSearchResponse>()
+
+    assertThat(res.content).hasSize(1)
+    assertThat(res.metadata.totalElements).isEqualTo(1)
+    assertThat(res.content.single().id).isEqualTo(scheduled.id)
+  }
+
+  @Test
   fun `can filter appearances by court code`() {
     val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()

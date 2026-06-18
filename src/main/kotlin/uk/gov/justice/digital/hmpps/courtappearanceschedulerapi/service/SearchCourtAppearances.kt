@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPersonName
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPersonPrisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPrisonCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceNotUnscheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearancePersonIdentifierIn
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceReasonCodeIn
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceStatusCodeIn
@@ -69,7 +70,7 @@ class SearchCourtAppearances(
   }
 
   private fun AppearanceSearchRequest.defaults(): List<Specification<CourtAppearance>> = listOfNotNull(
-    status.takeIf { it.isNotEmpty() }?.let { appearanceStatusCodeIn(it) },
+    status.takeIf { it.isNotEmpty() }?.let { appearanceStatusCodeIn(it) } ?: appearanceNotUnscheduled(),
     reason.takeIf { it.isNotEmpty() }?.let { appearanceReasonCodeIn(it) },
     courtCodes.takeIf { it.isNotEmpty() }?.let { appearanceMatchesCourtCodeIn(it) },
     external?.let { appearanceMatchesExternal(it) },

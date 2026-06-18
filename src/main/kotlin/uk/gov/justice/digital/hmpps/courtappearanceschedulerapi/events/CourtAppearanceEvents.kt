@@ -58,6 +58,29 @@ data class CourtAppearanceScheduled(
   }
 }
 
+data class CourtAppearanceUnscheduled(
+  override val additionalInformation: AdditionalAppearanceInformation,
+  override val personReference: PersonReference,
+) : DomainEvent<AdditionalAppearanceInformation> {
+  override val eventType: String = EVENT_TYPE
+  override val description: String = DESCRIPTION
+  override val detailUrl: String = appearanceUrl(id)
+
+  companion object {
+    const val EVENT_TYPE = "person.court-appearance.unscheduled"
+    const val DESCRIPTION = "A court appearance has been unscheduled"
+    operator fun invoke(
+      personIdentifier: String,
+      id: UUID,
+      externalReference: String?,
+      dataSource: DataSource = SchedulerContext.get().source,
+    ) = CourtAppearanceUnscheduled(
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
+      PersonReference.withIdentifier(personIdentifier),
+    )
+  }
+}
+
 data class CourtAppearanceCancelled(
   override val additionalInformation: AdditionalAppearanceInformation,
   override val personReference: PersonReference,
