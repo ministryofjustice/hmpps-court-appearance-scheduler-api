@@ -18,14 +18,11 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedulesResponse
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.WiremockConfig.mockServerConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
-import java.time.LocalDateTime
-import java.util.UUID
 
 class RemandAndSentencingMockServer : WireMockServer(mockServerConfig(9007)) {
   fun givenCourtAppearanceSchedule(schedule: CourtAppearanceSchedule): CourtAppearanceSchedule = givenCourtAppearanceSchedules(listOf(schedule)).first()
 
   fun givenCourtAppearanceSchedules(schedules: List<CourtAppearanceSchedule>): List<CourtAppearanceSchedule> {
-    val response = jsonMapper().writeValueAsString(CourtAppearanceSchedulesResponse(schedules))
     stubFor(
       post(urlPathEqualTo("/search/court-appearance-schedules"))
         .withRequestBody(
@@ -42,22 +39,10 @@ class RemandAndSentencingMockServer : WireMockServer(mockServerConfig(9007)) {
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withStatus(HttpStatus.OK.value())
-            .withBody(response),
+            .withBody(jsonMapper().writeValueAsString(CourtAppearanceSchedulesResponse(schedules))),
         ),
     )
-    println(response)
     return schedules
-  }
-
-  companion object {
-    fun caSchedule(
-      id: UUID,
-      personIdentifier: String,
-      courtCode: String,
-      reason: CourtAppearanceSchedule.ScheduleReason,
-      start: LocalDateTime,
-      isDuplicate: Boolean,
-    ) = CourtAppearanceSchedule(id, personIdentifier, courtCode, reason, start, isDuplicate)
   }
 }
 
