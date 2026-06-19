@@ -8,6 +8,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReasonPro
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.StatusProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearancePrison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
@@ -47,6 +48,7 @@ fun CourtAppearance.updateFrom(
   rasScheduleInfo: CourtAppearanceSchedule?,
 ): CourtAppearance = apply {
   movePerson(personSummary)
+  applyResponsibility(ChangeAppearancePrison(request.scheduledPrisonCode))
   applyExternalIdentifiers(request.externalReferenceUrn, request.eventId)
   relocate(RelocateAppearance(request.scheduledCourtCode))
   recategorise(RecategoriseAppearance(request.type), reason)

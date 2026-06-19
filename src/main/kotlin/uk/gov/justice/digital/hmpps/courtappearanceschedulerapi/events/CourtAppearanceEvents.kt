@@ -242,6 +242,28 @@ data class CourtAppearanceCommentsChanged(
   }
 }
 
+data class CourtAppearanceResponsiblePrisonChanged(
+  override val additionalInformation: AdditionalAppearanceInformation,
+  override val personReference: PersonReference,
+) : DomainEvent<AdditionalAppearanceInformation> {
+  override val eventType: String = EVENT_TYPE
+  override val description: String = DESCRIPTION
+
+  companion object {
+    const val EVENT_TYPE = "person.court-appearance.responsible-prison-changed"
+    const val DESCRIPTION = "The responsible prison for a court appearance has been changed"
+    operator fun invoke(
+      personIdentifier: String,
+      id: UUID,
+      externalReference: ExternalReference?,
+      dataSource: DataSource = SchedulerContext.get().source,
+    ) = CourtAppearanceResponsiblePrisonChanged(
+      AdditionalAppearanceInformation(id, dataSource, externalReference),
+      PersonReference.withIdentifier(personIdentifier),
+    )
+  }
+}
+
 data class CourtAppearanceRequestedInPerson(
   override val additionalInformation: AdditionalAppearanceInformation,
   override val personReference: PersonReference,

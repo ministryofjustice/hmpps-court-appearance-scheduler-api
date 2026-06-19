@@ -28,6 +28,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRelocated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRescheduled
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceResponsiblePrisonChanged
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
@@ -379,7 +380,7 @@ class ResyncCourtAppearanceIntTest(
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
       ),
     )
-    val scheduled = schedule.movements.first()
+    val scheduled = schedule.movements.single()
     val unscheduled = givenUnscheduledMovement(unscheduledMovement(person.identifier, prisonCode))
 
     val externalReference = externalReference()
@@ -412,6 +413,12 @@ class ResyncCourtAppearanceIntTest(
     verifyEventPublications(
       scheduled,
       setOf(
+        CourtAppearanceResponsiblePrisonChanged(
+          person.identifier,
+          schedule.id,
+          externalReference,
+          DataSource.NOMIS,
+        ).publication(schedule.id) { false },
         CourtAppearanceRescheduled(
           person.identifier,
           schedule.id,
@@ -496,6 +503,7 @@ class ResyncCourtAppearanceIntTest(
           courtEvent = courtEvent(
             dpsId = schedule.id,
             eventId = schedule.legacyId!!,
+            scheduledPrisonCode = prisonCode,
             scheduledCourtCode = courtCode,
             date = schedule.start.toLocalDate(),
             startTime = schedule.start.toLocalTime(),
@@ -507,6 +515,7 @@ class ResyncCourtAppearanceIntTest(
                 dpsId = unscheduled.id,
                 bookingId = unscheduled.bookingId!!,
                 sequenceNumber = unscheduled.sequenceNumber!!,
+                fromAgencyId = prisonCode,
                 toAgencyId = unscheduled.courtCode,
                 date = unscheduled.occurredAt.toLocalDate(),
                 time = unscheduled.occurredAt.toLocalTime(),
@@ -522,6 +531,7 @@ class ResyncCourtAppearanceIntTest(
             dpsId = scheduled.id,
             bookingId = scheduled.bookingId!!,
             sequenceNumber = scheduled.sequenceNumber!!,
+            fromAgencyId = prisonCode,
             toAgencyId = scheduled.courtCode,
             date = scheduled.occurredAt.toLocalDate(),
             time = scheduled.occurredAt.toLocalTime(),
