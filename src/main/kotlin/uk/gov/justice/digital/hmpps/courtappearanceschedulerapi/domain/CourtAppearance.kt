@@ -192,15 +192,13 @@ final class CourtAppearance(
     this.person = person
   }
 
-  fun unscheduleIfScheduled(statusProvider: StatusProvider) = apply {
-    if (status.code == CourtAppearanceStatus.Code.SCHEDULED) {
-      status = statusProvider(CourtAppearanceStatus.Code.UNSCHEDULED)
-      appliedActions += UnscheduleAppearance()
-    }
-  }
-
-  fun calculateStatus(statusProvider: StatusProvider, completeOverride: Boolean = false) = apply {
+  fun calculateStatus(
+    statusProvider: StatusProvider,
+    completeOverride: Boolean = false,
+    unscheduleOverride: Boolean = false,
+  ) = apply {
     val (statusCode, action) = when {
+      unscheduleOverride -> CourtAppearanceStatus.Code.UNSCHEDULED to UnscheduleAppearance()
       completeOverride || isCompleted() -> CourtAppearanceStatus.Code.COMPLETED to CompleteAppearance()
       isInProgress() -> CourtAppearanceStatus.Code.IN_PROGRESS to StartAppearance()
       isExpired() -> CourtAppearanceStatus.Code.EXPIRED to ExpireAppearance()

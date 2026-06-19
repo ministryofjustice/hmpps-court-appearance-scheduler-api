@@ -57,8 +57,7 @@ interface CourtAppearanceOperations {
         legacyId,
       )
         .apply { movements.forEach { addMovement(it(this)) } }
-        .calculateStatus(status)
-        .also { if (unschedule) it.unscheduleIfScheduled(status) }
+        .calculateStatus(status, unscheduleOverride = unschedule)
     }
   }
 

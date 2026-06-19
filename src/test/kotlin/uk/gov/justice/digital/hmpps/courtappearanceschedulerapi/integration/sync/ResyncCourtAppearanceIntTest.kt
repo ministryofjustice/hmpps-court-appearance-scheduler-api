@@ -45,6 +45,8 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync.SyncGenerator.courtEventMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchExtension.Companion.prisonerSearch
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchServer.Companion.prisoner
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.schedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.AtAndBy
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventMovement
@@ -99,6 +101,7 @@ class ResyncCourtAppearanceIntTest(
       ),
       listOf(resyncCourtEventMovement()),
     )
+    rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(prisoner.prisonerNumber) })
     val res = resync(prisoner.prisonerNumber, request).successResponse<ResyncResponse>()
 
     res.courtEvents.forEach { ce ->
@@ -174,6 +177,7 @@ class ResyncCourtAppearanceIntTest(
         ),
       ),
     )
+    rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(prisoner.prisonerNumber) })
     val res = resync(prisoner.prisonerNumber, request).successResponse<ResyncResponse>()
 
     res.courtEvents.single().also { ce ->
@@ -224,6 +228,7 @@ class ResyncCourtAppearanceIntTest(
         ),
       ),
     )
+    rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(prisoner.prisonerNumber) })
     val res = resync(prisoner.prisonerNumber, request).successResponse<ResyncResponse>()
 
     res.courtEvents.single().also { ce ->
@@ -271,6 +276,7 @@ class ResyncCourtAppearanceIntTest(
         ),
       ),
     )
+    rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(person.identifier) })
     val res = resync(person.identifier, request).successResponse<ResyncResponse>()
 
     res.courtEvents.single().also { ce ->
@@ -386,6 +392,7 @@ class ResyncCourtAppearanceIntTest(
       ),
       unscheduledMovements = listOf(resyncCourtEventMovement(movement = courtEventMovement(dpsId = unscheduled.id))),
     )
+    rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(person.identifier) })
     val res = resync(person.identifier, request).successResponse<ResyncResponse>()
     assertThat(res.courtEvents.first().dpsId).isEqualTo(schedule.id)
     assertThat(res.courtEvents.first().movements.first().dpsId).isEqualTo(scheduled.id)
@@ -596,6 +603,7 @@ class ResyncCourtAppearanceIntTest(
         ),
       ),
     )
+    rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(person.identifier) })
     val res = resync(person.identifier, request).successResponse<ResyncResponse>()
     assertThat(res.courtEvents.size).isEqualTo(2)
 

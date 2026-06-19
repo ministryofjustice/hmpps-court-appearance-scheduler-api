@@ -23,6 +23,8 @@ data class ResyncCourtEvents(
       ).unzip()
     return legacyIds.toSet() to ids.filterNotNull().toSet()
   }
+
+  fun rasIds(): Set<UUID> = courtEvents.mapNotNull { it.courtEvent.externalReferenceUrn?.uuid }.toSet()
 }
 
 data class ResyncCourtEvent(

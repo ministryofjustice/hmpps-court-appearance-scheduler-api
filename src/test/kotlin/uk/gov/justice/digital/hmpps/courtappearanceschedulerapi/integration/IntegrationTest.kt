@@ -40,6 +40,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wire
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.NomisMigrationExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerRegisterExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchExtension
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension
 import uk.gov.justice.hmpps.kotlin.common.ErrorResponse
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingTopicException
@@ -57,6 +58,7 @@ import java.util.concurrent.TimeUnit
     NomisMigrationExtension::class,
     PrisonerRegisterExtension::class,
     PrisonerSearchExtension::class,
+    RemandAndSentencingExtension::class,
   ],
 )
 @ContextConfiguration(classes = [TestConfig::class])

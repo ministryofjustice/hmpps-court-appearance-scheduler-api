@@ -11,6 +11,8 @@ integration:
     url: "https://prison-register-dev.hmpps.service.justice.gov.uk"
   prisoner-search:
     url: "https://prisoner-search-dev.prison.service.justice.gov.uk"
+  remand-and-sentencing:
+    url: "remand-and-sentencing-api-dev.hmpps.service.justice.gov.uk"
 
 service:
   active-prisons: "***"

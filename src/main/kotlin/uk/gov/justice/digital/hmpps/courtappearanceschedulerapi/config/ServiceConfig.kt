@@ -23,6 +23,7 @@ data class ServiceConfig(
   val domainEvents: DomainEventConfig,
   val uiBaseUrl: String,
   val apiBaseUrl: String,
+  val enableRasClient: Boolean,
 ) {
   data class DomainEventConfig(val pollInterval: Duration, val batchSize: Int)
 }

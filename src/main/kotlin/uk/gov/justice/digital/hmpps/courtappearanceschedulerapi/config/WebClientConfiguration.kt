@@ -17,6 +17,7 @@ class WebClientConfiguration(
   @Value($$"${integration.nomis-migration.url}") private val nomisMigrationBaseUri: String,
   @Value($$"${integration.prison-register.url}") private val prisonRegisterBaseUri: String,
   @Value($$"${integration.prisoner-search.url}") private val prisonerSearchBaseUri: String,
+  @Value($$"${integration.remand-and-sentencing.url}") private val rasBaseUri: String,
 ) {
   @Bean
   fun courtRegisterApiWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient = authorisedWebClient(courtRegisterBaseUri, builder, authorizedClientManager)
@@ -32,6 +33,9 @@ class WebClientConfiguration(
 
   @Bean
   fun prisonerSearchWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder) = authorisedWebClient(prisonerSearchBaseUri, builder, authorizedClientManager)
+
+  @Bean
+  fun remandAndSentencingWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder) = authorisedWebClient(rasBaseUri, builder, authorizedClientManager)
 
   fun authorisedWebClient(
     url: String,
