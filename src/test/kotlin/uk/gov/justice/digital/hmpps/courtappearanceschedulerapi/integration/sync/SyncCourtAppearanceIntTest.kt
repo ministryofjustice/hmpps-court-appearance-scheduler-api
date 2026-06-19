@@ -38,6 +38,8 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync.SyncGenerator.syncUser
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchExtension.Companion.prisonerSearch
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchServer.Companion.prisoner
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.schedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ReferenceId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.SyncCourtEvent
@@ -142,6 +144,7 @@ class SyncCourtAppearanceIntTest(
     val prisonCode = requireNotNull(person.prisonCode)
 
     val request = syncRequest(courtEvent(prisonCode, externalReference = externalReference()))
+    rasMockServer.givenCourtAppearanceSchedule(request.courtEvent.schedule(person.identifier)!!)
     val response = syncAppearance(person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -199,6 +202,8 @@ class SyncCourtAppearanceIntTest(
   @Test
   fun `200 ok scheduled appearance id and legacy id returned if external reference already exists`() {
     val appearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
+    rasMockServer.givenCourtAppearanceSchedule(appearance.schedule(false))
+
     val request = with(appearance) {
       syncRequest(
         courtEvent(
@@ -227,9 +232,10 @@ class SyncCourtAppearanceIntTest(
   @Test
   fun `200 ok - court appearance updated`() {
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
+    val rasScheduleInfo = rasMockServer.givenCourtAppearanceSchedule(appearance.schedule(false))
 
     val request =
-      syncRequest(courtEvent(appearance.prisonCode, eventId = appearance.legacyId!!, externalReference = externalReference()))
+      syncRequest(courtEvent(appearance.prisonCode, eventId = appearance.legacyId!!, externalReference = externalReference(uuid = rasScheduleInfo.id)))
     val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -275,6 +281,7 @@ class SyncCourtAppearanceIntTest(
     val prisonCode = requireNotNull(person.prisonCode)
 
     val request = syncRequest(courtEvent(prisonCode, status = "COMP", externalReference = externalReference()))
+    rasMockServer.givenCourtAppearanceSchedule(request.courtEvent.schedule(person.identifier)!!)
     val response = syncAppearance(person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -311,6 +318,7 @@ class SyncCourtAppearanceIntTest(
         commentText = appearance.comments,
       ),
     )
+    rasMockServer.givenCourtAppearanceSchedule(request.courtEvent.schedule(appearance.person.identifier)!!)
     val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -339,6 +347,51 @@ class SyncCourtAppearanceIntTest(
   }
 
   @Test
+  fun `200 ok - court appearance unscheduled by ras information`() {
+    val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
+    assertThat(appearance.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
+    val scheduleInfo = rasMockServer.givenCourtAppearanceSchedule(appearance.schedule(true))
+
+    val request = syncRequest(
+      courtEvent(
+        scheduledPrisonCode = appearance.prisonCode,
+        scheduledCourtCode = appearance.courtCode,
+        eventId = appearance.legacyId!!,
+        status = "COMP",
+        externalReference = externalReference(uuid = scheduleInfo.id),
+        date = appearance.start.toLocalDate(),
+        startTime = appearance.start.toLocalTime(),
+        commentText = appearance.comments,
+      ),
+    )
+    val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
+
+    val saved = requireNotNull(findCourtAppearance(response.id))
+    assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.UNSCHEDULED)
+    saved verifyAgainst request.courtEvent
+
+    verifyAudit(
+      saved,
+      RevisionType.MOD,
+      setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearance::class.simpleName!!),
+      SchedulerContext.get()
+        .copy(username = request.user.username, caseloadId = request.user.activeCaseloadId, source = DataSource.NOMIS),
+    )
+
+    verifyEventPublications(
+      saved,
+      setOf(
+        CourtAppearanceUnscheduled(
+          saved.person.identifier,
+          saved.id,
+          request.courtEvent.externalReferenceUrn,
+          DataSource.NOMIS,
+        ).publication(saved.id),
+      ),
+    )
+  }
+
+  @Test
   fun `200 ok - court appearance unscheduled by sync`() {
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
     assertThat(appearance.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
@@ -349,7 +402,7 @@ class SyncCourtAppearanceIntTest(
         scheduledCourtCode = appearance.courtCode,
         eventId = appearance.legacyId!!,
         status = "SCHED",
-        externalReference = externalReference(),
+        externalReference = null,
         date = appearance.start.toLocalDate(),
         startTime = appearance.start.toLocalTime(),
         commentText = appearance.comments,
@@ -394,7 +447,7 @@ class SyncCourtAppearanceIntTest(
         scheduledCourtCode = appearance.courtCode,
         eventId = appearance.legacyId!!,
         status = "SCHED",
-        externalReference = externalReference(),
+        externalReference = null,
         date = appearance.start.toLocalDate(),
         startTime = appearance.start.toLocalTime(),
         commentText = appearance.comments,

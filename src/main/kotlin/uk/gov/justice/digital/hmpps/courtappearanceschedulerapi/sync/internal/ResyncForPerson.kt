@@ -15,6 +15,8 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSourc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReasonProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.StatusProvider
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonSummaryService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.AtAndBy
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventMapping
@@ -28,6 +30,7 @@ import java.util.UUID
 @Transactional
 @Service
 class ResyncForPerson(
+  private val rasClient: RemandAndSentencingClient,
   private val reasonRepository: CourtAppearanceReasonRepository,
   private val statusRepository: CourtAppearanceStatusRepository,
   private val appearanceRepository: CourtAppearanceRepository,
@@ -37,6 +40,8 @@ class ResyncForPerson(
 ) {
   fun all(personIdentifier: String, request: ResyncCourtEvents): ResyncResponse {
     SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS, migratingData = true).set()
+    val rasScheduleInfo = rasClient.findCourtAppearanceSchedules(request.rasIds()).courtAppearances.associateBy { it.id }
+    val scheduleInfoProvider = { uuid: UUID -> rasScheduleInfo[uuid] }
     val person = personSummaryService.getWithSave(personIdentifier)
     val reasonsMap = reasonRepository.findAll().associateBy { it.code }
     val statusMap = statusRepository.findAll().associateBy { it.code }
@@ -57,7 +62,7 @@ class ResyncForPerson(
     }
 
     val scheduled = request.courtEvents.map {
-      it.resync(person, appearanceProvider, movementProvider, reason, status)
+      it.resync(person, appearanceProvider, movementProvider, reason, status, scheduleInfoProvider)
     }
     val unscheduled = request.unscheduledMovements.map {
       it.resync(person, null, movementProvider, reason, status)
@@ -96,10 +101,12 @@ class ResyncForPerson(
     movementProvider: (UUID?, String) -> CourtAppearanceMovement?,
     reasonProvider: ReasonProvider,
     statusProvider: StatusProvider,
+    scheduleInfoProvider: (UUID) -> CourtAppearanceSchedule?,
   ): CourtEventMapping {
+    val rasScheduleInfo = courtEvent.externalReferenceUrn?.uuid?.let { scheduleInfoProvider(it) }
     val appearance = appearanceProvider(courtEvent.dpsId, requireNotNull(courtEvent.eventId))
-      ?.updateFrom(person, courtEvent, reasonProvider, statusProvider)
-      ?: appearanceRepository.save(courtEvent.asEntity(person, reasonProvider, statusProvider))
+      ?.updateFrom(person, courtEvent, reasonProvider, statusProvider, rasScheduleInfo)
+      ?: appearanceRepository.save(courtEvent.asEntity(person, reasonProvider, statusProvider, rasScheduleInfo))
     val scheduledMovements = movements.map {
       it.resync(person, appearance, movementProvider, reasonProvider, statusProvider)
     }

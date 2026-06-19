@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReasonByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getStatusByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.ConflictException
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ReferenceId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonSummaryService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.SyncCourtEvent
@@ -20,6 +21,7 @@ import java.util.UUID
 @Transactional
 @Service
 class SyncCourtAppearance(
+  private val rasClient: RemandAndSentencingClient,
   private val personSummaryService: PersonSummaryService,
   private val reasonRepository: CourtAppearanceReasonRepository,
   private val statusRepository: CourtAppearanceStatusRepository,
@@ -31,17 +33,19 @@ class SyncCourtAppearance(
         .copy(requestAt = occurredAt, username = user.username, caseloadId = user.activeCaseloadId)
         .set()
     }
+    val rasScheduleInfo = request.courtEvent.externalReferenceUrn?.uuid?.let(rasClient::findCourtAppearanceSchedule)
     val person = personSummaryService.getWithSave(personIdentifier)
     val appearance = (
       request.courtEvent.dpsId?.let { appearanceRepository.findByIdOrNull(it) }
         ?: request.courtEvent.externalReferenceUrn?.let { appearanceRepository.findByExternalReference(it) }
         ?: request.courtEvent.eventId?.let { appearanceRepository.findByLegacyId(it) }
-      )?.updateFrom(person, request.courtEvent, reasonRepository::getReasonByCode, statusRepository::getStatusByCode)
+      )?.updateFrom(person, request.courtEvent, reasonRepository::getReasonByCode, statusRepository::getStatusByCode, rasScheduleInfo)
       ?: appearanceRepository.save(
         request.courtEvent.asEntity(
           person,
           reasonRepository::getReasonByCode,
           statusRepository::getStatusByCode,
+          rasScheduleInfo,
         ),
       )
     return ReferenceId(appearance.id)

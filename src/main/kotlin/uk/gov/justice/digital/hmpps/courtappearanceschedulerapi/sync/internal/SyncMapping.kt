@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerat
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReasonProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.StatusProvider
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
@@ -18,11 +19,13 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.mov
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.RelocateMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventMovement
+import java.time.LocalDateTime
 
 fun CourtEvent.asEntity(
   person: PersonSummary,
   reason: ReasonProvider,
   status: StatusProvider,
+  rasScheduleInfo: CourtAppearanceSchedule?,
 ): CourtAppearance = CourtAppearance(
   person,
   scheduledPrisonCode,
@@ -34,13 +37,14 @@ fun CourtEvent.asEntity(
   externalReferenceUrn,
   eventId,
   dpsId ?: newUuid(),
-).syncStatus(status, shouldBeCompleted(), currentTerm)
+).syncStatus(status, shouldBeCompleted(), currentTerm, rasScheduleInfo)
 
 fun CourtAppearance.updateFrom(
   personSummary: PersonSummary,
   request: CourtEvent,
   reason: ReasonProvider,
   status: StatusProvider,
+  rasScheduleInfo: CourtAppearanceSchedule?,
 ): CourtAppearance = apply {
   movePerson(personSummary)
   applyExternalIdentifiers(request.externalReferenceUrn, request.eventId)
@@ -48,14 +52,17 @@ fun CourtAppearance.updateFrom(
   recategorise(RecategoriseAppearance(request.type), reason)
   reschedule(RescheduleAppearance(request.start, null))
   applyComments(ChangeAppearanceComments(request.commentText))
-  syncStatus(status, request.shouldBeCompleted(), request.currentTerm)
+  syncStatus(status, request.shouldBeCompleted(), request.currentTerm, rasScheduleInfo)
 }
 
-fun CourtAppearance.syncStatus(statusProvider: StatusProvider, complete: Boolean, currentTerm: Boolean) = apply {
-  calculateStatus(statusProvider, complete)
-  if (!currentTerm) {
-    unscheduleIfScheduled(statusProvider)
-  }
+fun CourtAppearance.syncStatus(
+  statusProvider: StatusProvider,
+  complete: Boolean,
+  currentTerm: Boolean,
+  rasScheduleInfo: CourtAppearanceSchedule?,
+) = apply {
+  val unschedule = rasScheduleInfo?.isDuplicate == true || (!currentTerm && start.isAfter(LocalDateTime.now()))
+  calculateStatus(statusProvider, complete, unschedule)
 }
 
 fun CourtEventMovement.asEntity(

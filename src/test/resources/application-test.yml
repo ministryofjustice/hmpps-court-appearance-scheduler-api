@@ -18,6 +18,8 @@ integration:
     url: "http://localhost:9005"
   prisoner-search:
     url: "http://localhost:9000"
+  remand-and-sentencing:
+    url: "http://localhost:9007"
 
 spring:
   jpa:
@@ -67,3 +69,4 @@ service:
   api-base-url: "http://local-api"
   appearance-expiration:
     cron:
+  enable-ras-client: true

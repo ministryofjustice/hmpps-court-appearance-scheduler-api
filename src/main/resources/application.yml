@@ -131,3 +131,4 @@ service:
     batch-size: 10
   appearance-expiration:
     cron:
+  enable-ras-client: true # enabled for initial testing

@@ -4,6 +4,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ExternalR
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ExternalReferenceService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
+import java.util.UUID
 import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.atomic.AtomicLong
 
@@ -33,5 +34,6 @@ object DataGenerator {
   fun externalReference(
     service: ExternalReferenceService = ExternalReferenceService.REMAND_AND_SENTENCING,
     entity: ExternalReferenceEntity = ExternalReferenceEntity.COURT_APPEARANCE,
-  ) = ExternalReference(service, entity, newUuid())
+    uuid: UUID = newUuid(),
+  ) = ExternalReference(service, entity, uuid)
 }
