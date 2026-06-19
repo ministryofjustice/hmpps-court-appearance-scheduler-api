@@ -12,7 +12,7 @@ integration:
   prisoner-search:
     url: "https://prisoner-search.prison.service.justice.gov.uk"
   remand-and-sentencing:
-    url: "remand-and-sentencing-api.hmpps.service.justice.gov.uk"
+    url: "https://remand-and-sentencing-api.hmpps.service.justice.gov.uk"
 
 service:
   active-prisons:
