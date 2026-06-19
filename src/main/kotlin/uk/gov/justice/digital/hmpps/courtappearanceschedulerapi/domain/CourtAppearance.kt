@@ -29,6 +29,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceScheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearancePrison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CompleteAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ExpireAppearance
@@ -190,6 +191,13 @@ final class CourtAppearance(
 
   fun movePerson(person: PersonSummary) = apply {
     this.person = person
+  }
+
+  fun applyResponsibility(action: ChangeAppearancePrison) = apply {
+    if (action.prisonCode != prisonCode) {
+      prisonCode = action.prisonCode
+      appliedActions += action
+    }
   }
 
   fun calculateStatus(

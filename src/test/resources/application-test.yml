@@ -58,10 +58,16 @@ hmpps.sqs:
       queueName: ${random.uuid}
       dlqName: ${random.uuid}
       subscribeTopicId: hmppseventtesttopic
+    offendereventsqueue:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+      subscribeTopicId: offendereventstopic
   topics:
     hmppseventtopic:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
     hmppseventtesttopic:
+      arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
+    offendereventstopic:
       arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
 
 service:

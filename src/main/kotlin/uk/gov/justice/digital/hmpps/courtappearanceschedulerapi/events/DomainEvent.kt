@@ -21,6 +21,7 @@ import java.util.UUID
     JsonSubTypes.Type(value = CourtAppearanceRelocated::class, name = CourtAppearanceRelocated.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceRescheduled::class, name = CourtAppearanceRescheduled.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceCommentsChanged::class, name = CourtAppearanceCommentsChanged.EVENT_TYPE),
+    JsonSubTypes.Type(value = CourtAppearanceResponsiblePrisonChanged::class, name = CourtAppearanceResponsiblePrisonChanged.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceRequestedInPerson::class, name = CourtAppearanceRequestedInPerson.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceRequestedByVideoLink::class, name = CourtAppearanceRequestedByVideoLink.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceStarted::class, name = CourtAppearanceStarted.EVENT_TYPE),
