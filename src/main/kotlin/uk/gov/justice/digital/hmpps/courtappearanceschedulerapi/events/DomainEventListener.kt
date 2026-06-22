@@ -8,12 +8,14 @@ import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonUpdatedHandler
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PrisonerMergedHandler
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PrisonerReceivedHandler
 
 @Component
 class DomainEventListener(
   private val jsonMapper: JsonMapper,
   private val person: PersonUpdatedHandler,
   private val merged: PrisonerMergedHandler,
+  private val received: PrisonerReceivedHandler,
 ) {
 
   @SqsListener("hmppsdomaineventsqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -22,6 +24,7 @@ class DomainEventListener(
       when (notification.eventType) {
         PrisonerUpdated.EVENT_TYPE -> person.handle(jsonMapper.readValue(notification.message))
         PrisonerMerged.EVENT_TYPE -> merged.handle(jsonMapper.readValue(notification.message))
+        PrisonerReceived.EVENT_TYPE -> received.handle(jsonMapper.readValue(notification.message))
       }
     } catch (ex: Exception) {
       Sentry.captureException(ex)

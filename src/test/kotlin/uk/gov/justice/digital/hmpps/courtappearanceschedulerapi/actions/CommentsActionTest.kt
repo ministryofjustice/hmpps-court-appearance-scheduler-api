@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.model.actions
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.actions
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.params.ParameterizedTest
