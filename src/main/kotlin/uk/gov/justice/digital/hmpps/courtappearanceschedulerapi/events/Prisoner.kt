@@ -36,3 +36,26 @@ data class PrisonerMerged(
     const val DESCRIPTION: String = "Prisoner records merged"
   }
 }
+
+data class PrisonerReceivedInformation(
+  val nomsNumber: String,
+  val prisonId: String,
+  val reason: String,
+) : AdditionalInformation {
+  companion object {
+    const val BOOKING_SWITCHED_REASON = "READMISSION_SWITCH_BOOKING"
+  }
+}
+
+data class PrisonerReceived(
+  override val additionalInformation: PrisonerReceivedInformation,
+  override val personReference: PersonReference,
+) : DomainEvent<PrisonerReceivedInformation> {
+  override val eventType: String = EVENT_TYPE
+  override val description: String = DESCRIPTION
+
+  companion object {
+    const val EVENT_TYPE: String = "prison-offender-search.prisoner.received"
+    const val DESCRIPTION: String = "A prisoner has been received into prison"
+  }
+}
