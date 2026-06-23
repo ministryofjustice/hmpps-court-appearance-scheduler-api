@@ -4,8 +4,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceScheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEvent
 
-data class ScheduleAppearance(
-  override val reason: String? = null,
-) : CourtAppearanceAction {
+class ScheduleAppearance : CourtAppearanceAction {
   override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceScheduled(ca.person.identifier, ca.id, ca.externalReference)
 }

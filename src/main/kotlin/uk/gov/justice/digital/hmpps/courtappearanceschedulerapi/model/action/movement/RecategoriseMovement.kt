@@ -6,7 +6,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEve
 
 data class RecategoriseMovement(
   val reasonCode: String,
-  override val reason: String? = null,
 ) : AppearanceMovementAction {
   override fun domainEvent(mov: CourtAppearanceMovement): DomainEvent<*> = AppearanceMovementRecategorised(mov.person.identifier, mov.id)
 }

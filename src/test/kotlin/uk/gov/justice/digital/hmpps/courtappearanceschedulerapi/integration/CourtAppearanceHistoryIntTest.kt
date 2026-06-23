@@ -59,22 +59,25 @@ class CourtAppearanceHistoryIntTest(
     val prison = prisonRegister.givenPrison()
     val ca = givenCourtAppearance(courtAppearance(prisonCode = prison.code))
 
-    val commentsChangedAction = ChangeAppearanceComments(word(25), word(12))
+    val commentsChangedAction = ChangeAppearanceComments(word(25))
+    val commentsChangedReason = word(12)
     val commentsUser = manageUsers.givenUser(user(DEFAULT_USERNAME, DEFAULT_NAME))
     transactionTemplate.executeWithoutResult {
-      SchedulerContext.get().copy(username = commentsUser.username, reason = commentsChangedAction.reason).set()
+      SchedulerContext.get().copy(username = commentsUser.username, reason = commentsChangedReason).set()
       requireNotNull(findCourtAppearance(ca.id)).applyComments(commentsChangedAction)
     }
     val relocateUser = manageUsers.givenUser()
-    val relocateAction = RelocateAppearance(courtCode = courtCode(), reason = commentsChangedAction.reason)
+    val relocateAction = RelocateAppearance(courtCode = courtCode())
+    val relocationReason = word(12)
     transactionTemplate.executeWithoutResult {
-      SchedulerContext.get().copy(username = relocateUser.username, reason = relocateAction.reason).set()
+      SchedulerContext.get().copy(username = relocateUser.username, reason = relocationReason).set()
       requireNotNull(findCourtAppearance(ca.id)).relocate(relocateAction)
     }
     val recategoriseUser = manageUsers.givenUser()
-    val recategoriseAction = RecategoriseAppearance("VL", word(20))
+    val recategoriseAction = RecategoriseAppearance("VL")
+    val recategorisationReason = word(20)
     transactionTemplate.executeWithoutResult {
-      SchedulerContext.get().copy(username = recategoriseUser.username, reason = recategoriseAction.reason).set()
+      SchedulerContext.get().copy(username = recategoriseUser.username, reason = recategorisationReason).set()
       requireNotNull(findCourtAppearance(ca.id)).recategorise(recategoriseAction, reasonRepository::getReasonByCode)
     }
 
@@ -90,7 +93,7 @@ class CourtAppearanceHistoryIntTest(
     with(history.content[1]) {
       assertThat(user).isEqualTo(AuditedAction.User(DEFAULT_USERNAME, DEFAULT_NAME))
       assertThat(domainEvents).containsExactly(CourtAppearanceCommentsChanged.EVENT_TYPE)
-      assertThat(reason).isEqualTo(commentsChangedAction.reason)
+      assertThat(reason).isEqualTo(commentsChangedReason)
       assertThat(changes).containsExactly(
         AuditedAction.Change(
           CourtAppearance::comments.name,
@@ -102,7 +105,7 @@ class CourtAppearanceHistoryIntTest(
     with(history.content[2]) {
       assertThat(user).isEqualTo(AuditedAction.User(relocateUser.username, relocateUser.name))
       assertThat(domainEvents).containsExactly(CourtAppearanceRelocated.EVENT_TYPE)
-      assertThat(reason).isEqualTo(relocateAction.reason)
+      assertThat(reason).isEqualTo(relocationReason)
       assertThat(changes).containsExactly(
         AuditedAction.Change(
           CourtAppearance::courtCode.name,
@@ -117,7 +120,7 @@ class CourtAppearanceHistoryIntTest(
         CourtAppearanceRecategorised.EVENT_TYPE,
         CourtAppearanceRequestedByVideoLink.EVENT_TYPE,
       )
-      assertThat(reason).isEqualTo(recategoriseAction.reason)
+      assertThat(reason).isEqualTo(recategorisationReason)
       assertThat(changes).containsExactly(
         AuditedAction.Change(
           CourtAppearance::reason.name,
