@@ -9,10 +9,12 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatusRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReasonByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getStatusByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.ConflictException
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditHistory
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CancelAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
@@ -31,6 +33,7 @@ class CourtAppearanceModifications(
   private val statusRepository: CourtAppearanceStatusRepository,
   private val appearanceRepository: CourtAppearanceRepository,
   private val appearanceHistory: CourtAppearanceHistory,
+  private val rasClient: RemandAndSentencingClient,
 ) {
   fun apply(id: UUID, request: CourtAppearanceActions): AuditHistory {
     SchedulerContext.get().copy(reason = request.reason).set()
@@ -50,13 +53,26 @@ class CourtAppearanceModifications(
       is RecategoriseAppearance -> recategorise(action, reasonRepository::getReasonByCode)
       is RelocateAppearance -> relocate(action)
       is RescheduleAppearance -> reschedule(action).calculateStatus(statusRepository::getStatusByCode)
-      is CancelAppearance -> if (status.code == CourtAppearanceStatus.Code.SCHEDULED) {
-        appearanceRepository.delete(this)
-      } else {
-        throw ConflictException("Cannot delete an appearance that is not scheduled.")
-      }
+      is CancelAppearance -> handleCancel()
 
       else -> throw IllegalArgumentException("${action::class.simpleName} not supported")
+    }
+  }
+
+  private fun CourtAppearance.canBeDeleted(): Boolean {
+    val rasId = externalReference?.takeIf { it.service == ExternalReferenceService.REMAND_AND_SENTENCING }?.uuid
+    return status.code == CourtAppearanceStatus.Code.SCHEDULED &&
+      when (rasId) {
+        null -> true
+        else -> rasClient.deleteAppearance(rasId)
+      }
+  }
+
+  private fun CourtAppearance.handleCancel() {
+    if (canBeDeleted()) {
+      appearanceRepository.delete(this)
+    } else {
+      throw ConflictException("Appearance cannot be deleted.")
     }
   }
 }

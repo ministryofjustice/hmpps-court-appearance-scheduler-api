@@ -17,6 +17,7 @@ data class Appearance(
   val comments: String?,
   val status: AppearanceStatus,
   val origin: AppearanceOrigin?,
+  val cancellable: Boolean,
 )
 
 data class AppearanceStatus(val code: CourtAppearanceStatus.Code, val description: String)

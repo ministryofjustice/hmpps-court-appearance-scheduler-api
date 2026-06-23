@@ -22,10 +22,12 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRequestedInPerson
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRescheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.username
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditHistory
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditedAction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CancelAppearance
@@ -117,6 +119,24 @@ class CourtAppearanceModificationsIntTest(
   }
 
   @Test
+  fun `409 - cannot cancel ras appearance if ras not available`() {
+    val ca = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
+    assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
+    rasMockServer.givenDeleteAppearance(ca.externalReference!!.uuid, HttpStatus.SERVICE_UNAVAILABLE)
+
+    applyAction(ca.id, CancelAppearance()).errorResponse(HttpStatus.CONFLICT)
+  }
+
+  @Test
+  fun `409 - cannot cancel ras appearance if ras returns 409`() {
+    val ca = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
+    assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
+    rasMockServer.givenDeleteAppearance(ca.externalReference!!.uuid, HttpStatus.CONFLICT)
+
+    applyAction(ca.id, CancelAppearance()).errorResponse(HttpStatus.CONFLICT)
+  }
+
+  @Test
   fun `200 - cancel scheduled appearance`() {
     val ca = givenCourtAppearance(courtAppearance())
     assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
@@ -144,6 +164,39 @@ class CourtAppearanceModificationsIntTest(
     verifyEventPublications(
       ca,
       setOf(CourtAppearanceCancelled(ca.person.identifier, ca.id, null).publication(ca.id)),
+    )
+  }
+
+  @Test
+  fun `200 - cancel ras appearance with success response from ras`() {
+    val ca = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
+    assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
+    rasMockServer.givenDeleteAppearance(ca.externalReference!!.uuid, HttpStatus.NO_CONTENT)
+
+    val action = CancelAppearance()
+    val reason = word(20)
+    val username = username()
+
+    val res = applyAction(ca.id, action, reason, username).successResponse<AuditHistory>()
+    with(res.content.single()) {
+      assertThat(this.reason).isEqualTo(reason)
+      assertThat(domainEvents).containsExactly("person.court-appearance.cancelled")
+      assertThat(changes).isEmpty()
+    }
+
+    val saved = findCourtAppearance(ca.id)
+    assertThat(saved).isNull()
+
+    verifyAudit(
+      ca,
+      RevisionType.DEL,
+      setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
+      SchedulerContext.get().copy(username = username, reason = reason),
+    )
+
+    verifyEventPublications(
+      ca,
+      setOf(CourtAppearanceCancelled(ca.person.identifier, ca.id, ca.externalReference).publication(ca.id)),
     )
   }
 

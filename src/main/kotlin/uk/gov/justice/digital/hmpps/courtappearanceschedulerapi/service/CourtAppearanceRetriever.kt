@@ -4,9 +4,12 @@ import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.courtregister.CourtRegisterClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonregister.PrisonRegisterClient
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Appearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Court
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Person
@@ -21,6 +24,7 @@ class CourtAppearanceRetriever(
   private val appearanceRepository: CourtAppearanceRepository,
   private val prisonRegister: PrisonRegisterClient,
   private val courtRegister: CourtRegisterClient,
+  private val rasClient: RemandAndSentencingClient,
 ) {
   fun byId(id: UUID): Appearance {
     val appearance = appearanceRepository.getAppearance(id)
@@ -32,7 +36,20 @@ class CourtAppearanceRetriever(
   }
 
   private fun CourtAppearance.toModel(prison: Prison, court: Court) = Appearance(
-    id, person(), prison, court, reason.asReason(), external, start, end, comments, status.asStatus(), externalReference?.asAppearanceOrigin(),
+    id,
+    person(),
+    prison,
+    court,
+    reason.asReason(),
+    external,
+    start,
+    end,
+    comments,
+    status.asStatus(),
+    externalReference?.asAppearanceOrigin(),
+    status.code == CourtAppearanceStatus.Code.SCHEDULED &&
+      externalReference?.takeIf { it.service == ExternalReferenceService.REMAND_AND_SENTENCING }
+        ?.let { rasClient.canDeleteAppearance(it.uuid) && status.code == CourtAppearanceStatus.Code.SCHEDULED } ?: true,
   )
 
   private fun CourtAppearance.person(): Person = with(person) {
