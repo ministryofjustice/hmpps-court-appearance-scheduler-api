@@ -31,25 +31,23 @@ class RemandAndSentencingClient(
   fun findCourtAppearanceSchedule(uuid: UUID): CourtAppearanceSchedule? = findCourtAppearanceSchedules(setOf(uuid)).courtAppearances.find { it.id == uuid }
 
   fun canDeleteAppearance(uuid: UUID): Boolean = try {
-    serviceConfig.enableRasClient &&
-      webClient.get()
-        .uri("/court-appearance-schedule/{uuid}/delete-status", uuid)
-        .retrieve()
-        .bodyToMono<AppearanceDeletionStatusResponse>()
-        .retryOnTransientException()
-        .block()!!.status == AppearanceDeletionStatus.SUPPORTED
+    webClient.get()
+      .uri("/court-appearance-schedule/{uuid}/delete-status", uuid)
+      .retrieve()
+      .bodyToMono<AppearanceDeletionStatusResponse>()
+      .retryOnTransientException()
+      .block()!!.status == AppearanceDeletionStatus.SUPPORTED
   } catch (_: Exception) {
     false
   }
 
-  fun deleteAppearance(uuid: UUID): Boolean = serviceConfig.enableRasClient &&
-    webClient.delete().uri("/court-appearance/{uuid}", uuid)
-      .exchangeToMono {
-        when {
-          it.statusCode().is2xxSuccessful || it.statusCode() == HttpStatus.NOT_FOUND -> Mono.just(true)
-          else -> Mono.just(false)
-        }
+  fun deleteAppearance(uuid: UUID): Boolean = webClient.delete().uri("/court-appearance/{uuid}", uuid)
+    .exchangeToMono {
+      when {
+        it.statusCode().is2xxSuccessful || it.statusCode() == HttpStatus.NOT_FOUND -> Mono.just(true)
+        else -> Mono.just(false)
       }
-      .retryOnTransientException()
-      .block()!!
+    }
+    .retryOnTransientException()
+    .block()!!
 }
