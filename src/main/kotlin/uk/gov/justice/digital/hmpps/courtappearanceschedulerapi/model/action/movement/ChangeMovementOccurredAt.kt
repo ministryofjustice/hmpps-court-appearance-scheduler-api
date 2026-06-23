@@ -8,7 +8,6 @@ import java.time.temporal.ChronoUnit.SECONDS
 
 data class ChangeMovementOccurredAt(
   val occurredAt: LocalDateTime,
-  override val reason: String? = null,
 ) : AppearanceMovementAction {
   override fun domainEvent(mov: CourtAppearanceMovement): DomainEvent<*> = AppearanceMovementOccurredAtChanged(mov.person.identifier, mov.id)
 

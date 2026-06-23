@@ -1,6 +1,7 @@
 import com.google.cloud.tools.jib.gradle.BuildImageTask
 import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_25
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "10.5.0"
@@ -48,7 +49,7 @@ kotlin {
 }
 
 tasks {
-  withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+  withType<KotlinCompile> {
     compilerOptions {
       jvmTarget = JVM_25
     }

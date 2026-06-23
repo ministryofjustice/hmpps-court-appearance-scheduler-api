@@ -6,7 +6,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEve
 
 data class ChangeAppearancePrison(
   val prisonCode: String,
-  override val reason: String? = null,
 ) : CourtAppearanceAction {
   override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceResponsiblePrisonChanged(ca.person.identifier, ca.id, ca.externalReference)
 }

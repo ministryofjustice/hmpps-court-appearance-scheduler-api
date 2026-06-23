@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain
 
 enum class ExternalReferenceService(val code: String, val description: String) {
   REMAND_AND_SENTENCING("remand-and-sentencing", "Remand and Sentencing"),
@@ -21,7 +21,7 @@ enum class ExternalReferenceEntity(val code: String, val services: Set<ExternalR
 
   companion object {
     @JvmStatic
-    fun fromString(value: String): ExternalReferenceEntity = ExternalReferenceEntity.entries.firstOrNull { it.code.equals(value, ignoreCase = true) }
+    fun fromString(value: String): ExternalReferenceEntity = entries.firstOrNull { it.code.equals(value, ignoreCase = true) }
       ?: throw IllegalArgumentException("External reference entity not recognised")
   }
 }

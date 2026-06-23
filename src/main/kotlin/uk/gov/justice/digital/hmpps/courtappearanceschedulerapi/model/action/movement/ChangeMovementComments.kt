@@ -7,7 +7,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.Com
 
 data class ChangeMovementComments(
   override val comments: String?,
-  override val reason: String? = null,
 ) : AppearanceMovementAction,
   CommentsAction {
   override fun domainEvent(mov: CourtAppearanceMovement): DomainEvent<*> = AppearanceMovementCommentsChanged(mov.person.identifier, mov.id)

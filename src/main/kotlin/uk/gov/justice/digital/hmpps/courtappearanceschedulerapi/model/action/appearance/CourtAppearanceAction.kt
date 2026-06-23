@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import jakarta.validation.Valid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.Action
@@ -9,3 +10,5 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.Act
 sealed interface CourtAppearanceAction : Action {
   fun domainEvent(ca: CourtAppearance): DomainEvent<*>? = null
 }
+
+data class CourtAppearanceActions(@Valid val actions: List<CourtAppearanceAction>, val reason: String?)

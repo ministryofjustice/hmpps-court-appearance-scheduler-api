@@ -18,7 +18,6 @@ import kotlin.reflect.KMutableProperty0
 data class RescheduleAppearance(
   override val start: LocalDateTime?,
   override val end: LocalDateTime?,
-  override val reason: String? = null,
 ) : CourtAppearanceAction,
   StartAndEnd<LocalDateTime> {
   override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceRescheduled(ca.person.identifier, ca.id, ca.externalReference)

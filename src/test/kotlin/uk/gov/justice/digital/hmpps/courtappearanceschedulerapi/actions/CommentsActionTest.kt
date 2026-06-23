@@ -12,7 +12,6 @@ class CommentsActionTest {
   fun `correctly identifies comments have changed`(originalComment: String?, newComment: String?, hasChanged: Boolean) {
     val action = object : CommentsAction {
       override val comments: String? = newComment
-      override val reason: String? = null
     }
     assertThat(action changes originalComment).isEqualTo(hasChanged)
   }

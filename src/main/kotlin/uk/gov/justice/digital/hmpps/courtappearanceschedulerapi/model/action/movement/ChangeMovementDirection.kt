@@ -6,7 +6,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEve
 
 data class ChangeMovementDirection(
   val direction: CourtAppearanceMovement.Direction,
-  override val reason: String? = null,
 ) : AppearanceMovementAction {
   override fun domainEvent(mov: CourtAppearanceMovement): DomainEvent<*> = AppearanceMovementReversed(mov.person.identifier, mov.id)
 }
