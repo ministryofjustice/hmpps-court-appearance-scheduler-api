@@ -31,6 +31,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditedAct
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CancelAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceActions
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
@@ -49,7 +50,7 @@ class CourtAppearanceModificationsIntTest(
     webTestClient
       .put()
       .uri(URL_TO_TEST, newUuid())
-      .bodyValue(ChangeAppearanceComments("401"))
+      .bodyValue(CourtAppearanceActions(listOf(ChangeAppearanceComments("401")), "some reason"))
       .exchange()
       .expectStatus()
       .isUnauthorized
@@ -58,8 +59,7 @@ class CourtAppearanceModificationsIntTest(
   @ParameterizedTest
   @ValueSource(strings = [Roles.SCHEDULER_RO, Roles.SCHEDULER_RW])
   fun `403 forbidden without correct role`(role: String) {
-    applyAction(newUuid(), ChangeAppearanceComments("403"), role = role)
-      .expectStatus().isForbidden
+    applyAction(newUuid(), ChangeAppearanceComments("403"), role = role).expectStatus().isForbidden
   }
 
   @Test
@@ -120,12 +120,13 @@ class CourtAppearanceModificationsIntTest(
   fun `200 - cancel scheduled appearance`() {
     val ca = givenCourtAppearance(courtAppearance())
     assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
-    val action = CancelAppearance(reason = word(20))
+    val action = CancelAppearance()
+    val reason = word(20)
     val username = username()
 
-    val res = applyAction(ca.id, action, username).successResponse<AuditHistory>()
+    val res = applyAction(ca.id, action, reason, username).successResponse<AuditHistory>()
     with(res.content.single()) {
-      assertThat(reason).isEqualTo(action.reason)
+      assertThat(this.reason).isEqualTo(reason)
       assertThat(domainEvents).containsExactly("person.court-appearance.cancelled")
       assertThat(changes).isEmpty()
     }
@@ -137,7 +138,7 @@ class CourtAppearanceModificationsIntTest(
       ca,
       RevisionType.DEL,
       setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
-      SchedulerContext.get().copy(username = username, reason = action.reason),
+      SchedulerContext.get().copy(username = username, reason = reason),
     )
 
     verifyEventPublications(
@@ -150,11 +151,12 @@ class CourtAppearanceModificationsIntTest(
   fun `200 can change the comments on a court appearance`() {
     val ca = givenCourtAppearance(courtAppearance())
     val username = username()
-    val action = ChangeAppearanceComments(word(20), word(20))
-    val res = applyAction(ca.id, action, username).successResponse<AuditHistory>()
+    val action = ChangeAppearanceComments(word(20))
+    val reason = word(20)
+    val res = applyAction(ca.id, action, reason, username).successResponse<AuditHistory>()
     with(res.content.single()) {
       assertThat(domainEvents).containsExactly(CourtAppearanceCommentsChanged.EVENT_TYPE)
-      assertThat(reason).isEqualTo(action.reason)
+      assertThat(this.reason).isEqualTo(reason)
       assertThat(changes).containsExactly(
         AuditedAction.Change(
           CourtAppearance::comments.name,
@@ -171,7 +173,7 @@ class CourtAppearanceModificationsIntTest(
       saved,
       RevisionType.MOD,
       setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
-      SchedulerContext.get().copy(username = username, reason = action.reason),
+      SchedulerContext.get().copy(username = username, reason = reason),
     )
 
     verifyEventPublications(
@@ -184,11 +186,12 @@ class CourtAppearanceModificationsIntTest(
   fun `200 can reschedule a court appearance with start and end`() {
     val ca = givenCourtAppearance(courtAppearance())
     val username = username()
-    val action = RescheduleAppearance(ca.start.plusDays(1), ca.end!!.plusDays(1), word(10))
-    val res = applyAction(ca.id, action, username).successResponse<AuditHistory>()
+    val action = RescheduleAppearance(ca.start.plusDays(1), ca.end!!.plusDays(1))
+    val reason = word(20)
+    val res = applyAction(ca.id, action, reason, username).successResponse<AuditHistory>()
     with(res.content.single()) {
       assertThat(domainEvents).containsExactly(CourtAppearanceRescheduled.EVENT_TYPE)
-      assertThat(reason).isEqualTo(action.reason)
+      assertThat(this.reason).isEqualTo(reason)
       assertThat(changes.map { it.propertyName }).containsExactly(
         CourtAppearance::start.name,
         CourtAppearance::end.name,
@@ -203,7 +206,7 @@ class CourtAppearanceModificationsIntTest(
       saved,
       RevisionType.MOD,
       setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
-      SchedulerContext.get().copy(username = username, reason = action.reason),
+      SchedulerContext.get().copy(username = username, reason = reason),
     )
 
     verifyEventPublications(
@@ -216,11 +219,12 @@ class CourtAppearanceModificationsIntTest(
   fun `200 can reschedule a court appearance with start and no end`() {
     val ca = givenCourtAppearance(courtAppearance(end = null))
     val username = username()
-    val action = RescheduleAppearance(ca.start.plusDays(1), ca.start.withHour(17).plusDays(1), word(10))
-    val res = applyAction(ca.id, action, username).successResponse<AuditHistory>()
+    val action = RescheduleAppearance(ca.start.plusDays(1), ca.start.withHour(17).plusDays(1))
+    val reason = word(20)
+    val res = applyAction(ca.id, action, reason, username).successResponse<AuditHistory>()
     with(res.content.single()) {
       assertThat(domainEvents).containsExactly(CourtAppearanceRescheduled.EVENT_TYPE)
-      assertThat(reason).isEqualTo(action.reason)
+      assertThat(this.reason).isEqualTo(reason)
       assertThat(changes.map { it.propertyName }).containsExactly(
         CourtAppearance::start.name,
         CourtAppearance::end.name,
@@ -235,7 +239,7 @@ class CourtAppearanceModificationsIntTest(
       saved,
       RevisionType.MOD,
       setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
-      SchedulerContext.get().copy(username = username, reason = action.reason),
+      SchedulerContext.get().copy(username = username, reason = reason),
     )
 
     verifyEventPublications(
@@ -249,14 +253,15 @@ class CourtAppearanceModificationsIntTest(
     val ca = givenCourtAppearance(courtAppearance(reasonCode = "VL"))
     assertThat(ca.external).isFalse
     val username = username()
-    val action = RecategoriseAppearance("CRT", word(10))
-    val res = applyAction(ca.id, action, username).successResponse<AuditHistory>()
+    val action = RecategoriseAppearance("CRT")
+    val reason = word(10)
+    val res = applyAction(ca.id, action, reason, username).successResponse<AuditHistory>()
     with(res.content.single()) {
       assertThat(domainEvents).containsExactlyInAnyOrder(
         CourtAppearanceRecategorised.EVENT_TYPE,
         CourtAppearanceRequestedInPerson.EVENT_TYPE,
       )
-      assertThat(reason).isEqualTo(action.reason)
+      assertThat(this.reason).isEqualTo(reason)
       assertThat(changes).containsExactly(
         AuditedAction.Change(
           CourtAppearance::reason.name,
@@ -274,7 +279,7 @@ class CourtAppearanceModificationsIntTest(
       saved,
       RevisionType.MOD,
       setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
-      SchedulerContext.get().copy(username = username, reason = action.reason),
+      SchedulerContext.get().copy(username = username, reason = reason),
     )
 
     verifyEventPublications(
@@ -290,11 +295,12 @@ class CourtAppearanceModificationsIntTest(
   fun `200 can relocate a court appearance`() {
     val ca = givenCourtAppearance(courtAppearance())
     val username = username()
-    val action = RelocateAppearance(courtCode(), word(10))
-    val res = applyAction(ca.id, action, username).successResponse<AuditHistory>()
+    val action = RelocateAppearance(courtCode())
+    val reason = word(10)
+    val res = applyAction(ca.id, action, reason, username).successResponse<AuditHistory>()
     with(res.content.single()) {
       assertThat(domainEvents).containsExactly(CourtAppearanceRelocated.EVENT_TYPE)
-      assertThat(reason).isEqualTo(action.reason)
+      assertThat(this.reason).isEqualTo(reason)
       assertThat(changes).containsExactly(
         AuditedAction.Change(
           CourtAppearance::courtCode.name,
@@ -311,7 +317,7 @@ class CourtAppearanceModificationsIntTest(
       saved,
       RevisionType.MOD,
       setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
-      SchedulerContext.get().copy(username = username, reason = action.reason),
+      SchedulerContext.get().copy(username = username, reason = reason),
     )
 
     verifyEventPublications(
@@ -323,12 +329,13 @@ class CourtAppearanceModificationsIntTest(
   private fun applyAction(
     id: UUID,
     action: CourtAppearanceAction,
+    reason: String? = word(20),
     username: String = username(),
     role: String? = Roles.SCHEDULER_UI,
   ) = webTestClient
     .put()
     .uri(URL_TO_TEST, id)
-    .bodyValue(action)
+    .bodyValue(CourtAppearanceActions(listOf(action), reason))
     .headers(setAuthorisation(username = username, roles = listOfNotNull(role)))
     .exchange()
 

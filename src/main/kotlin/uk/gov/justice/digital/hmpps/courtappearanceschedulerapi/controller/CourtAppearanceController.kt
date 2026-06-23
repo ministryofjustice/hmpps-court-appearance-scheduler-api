@@ -17,7 +17,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Appearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditHistory
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ReferenceId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ScheduleCourtAppearance
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceActions
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.CourtAppearanceModifications
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.CourtAppearanceRetriever
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.CourtAppearanceScheduler
@@ -46,7 +46,7 @@ class CourtAppearanceController(
 
   @CaseloadIdHeader
   @PutMapping("/{id}")
-  fun applyAction(@PathVariable id: UUID, @Valid @RequestBody request: CourtAppearanceAction): AuditHistory = modify.apply(id, request)
+  fun applyActions(@PathVariable id: UUID, @Valid @RequestBody request: CourtAppearanceActions): AuditHistory = modify.apply(id, request)
 
   @GetMapping("/{id}/history")
   fun getAppearanceHistory(@PathVariable id: UUID): AuditHistory = history.changes(id)
