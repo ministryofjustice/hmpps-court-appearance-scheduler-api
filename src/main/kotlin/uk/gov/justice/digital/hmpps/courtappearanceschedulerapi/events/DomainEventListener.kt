@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.Schedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonUpdatedHandler
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PrisonerMergedHandler
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PrisonerReceivedHandler
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.ras.CourtAppearanceDeletedHandler
 
 @Component
 class DomainEventListener(
@@ -16,6 +17,7 @@ class DomainEventListener(
   private val person: PersonUpdatedHandler,
   private val merged: PrisonerMergedHandler,
   private val received: PrisonerReceivedHandler,
+  private val cadHandler: CourtAppearanceDeletedHandler,
 ) {
 
   @SqsListener("hmppsdomaineventsqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -25,6 +27,7 @@ class DomainEventListener(
         PrisonerUpdated.EVENT_TYPE -> person.handle(jsonMapper.readValue(notification.message))
         PrisonerMerged.EVENT_TYPE -> merged.handle(jsonMapper.readValue(notification.message))
         PrisonerReceived.EVENT_TYPE -> received.handle(jsonMapper.readValue(notification.message))
+        RasAppearanceDeleted.EVENT_TYPE -> cadHandler.handle(jsonMapper.readValue(notification.message))
       }
     } catch (ex: Exception) {
       Sentry.captureException(ex)
