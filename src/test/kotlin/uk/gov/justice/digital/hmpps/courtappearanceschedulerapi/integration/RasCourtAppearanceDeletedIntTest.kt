@@ -5,6 +5,7 @@ import org.hibernate.envers.RevisionType
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCancelled
@@ -55,6 +56,19 @@ class RasCourtAppearanceDeletedIntTest(
         ).publication(toDelete.id),
       ),
     )
+  }
+
+  @Test
+  fun `does not delete a court appearance with movements`() {
+    val noDelete = givenCourtAppearance(
+      courtAppearance(
+        externalReference = externalReference(),
+        movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
+      ),
+    )
+    val event = event(noDelete.externalReference!!.uuid)
+    cadHandler.handle(event)
+    assertThat(findCourtAppearance(noDelete.id)).isNotNull
   }
 }
 
