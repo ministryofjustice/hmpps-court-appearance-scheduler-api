@@ -49,7 +49,7 @@ class CourtAppearanceRetriever(
     externalReference?.asAppearanceOrigin(),
     status.code == CourtAppearanceStatus.Code.SCHEDULED &&
       externalReference?.takeIf { it.service == ExternalReferenceService.REMAND_AND_SENTENCING }
-        ?.let { rasClient.canDeleteAppearance(it.uuid) && status.code == CourtAppearanceStatus.Code.SCHEDULED } ?: true,
+        ?.let { rasClient.canDeleteAppearance(it.uuid) } ?: true,
   )
 
   private fun CourtAppearance.person(): Person = with(person) {
