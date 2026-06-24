@@ -1,14 +1,20 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync
 
 import org.assertj.core.api.Assertions.assertThat
+import org.hibernate.envers.RevisionType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext.Companion.SYSTEM_USERNAME
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
@@ -39,6 +45,33 @@ class DeleteCourtAppearanceIntTest(
   fun `409 conflict when appearance has movements`() {
     val appearance = givenCourtAppearance(courtAppearance(movements = listOf(movement(CourtAppearanceMovement.Direction.OUT))))
     deleteAppearance(appearance.id).errorResponse(HttpStatus.CONFLICT)
+  }
+
+  @Test
+  fun `409 conflict - RaS appearance with movements unlinked from RaS`() {
+    val appearance = givenCourtAppearance(
+      courtAppearance(
+        externalReference = externalReference(),
+        movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
+      ),
+    )
+    deleteAppearance(appearance.id).errorResponse(HttpStatus.CONFLICT)
+
+    val updated = requireNotNull(findCourtAppearance(appearance.id))
+    assertThat(updated.externalReference).isNull()
+
+    verifyAudit(
+      updated,
+      RevisionType.MOD,
+      setOf(CourtAppearance::class.simpleName!!),
+      SchedulerContext.get()
+        .copy(username = SYSTEM_USERNAME, caseloadId = null, source = DataSource.NOMIS),
+    )
+
+    verifyEventPublications(
+      updated,
+      setOf(),
+    )
   }
 
   @Test

@@ -59,7 +59,7 @@ class RasCourtAppearanceDeletedIntTest(
   }
 
   @Test
-  fun `does not delete a court appearance with movements`() {
+  fun `does not delete a court appearance with movements - ras reference removed`() {
     val noDelete = givenCourtAppearance(
       courtAppearance(
         externalReference = externalReference(),
@@ -68,7 +68,8 @@ class RasCourtAppearanceDeletedIntTest(
     )
     val event = event(noDelete.externalReference!!.uuid)
     cadHandler.handle(event)
-    assertThat(findCourtAppearance(noDelete.id)).isNotNull
+    val updated = requireNotNull(findCourtAppearance(noDelete.id))
+    assertThat(updated.externalReference).isNull()
   }
 }
 
