@@ -20,7 +20,7 @@ class DomainEventListener(
   private val cadHandler: CourtAppearanceDeletedHandler,
 ) {
 
-  @SqsListener("hmppsdomaineventsqueue", factory = "hmppsQueueContainerFactoryProxy")
+  @SqsListener("hmppsdomaineventsqueue", factory = "hmppsQueueContainerFactoryProxy", maxConcurrentMessages = "16", maxMessagesPerPoll = "8")
   fun handleDomainEvent(notification: Notification) {
     try {
       when (notification.eventType) {
