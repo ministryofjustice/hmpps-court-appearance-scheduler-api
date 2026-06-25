@@ -38,7 +38,7 @@ fun CourtEvent.asEntity(
   externalReferenceUrn,
   eventId,
   dpsId ?: newUuid(),
-).syncStatus(status, shouldBeCompleted(), currentTerm, rasScheduleInfo)
+).syncStatus(status, currentTerm, rasScheduleInfo)
 
 fun CourtAppearance.updateFrom(
   personSummary: PersonSummary,
@@ -54,17 +54,16 @@ fun CourtAppearance.updateFrom(
   recategorise(RecategoriseAppearance(request.type), reason)
   reschedule(RescheduleAppearance(request.start, null))
   applyComments(ChangeAppearanceComments(request.commentText))
-  syncStatus(status, request.shouldBeCompleted(), request.currentTerm, rasScheduleInfo)
+  syncStatus(status, request.currentTerm, rasScheduleInfo)
 }
 
 fun CourtAppearance.syncStatus(
   statusProvider: StatusProvider,
-  complete: Boolean,
   currentTerm: Boolean,
   rasScheduleInfo: CourtAppearanceSchedule?,
 ) = apply {
   val unschedule = rasScheduleInfo?.isDuplicate == true || (!currentTerm && start.isAfter(LocalDateTime.now()))
-  calculateStatus(statusProvider, complete, unschedule)
+  calculateStatus(statusProvider, unschedule)
 }
 
 fun CourtEventMovement.asEntity(
