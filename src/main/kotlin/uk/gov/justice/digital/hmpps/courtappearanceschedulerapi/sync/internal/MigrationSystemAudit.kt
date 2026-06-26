@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
+import jakarta.persistence.PostLoad
 import jakarta.persistence.Table
 import jakarta.persistence.Transient
 import org.hibernate.annotations.SQLInsert
@@ -24,9 +25,9 @@ class MigrationSystemAudit(
   @Column("id")
   val uuid: UUID,
   @Column(name = "created_at", nullable = false)
-  val createdAt: LocalDateTime,
+  var createdAt: LocalDateTime,
   @Column(name = "created_by", nullable = false)
-  val createdBy: String,
+  var createdBy: String,
   @Column(name = "modified_at")
   var modifiedAt: LocalDateTime?,
   @Column(name = "modified_by")
@@ -37,6 +38,11 @@ class MigrationSystemAudit(
   @Transient
   var new: Boolean = true
   override fun isNew() = new
+
+  @PostLoad
+  fun onLoad() {
+    new = false
+  }
 }
 
 interface MigrationSystemAuditRepository : CrudRepository<MigrationSystemAudit, UUID>
