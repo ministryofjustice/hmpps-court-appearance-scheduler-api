@@ -19,16 +19,16 @@ generic-service:
     # using s3 bucket backup must be after 04:30
     schedule: "30 5 * * *"
     namespace_secrets:
-      dps-rds-instance-output:
+      hmpps-court-appearance-scheduler-postgres:
+        DB_HOST: "database_server"
         DB_NAME: "database_name"
         DB_USER: "database_username"
         DB_PASS: "database_password"
-        DB_HOST: "rds_instance_address"
-      dps-rds-instance-output-preprod:
+      refresh-preprod-postgres:
+        DB_HOST_PREPROD: "database_server"
         DB_NAME_PREPROD: "database_name"
         DB_USER_PREPROD: "database_username"
         DB_PASS_PREPROD: "database_password"
-        DB_HOST_PREPROD: "rds_instance_address"
       s3-db-restore:
         BUCKET_NAME: "bucket_name"
 
