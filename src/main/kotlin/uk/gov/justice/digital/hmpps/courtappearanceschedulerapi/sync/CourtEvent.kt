@@ -31,9 +31,6 @@ data class CourtEvent(
   @JsonIgnore
   val end: LocalDateTime = LocalDateTime.of(start.toLocalDate(), DEFAULT_END_TIME)
 
-  @JsonIgnore
-  fun shouldBeCompleted() = status == "COMP" && externalReferenceUrn != null
-
   companion object {
     private val DEFAULT_END_TIME = LocalTime.of(17, 0)
   }
