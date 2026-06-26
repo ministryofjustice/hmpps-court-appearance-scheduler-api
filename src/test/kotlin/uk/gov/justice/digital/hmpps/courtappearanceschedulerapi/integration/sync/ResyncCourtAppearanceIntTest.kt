@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.hibernate.envers.RevisionType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -55,6 +56,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ResyncCourt
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ResyncCourtEventMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ResyncCourtEvents
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ResyncResponse
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal.MigrationSystemAudit
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal.MigrationSystemAuditRepository
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -373,31 +375,40 @@ class ResyncCourtAppearanceIntTest(
   fun `200 ok - can merge, updating records`() {
     val prisonCode = prisonCode()
     val person = givenPersonSummary(personSummary(prisonCode = prisonCode))
+    val externalReference = externalReference()
     val schedule = givenCourtAppearance(
       courtAppearance(
         personIdentifier = person.identifier,
         prisonCode = prisonCode,
+        externalReference = externalReference,
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
       ),
     )
     val scheduled = schedule.movements.single()
     val unscheduled = givenUnscheduledMovement(unscheduledMovement(person.identifier, prisonCode))
 
-    val externalReference = externalReference()
     val request = resyncRequest(
       courtEvents = listOf(
         resyncCourtEvent(
           courtEvent = courtEvent(dpsId = schedule.id, externalReference = externalReference),
           movements = listOf(resyncCourtEventMovement(movement = courtEventMovement(dpsId = scheduled.id))),
+          modified = AtAndBy(LocalDateTime.now().minusDays(1).truncatedTo(ChronoUnit.SECONDS), username()),
         ),
       ),
       unscheduledMovements = listOf(resyncCourtEventMovement(movement = courtEventMovement(dpsId = unscheduled.id))),
     )
+    val courtEvent = request.courtEvents.first()
+    val originalMsa = MigrationSystemAudit(schedule.id, courtEvent.created.at, courtEvent.created.by, null, null)
+    msaRepository.save(originalMsa)
     rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(person.identifier) })
+
     val res = resync(person.identifier, request).successResponse<ResyncResponse>()
     assertThat(res.courtEvents.first().dpsId).isEqualTo(schedule.id)
     assertThat(res.courtEvents.first().movements.first().dpsId).isEqualTo(scheduled.id)
     assertThat(res.unscheduledMovements.first().dpsId).isEqualTo(unscheduled.id)
+    val updatedMsa = requireNotNull(msaRepository.findByIdOrNull(schedule.id))
+    assertThat(updatedMsa.modifiedBy).isEqualTo(courtEvent.modified!!.by)
+    assertThat(updatedMsa.modifiedAt).isCloseTo(courtEvent.modified.at, within(1, ChronoUnit.SECONDS))
 
     verifyAudit(
       scheduled,

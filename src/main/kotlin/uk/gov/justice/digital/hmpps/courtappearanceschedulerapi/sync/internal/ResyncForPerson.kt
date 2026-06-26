@@ -40,7 +40,8 @@ class ResyncForPerson(
 ) {
   fun all(personIdentifier: String, request: ResyncCourtEvents): ResyncResponse {
     SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS, migratingData = true).set()
-    val rasScheduleInfo = rasClient.findCourtAppearanceSchedules(request.rasIds()).courtAppearances.associateBy { it.id }
+    val rasScheduleInfo =
+      rasClient.findCourtAppearanceSchedules(request.rasIds()).courtAppearances.associateBy { it.id }
     val scheduleInfoProvider = { uuid: UUID -> rasScheduleInfo[uuid] }
     val person = personSummaryService.getWithSave(personIdentifier)
     val reasonsMap = reasonRepository.findAll().associateBy { it.code }
@@ -54,18 +55,29 @@ class ResyncForPerson(
     val movements = with(request.movementIds()) {
       findUnscheduledMovements(personIdentifier, first, second)
     }
+    val migrationAudits = msa.findAllById(appearances.map { it.id } + movements.map { it.id })
+
     val appearanceProvider = { id: UUID?, legacyId: Long ->
       appearances.firstOrNull { it.id == id || it.legacyId == legacyId }
     }
     val movementProvider = { id: UUID?, legacyId: String ->
       movements.firstOrNull { it.id == id || it.legacyId == legacyId }
     }
+    val migrationAuditProvider = MigrationAuditProvider(migrationAudits)
 
     val scheduled = request.courtEvents.map {
-      it.resync(person, appearanceProvider, movementProvider, reason, status, scheduleInfoProvider)
+      it.resync(
+        person,
+        appearanceProvider,
+        movementProvider,
+        reason,
+        status,
+        scheduleInfoProvider,
+        migrationAuditProvider,
+      )
     }
     val unscheduled = request.unscheduledMovements.map {
-      it.resync(person, null, movementProvider, reason, status)
+      it.resync(person, null, movementProvider, reason, status, migrationAuditProvider)
     }
 
     val (sch, uns) = removeNotInResync(scheduled, unscheduled, appearances, movements)
@@ -102,15 +114,16 @@ class ResyncForPerson(
     reasonProvider: ReasonProvider,
     statusProvider: StatusProvider,
     scheduleInfoProvider: (UUID) -> CourtAppearanceSchedule?,
+    migrationAuditProvider: MigrationAuditProvider,
   ): CourtEventMapping {
     val rasScheduleInfo = courtEvent.externalReferenceUrn?.uuid?.let { scheduleInfoProvider(it) }
     val appearance = appearanceProvider(courtEvent.dpsId, requireNotNull(courtEvent.eventId))
       ?.updateFrom(person, courtEvent, reasonProvider, statusProvider, rasScheduleInfo)
       ?: appearanceRepository.save(courtEvent.asEntity(person, reasonProvider, statusProvider, rasScheduleInfo))
     val scheduledMovements = movements.map {
-      it.resync(person, appearance, movementProvider, reasonProvider, statusProvider)
+      it.resync(person, appearance, movementProvider, reasonProvider, statusProvider, migrationAuditProvider)
     }
-    mergeMigrationAudit(appearance.id, created, modified)
+    mergeMigrationAudit(appearance.id, created, modified, migrationAuditProvider)
     return CourtEventMapping(appearance.id, courtEvent.eventId, scheduledMovements)
   }
 
@@ -120,11 +133,12 @@ class ResyncForPerson(
     movementProvider: (UUID?, String) -> CourtAppearanceMovement?,
     reasonProvider: ReasonProvider,
     statusProvider: StatusProvider,
+    migrationAuditProvider: MigrationAuditProvider,
   ): CourtMovementMapping {
     val move = movementProvider(movement.dpsId, requireNotNull(movement.legacyId))
       ?.updateFrom(person, appearance, movement, reasonProvider, statusProvider)
       ?: movementRepository.save(movement.asEntity(person, appearance, reasonProvider, statusProvider))
-    mergeMigrationAudit(move.id, created, modified)
+    mergeMigrationAudit(move.id, created, modified, migrationAuditProvider)
     return CourtMovementMapping(move.id, requireNotNull(movement.bookingId), requireNotNull(movement.sequenceNumber))
   }
 
@@ -143,9 +157,28 @@ class ResyncForPerson(
     return appToKeep to movToKeep
   }
 
-  private fun mergeMigrationAudit(id: UUID, created: AtAndBy, modified: AtAndBy?) {
-    msa.save(
-      MigrationSystemAudit(id, created.at, created.by, modified?.at, modified?.by),
-    )
+  private fun mergeMigrationAudit(id: UUID, created: AtAndBy, modified: AtAndBy?, maProvider: MigrationAuditProvider) {
+    maProvider[id]?.also {
+      it.createdBy = created.by
+      it.createdAt = created.at
+      it.modifiedBy = modified?.by
+      it.modifiedAt = modified?.at
+    } ?: run {
+      maProvider.put(
+        msa.save(
+          MigrationSystemAudit(id, created.at, created.by, modified?.at, modified?.by),
+        ),
+      )
+    }
+  }
+}
+
+private class MigrationAuditProvider(audits: Iterable<MigrationSystemAudit>) {
+  private val audits = audits.associateBy { it.id }.toMutableMap()
+
+  operator fun get(id: UUID): MigrationSystemAudit? = audits[id]
+
+  fun put(msa: MigrationSystemAudit) {
+    audits[msa.id] = msa
   }
 }
