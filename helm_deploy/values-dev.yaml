@@ -10,6 +10,12 @@ generic-service:
     SPRING_PROFILES_ACTIVE: dev
     SENTRY_ENVIRONMENT: dev
 
+  allowlist:
+    kmpg: 195.68.59.74
+    groups:
+      - digital_staff_and_mojo
+      - moj_cloud_platform
+
 generic-prometheus-alerts:
   businessHoursOnly: true
   alertSeverity: move-and-improve-alerts-non-prod
