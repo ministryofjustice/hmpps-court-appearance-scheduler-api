@@ -43,6 +43,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.SyncCourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.User
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
 class SyncCourtAppearanceIntTest(
@@ -405,6 +406,33 @@ class SyncCourtAppearanceIntTest(
           DataSource.NOMIS,
         ).publication(saved.id),
       ),
+    )
+  }
+
+  @Test
+  fun `200 ok - court appearance end matches start after 1700`() {
+    val person = givenPersonSummary(personSummary())
+    val prisonCode = requireNotNull(person.prisonCode)
+
+    val request = syncRequest(courtEvent(prisonCode, startTime = LocalTime.of(18, 0)))
+    val response = syncAppearance(person.identifier, request).successResponse<ReferenceId>()
+
+    val saved = requireNotNull(findCourtAppearance(response.id))
+    assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
+    saved verifyAgainst request.courtEvent
+    assertThat(saved.end).isEqualTo(request.courtEvent.start)
+
+    verifyAudit(
+      saved,
+      RevisionType.ADD,
+      setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearance::class.simpleName!!),
+      SchedulerContext.get()
+        .copy(username = request.user.username, caseloadId = request.user.activeCaseloadId, source = DataSource.NOMIS),
+    )
+
+    verifyEventPublications(
+      saved,
+      setOf(CourtAppearanceScheduled(saved.person.identifier, saved.id, null, DataSource.NOMIS).publication(saved.id)),
     )
   }
 

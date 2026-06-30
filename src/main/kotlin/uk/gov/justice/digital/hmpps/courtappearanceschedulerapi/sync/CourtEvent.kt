@@ -29,7 +29,7 @@ data class CourtEvent(
   val currentTerm: Boolean = true,
 ) {
   @JsonIgnore
-  val end: LocalDateTime = LocalDateTime.of(start.toLocalDate(), DEFAULT_END_TIME)
+  val end: LocalDateTime = LocalDateTime.of(start.toLocalDate(), maxOf(DEFAULT_END_TIME, start.toLocalTime()))
 
   companion object {
     private val DEFAULT_END_TIME = LocalTime.of(17, 0)
