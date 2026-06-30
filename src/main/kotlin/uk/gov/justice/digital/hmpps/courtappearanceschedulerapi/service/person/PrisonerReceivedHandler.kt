@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person
 
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PrisonerReceived
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PrisonerReceivedInformation.Companion.BOOKING_SWITCHED_REASON
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PrisonerReceived
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PrisonerReceivedInformation.Companion.BOOKING_SWITCHED_REASON
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.nomis.MigrationClient
 
 @Service

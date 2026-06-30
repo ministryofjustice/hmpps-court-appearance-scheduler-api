@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain
 
 import jakarta.persistence.criteria.JoinType
 import org.springframework.data.jpa.domain.Specification
+import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
@@ -38,6 +39,9 @@ interface CourtAppearanceRepository :
   fun findIdsForLegacyIds(legacyIds: Set<Long>): List<UUID>
 
   fun findByStatusIdAndStartBefore(statusId: UUID, date: LocalDateTime): List<CourtAppearance>
+
+  @EntityGraph(attributePaths = ["person", "reason", "status", "movements.reason"])
+  fun findByPersonIdentifierAndExternalReferenceIsNotNull(personIdentifier: String): List<CourtAppearance>
 }
 
 fun CourtAppearanceRepository.getAppearance(id: UUID) = findByIdOrNull(id) ?: throw NotFoundException("Court appearance not found")

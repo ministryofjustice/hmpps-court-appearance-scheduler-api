@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wir
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import org.junit.jupiter.api.extension.AfterAllCallback
@@ -15,6 +16,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.Data
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonersearch.Prisoner
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonersearch.PrisonerNumbers
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonersearch.Prisoners
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.WiremockConfig.mockServerConfig
 
 class PrisonerSearchServer : WireMockServer(mockServerConfig(9000)) {
@@ -33,6 +35,21 @@ class PrisonerSearchServer : WireMockServer(mockServerConfig(9000)) {
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withBody(jsonMapper().writeValueAsString(prisoners))
+            .withStatus(200),
+        ),
+    )
+    return prisoners
+  }
+
+  fun givenPrisonersAt(prisonCode: String, numberOfPrisoners: Int): List<Prisoner> {
+    val prisoners = (1..numberOfPrisoners).map { prisoner(prisonCode) }
+    stubFor(
+      get(urlPathEqualTo("/prisoner-search/prison/$prisonCode"))
+        .withBearerToken()
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withBody(jsonMapper().writeValueAsString(Prisoners(prisoners)))
             .withStatus(200),
         ),
     )

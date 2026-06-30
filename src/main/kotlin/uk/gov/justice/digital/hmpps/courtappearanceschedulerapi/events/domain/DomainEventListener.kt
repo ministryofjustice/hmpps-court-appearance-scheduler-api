@@ -1,11 +1,11 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events
-
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain
 import io.awspring.cloud.sqs.annotation.SqsListener
 import io.sentry.Sentry
 import org.springframework.stereotype.Component
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.Notification
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonUpdatedHandler
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PrisonerMergedHandler
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PrisonerReceivedHandler
@@ -20,7 +20,7 @@ class DomainEventListener(
   private val cadHandler: CourtAppearanceDeletedHandler,
 ) {
 
-  @SqsListener("hmppsdomaineventsqueue", factory = "hmppsQueueContainerFactoryProxy", maxConcurrentMessages = "16", maxMessagesPerPoll = "8")
+  @SqsListener("hmppsdomaineventsqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun handleDomainEvent(notification: Notification) {
     try {
       when (notification.eventType) {

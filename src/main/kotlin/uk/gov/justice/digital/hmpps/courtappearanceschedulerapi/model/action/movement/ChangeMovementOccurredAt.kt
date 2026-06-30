@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement
 
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementOccurredAtChanged
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEvent
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementOccurredAtChanged
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.DomainEvent
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.SECONDS
 

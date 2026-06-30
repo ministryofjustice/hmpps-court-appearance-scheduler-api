@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement
 
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRelocated
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEvent
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementRelocated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.DomainEvent
 
 data class RelocateMovement(
   val courtCode: String,

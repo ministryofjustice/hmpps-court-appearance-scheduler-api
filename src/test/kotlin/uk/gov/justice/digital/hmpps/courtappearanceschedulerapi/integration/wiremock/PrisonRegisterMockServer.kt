@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wir
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
+import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import org.junit.jupiter.api.extension.AfterAllCallback
@@ -18,6 +19,29 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wire
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Prison
 
 class PrisonRegisterMockServer : WireMockServer(mockServerConfig(9005)) {
+  fun givenNamedPrisons(prisons: Set<Prison>): Set<Prison> {
+    stubFor(
+      get(urlPathEqualTo("/prisons/names"))
+        .withBearerToken()
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(HttpStatus.OK.value())
+            .withBody(
+              jsonMapper().writeValueAsString(
+                prisons.map {
+                  mapOf(
+                    "prisonId" to it.code,
+                    "prisonName" to it.name,
+                  )
+                },
+              ),
+            ),
+        ),
+    )
+    return prisons
+  }
+
   fun givenPrison(prison: Prison = prison()): Prison = givenPrisons(setOf(prison)).first()
 
   fun givenPrisons(

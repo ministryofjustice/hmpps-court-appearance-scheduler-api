@@ -4,9 +4,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PersonReference
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PrisonerMerged
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PrisonerMergedInformation
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PersonReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PrisonerMerged
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PrisonerMergedInformation
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations

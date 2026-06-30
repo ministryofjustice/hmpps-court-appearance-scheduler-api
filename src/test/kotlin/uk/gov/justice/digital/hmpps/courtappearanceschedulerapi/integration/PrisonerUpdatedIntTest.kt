@@ -6,9 +6,9 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PersonReference
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PrisonerUpdated
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PrisonerUpdatedInformation
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PersonReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PrisonerUpdated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PrisonerUpdatedInformation
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary

@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceEntity
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceService
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.RasAppearanceDeleted
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceDeleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import java.util.UUID
 

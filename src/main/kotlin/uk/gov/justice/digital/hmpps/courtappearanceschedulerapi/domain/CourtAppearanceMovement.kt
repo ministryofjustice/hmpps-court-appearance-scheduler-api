@@ -22,9 +22,9 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.findByIdOrNull
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementDeleted
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementMigrated
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementRecorded
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementDeleted
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementMigrated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementRecorded
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.AppearanceMovementAction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.movement.ChangeMovementComments
