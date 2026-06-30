@@ -4,8 +4,8 @@ import jakarta.validation.Constraint
 import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceRescheduled
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEvent
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceRescheduled
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.DomainEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.StartAndEnd
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ValidStartAndEnd
 import java.time.LocalDateTime

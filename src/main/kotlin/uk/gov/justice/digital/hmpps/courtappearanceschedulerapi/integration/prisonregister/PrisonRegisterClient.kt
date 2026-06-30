@@ -25,6 +25,15 @@ class PrisonRegisterClient(
   }
 
   fun findPrison(code: String): Mono<Prison> = findPrisons(setOf(code)).map { prs -> prs.firstOrNull { it.code == code } ?: Prison.default(code) }
+
+  fun findAllPrisons(active: Boolean? = true): List<Prison> = webClient.get().uri { ub ->
+    ub.path("/prisons/names")
+    active?.let { ub.queryParam("active", it) }
+    ub.build()
+  }.retrieve()
+    .bodyToMono<List<Prison>>()
+    .retryOnTransientException()
+    .block()!!
 }
 
 data class PrisonsByIdsRequest(val prisonIds: Set<String>)

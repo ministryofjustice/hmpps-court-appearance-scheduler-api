@@ -25,6 +25,20 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import java.util.UUID
 
 class RemandAndSentencingMockServer : WireMockServer(mockServerConfig(9007)) {
+  fun givenReconciliationAppearances(personIdentifier: String, schedules: List<CourtAppearanceSchedule>): List<CourtAppearanceSchedule> {
+    stubFor(
+      get(urlPathEqualTo("/person/$personIdentifier/court-appearance-schedules"))
+        .withBearerToken()
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(HttpStatus.OK.value())
+            .withBody(jsonMapper().writeValueAsString(CourtAppearanceSchedulesResponse(schedules))),
+        ),
+    )
+    return schedules
+  }
+
   fun givenCourtAppearanceSchedule(schedule: CourtAppearanceSchedule): CourtAppearanceSchedule = givenCourtAppearanceSchedules(listOf(schedule)).first()
 
   fun givenCourtAppearanceSchedules(schedules: List<CourtAppearanceSchedule>): List<CourtAppearanceSchedule> {
@@ -83,6 +97,7 @@ fun CourtAppearance.schedule(isDuplicate: Boolean) = CourtAppearanceSchedule(
   CourtAppearanceSchedule.ScheduleReason(reason.code),
   start,
   isDuplicate,
+  comments,
 )
 
 fun CourtEvent.schedule(personIdentifier: String) = externalReferenceUrn?.uuid?.let {
@@ -93,6 +108,7 @@ fun CourtEvent.schedule(personIdentifier: String) = externalReferenceUrn?.uuid?.
     CourtAppearanceSchedule.ScheduleReason(type),
     start,
     !currentTerm,
+    commentText,
   )
 }
 

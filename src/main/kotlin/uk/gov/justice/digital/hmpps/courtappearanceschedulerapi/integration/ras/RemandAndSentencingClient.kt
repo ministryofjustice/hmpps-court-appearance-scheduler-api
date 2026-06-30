@@ -15,6 +15,13 @@ class RemandAndSentencingClient(
   @Qualifier("remandAndSentencingWebClient") private val webClient: WebClient,
   private val serviceConfig: ServiceConfig,
 ) {
+  fun findScheduleAppearancesFor(personIdentifier: String): CourtAppearanceSchedulesResponse = webClient.get()
+    .uri("/person/{personIdentifier}/court-appearance-schedules", personIdentifier)
+    .retrieve()
+    .bodyToMono<CourtAppearanceSchedulesResponse>()
+    .retryOnTransientException()
+    .block()!!
+
   fun findCourtAppearanceSchedules(ids: Set<UUID>): CourtAppearanceSchedulesResponse = if (ids.isEmpty() || !serviceConfig.enableRasClient) {
     CourtAppearanceSchedulesResponse(emptyList())
   } else {

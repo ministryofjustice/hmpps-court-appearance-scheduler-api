@@ -2,8 +2,8 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.mo
 
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.AppearanceMovementAppearanceChanged
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEvent
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementAppearanceChanged
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.DomainEvent
 
 data class ChangeMovementSchedule(
   val appearance: CourtAppearance?,

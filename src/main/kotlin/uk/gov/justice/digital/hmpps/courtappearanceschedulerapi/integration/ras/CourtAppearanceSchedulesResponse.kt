@@ -13,6 +13,7 @@ data class CourtAppearanceSchedule(
   val start: LocalDateTime,
   @JsonProperty("isDuplicate")
   val isDuplicate: Boolean,
+  val comments: String?,
 ) {
   data class ScheduleReason(val code: String)
 }

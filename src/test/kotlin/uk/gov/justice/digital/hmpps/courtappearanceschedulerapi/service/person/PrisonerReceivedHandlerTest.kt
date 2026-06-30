@@ -7,9 +7,9 @@ import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PersonReference
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PrisonerReceived
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PrisonerReceivedInformation
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PersonReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PrisonerReceived
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PrisonerReceivedInformation
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.nomis.MigrationClient

@@ -8,9 +8,9 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPersonIdentifier
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEvent
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PrisonerMerged
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PrisonerMergedInformation
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.DomainEvent
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PrisonerMerged
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PrisonerMergedInformation
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.nomis.MigrationClient
 
 @Service

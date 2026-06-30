@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain
 
 import io.sentry.Sentry
 import org.springframework.context.annotation.Condition

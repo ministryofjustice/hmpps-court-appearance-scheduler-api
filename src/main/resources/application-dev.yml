@@ -22,6 +22,8 @@ service:
   api-base-url: "https://court-appearance-scheduler-api-dev.hmpps.service.justice.gov.uk"
   appearance-expiration:
     cron: "0 0 7 * * *"
+  reconciliation:
+    cron: "0 0 18 * * *"
 
 springdoc:
   api-docs:

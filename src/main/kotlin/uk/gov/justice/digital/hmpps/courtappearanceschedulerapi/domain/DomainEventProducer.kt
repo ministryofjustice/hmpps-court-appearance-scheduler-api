@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain
 
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.DomainEvent
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.DomainEvent
 import java.util.*
 
 interface DomainEventProducer : Identifiable {

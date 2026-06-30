@@ -8,10 +8,10 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.CourtAppearanceCancelled
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.PersonReference
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.RasAppearanceDeleted
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.RasAppearanceInformation
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceCancelled
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PersonReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceDeleted
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceInformation
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
