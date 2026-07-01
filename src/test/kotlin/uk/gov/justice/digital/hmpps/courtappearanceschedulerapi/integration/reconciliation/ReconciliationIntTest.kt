@@ -8,6 +8,8 @@ import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReconciliationHistoryRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.CourtAppearanceReconcileActive
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
@@ -19,9 +21,11 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wire
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchExtension.Companion.prisonerSearch
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.schedule
+import java.time.LocalDate
 
 class ReconciliationIntTest(
   @Autowired cao: CourtAppearanceOperations,
+  @Autowired private val rhr: ReconciliationHistoryRepository,
 ) : IntegrationTest(),
   CourtAppearanceOperations by cao {
   @Test
@@ -33,10 +37,16 @@ class ReconciliationIntTest(
     assertThat(prisoners).hasSize(30)
     prisoners.forEach { rasMockServer.givenReconciliationAppearances(it.prisonerNumber, listOf()) }
 
-    trigger.reconciliation()
+    trigger.activeReconciliation()
+    trigger.activeReconciliation()
 
     prisons.forEach { verify(prisonReconciliation, timeout(1000).times(1)).reconcile(it.code) }
     prisoners.forEach { verify(personReconciliation, timeout(1000).times(1)).reconcile(it.prisonerNumber) }
+
+    val rec = rhr.findAll().single()
+    assertThat(rec.type).isEqualTo(CourtAppearanceReconcileActive.EVENT_TYPE)
+    assertThat(rec.requestedOn).isEqualTo(LocalDate.now())
+    assertThat(rec.version).isEqualTo(0)
   }
 
   @Test
@@ -89,10 +99,9 @@ class ReconciliationIntTest(
       "Property Mismatch",
       mapOf(
         "personIdentifier" to casAppearance.person.identifier,
+        "propertyName" to "courtCode",
         "casId" to "${casAppearance.id}",
         "rasId" to "${rasAppearance.id}",
-        "casPropertyName" to "courtCode",
-        "rasPropertyName" to "courtCode",
       ),
       mapOf(),
     )
@@ -101,10 +110,9 @@ class ReconciliationIntTest(
       "Property Mismatch",
       mapOf(
         "personIdentifier" to casAppearance.person.identifier,
+        "propertyName" to "start",
         "casId" to "${casAppearance.id}",
         "rasId" to "${rasAppearance.id}",
-        "casPropertyName" to "start",
-        "rasPropertyName" to "start",
       ),
       mapOf(),
     )
@@ -113,10 +121,9 @@ class ReconciliationIntTest(
       "Property Mismatch",
       mapOf(
         "personIdentifier" to casAppearance.person.identifier,
+        "propertyName" to "comments",
         "casId" to "${casAppearance.id}",
         "rasId" to "${rasAppearance.id}",
-        "casPropertyName" to "comments",
-        "rasPropertyName" to "comments",
       ),
       mapOf(),
     )

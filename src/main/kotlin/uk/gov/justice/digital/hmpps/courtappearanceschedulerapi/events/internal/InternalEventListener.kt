@@ -7,12 +7,14 @@ import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.Notification
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcileActive
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcilePerson
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcilePrison
 
 @Component
 class InternalEventListener(
   private val jsonMapper: JsonMapper,
+  private val active: ReconcileActive,
   private val prison: ReconcilePrison,
   private val person: ReconcilePerson,
 ) {
@@ -26,6 +28,7 @@ class InternalEventListener(
     val event = jsonMapper.readValue<InternalEvent>(notification.message)
     try {
       when (event) {
+        is CourtAppearanceReconcileActive -> active.reconcile()
         is CourtAppearanceReconcilePrison -> prison.reconcile(event.prisonCode)
         is CourtAppearanceReconcilePerson -> person.reconcile(event.identifier)
       }

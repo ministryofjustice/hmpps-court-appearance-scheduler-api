@@ -9,15 +9,16 @@ import java.time.LocalDateTime
   value = [
     JsonSubTypes.Type(value = CourtAppearanceReconcilePrison::class, name = CourtAppearanceReconcilePrison.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceReconcilePerson::class, name = CourtAppearanceReconcilePerson.EVENT_TYPE),
+    JsonSubTypes.Type(value = CourtAppearanceReconcileActive::class, name = CourtAppearanceReconcileActive.EVENT_TYPE),
   ],
 )
 sealed interface InternalEvent {
   val occurredAt: LocalDateTime
+    get() = LocalDateTime.now()
   val type: String
 }
 
 data class CourtAppearanceReconcilePrison(val prisonCode: String) : InternalEvent {
-  override val occurredAt: LocalDateTime = LocalDateTime.now()
   override val type: String = EVENT_TYPE
 
   companion object {
@@ -26,10 +27,17 @@ data class CourtAppearanceReconcilePrison(val prisonCode: String) : InternalEven
 }
 
 data class CourtAppearanceReconcilePerson(val identifier: String) : InternalEvent {
-  override val occurredAt: LocalDateTime = LocalDateTime.now()
   override val type: String = EVENT_TYPE
 
   companion object {
     const val EVENT_TYPE = "court-appearance.reconcile.person"
+  }
+}
+
+class CourtAppearanceReconcileActive : InternalEvent {
+  override val type: String = EVENT_TYPE
+
+  companion object {
+    const val EVENT_TYPE = "court-appearance.reconcile.active"
   }
 }
