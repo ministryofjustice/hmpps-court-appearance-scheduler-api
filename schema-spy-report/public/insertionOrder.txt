@@ -9,3 +9,4 @@ court_appearance_movement
 hmpps_domain_event
 hmpps_domain_event_audit
 migration_system_audit
+reconciliation_history

@@ -1,3 +1,4 @@
+reconciliation_history
 migration_system_audit
 hmpps_domain_event_audit
 hmpps_domain_event

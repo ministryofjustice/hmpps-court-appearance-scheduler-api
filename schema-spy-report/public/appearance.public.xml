@@ -264,5 +264,19 @@
          </index>
          <index name="idx_person_summary_name" unique="false"/>
       </table>
+      <table catalog="appearance" name="reconciliation_history" remarks="" schema="public" type="TABLE">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="type" nullable="false" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="requested_on" nullable="false" remarks="" size="13" type="date" typeCode="91"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="version" nullable="false" remarks="" size="10" type="int4" typeCode="4"/>
+         <primaryKey column="id" sequenceNumberInPK="1"/>
+         <index name="pk_reconciliation_history" unique="true">
+            <column ascending="true" name="id"/>
+         </index>
+         <index name="uq_reconciliation_history_type_requested" unique="true">
+            <column ascending="true" name="type"/>
+            <column ascending="true" name="requested_on"/>
+         </index>
+      </table>
    </tables>
 </database>
