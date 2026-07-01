@@ -22,3 +22,4 @@ service:
   api-base-url: "https://court-appearance-scheduler-api.hmpps.service.justice.gov.uk"
   appearance-expiration:
     cron: "0 30 2 * * *"
+  enable-ras-client: false

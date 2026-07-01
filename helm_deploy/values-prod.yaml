@@ -36,8 +36,8 @@ generic-service:
 generic-prometheus-alerts:
   alertSeverity: move-and-improve-alerts
   rdsAlertsDatabases:
-    cloud-platform-0bd73f82c47caa68: "Court Appearance Scheduler API"
-  rdsAlertsConnectionThreshold: 160
+    cloud-platform-0bd73f82c47caa68: "Court Appearance Scheduler DB"
+  rdsAlertsConnectionThreshold: 130
   sqsOldestAlertQueueNames:
     - "hmpps-court-appearance-scheduler-prod-domain_events_queue"
   sqsAlertsOldestThreshold: 10

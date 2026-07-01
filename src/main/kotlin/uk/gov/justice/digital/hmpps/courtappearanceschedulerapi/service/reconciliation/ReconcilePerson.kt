@@ -4,10 +4,10 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus.Code.UNSCHEDULED
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
-import kotlin.reflect.KProperty
 
 @Service
 class ReconcilePerson(
@@ -38,26 +38,28 @@ class ReconcilePerson(
   }
 }
 
-private fun compare(ras: CourtAppearanceSchedule?, cas: CourtAppearance?): List<ReconciliationIssue> {
-  val issues = mutableListOf<ReconciliationIssue>()
-
-  if (ras != null && cas != null) {
-    propertyMappings().map { e ->
-      val rasProperty = e.key
-      val casProperty = e.value
-      if (rasProperty.getter.call(ras)?.equals(casProperty.getter.call(cas)) != true ||
-        casProperty.getter.call(cas)?.equals(rasProperty.getter.call(ras)) != true
-      ) {
-        issues += PropertyMismatch(cas.person.identifier, cas.id, ras.id, casProperty.name, rasProperty.name)
-      }
+private fun compare(ras: CourtAppearanceSchedule?, cas: CourtAppearance?): List<ReconciliationIssue> = if (ras == null || cas == null) {
+  emptyList()
+} else {
+  propertyReconcilers().mapNotNull {
+    it.reconcile(ras, cas)?.let { propertyName ->
+      PropertyMismatch(cas.person.identifier, cas.id, ras.id, propertyName)
     }
   }
-
-  return issues
 }
 
-fun propertyMappings(): Map<KProperty<*>, KProperty<*>> = mapOf(
-  CourtAppearanceSchedule::courtCode to CourtAppearance::courtCode,
-  CourtAppearanceSchedule::start to CourtAppearance::start,
-  CourtAppearanceSchedule::comments to CourtAppearance::comments,
+fun propertyReconcilers(): List<PropertyReconciler> = listOf(
+  PropertyReconciler("courtCode", { it.courtCode }, { it.courtCode }),
+  PropertyReconciler("start", { it.start }, { it.start }),
+  PropertyReconciler("isDuplicate", { it.isDuplicate }, { it.status.code == UNSCHEDULED }),
+  PropertyReconciler("reasonCode", { it.reason.code }, { it.reason.code }),
+  PropertyReconciler("comments", { it.comments }, { it.comments }),
 )
+
+class PropertyReconciler(
+  val propertyName: String,
+  val ras: (CourtAppearanceSchedule) -> Any?,
+  val cas: (CourtAppearance) -> Any?,
+) {
+  fun reconcile(rasSchedule: CourtAppearanceSchedule, casSchedule: CourtAppearance): String? = if (ras(rasSchedule) == cas(casSchedule)) null else propertyName
+}

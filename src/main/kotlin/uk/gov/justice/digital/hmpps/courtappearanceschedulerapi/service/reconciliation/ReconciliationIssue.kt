@@ -28,14 +28,12 @@ data class PropertyMismatch(
   override val personIdentifier: String,
   val casId: UUID,
   val rasId: UUID,
-  val casPropertyName: String,
-  val rasPropertyName: String,
+  val propertyName: String,
 ) : ReconciliationIssue {
   override val name: String = "Property Mismatch"
   override fun telemetryProperties(): Map<String, String> = super.telemetryProperties() + mapOf(
+    "propertyName" to propertyName,
     "casId" to casId.toString(),
     "rasId" to rasId.toString(),
-    "casPropertyName" to casPropertyName,
-    "rasPropertyName" to rasPropertyName,
   )
 }
