@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.delete
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.post
+import com.github.tomakehurst.wiremock.client.WireMock.put
 import com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
@@ -20,6 +21,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedulesRequest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedulesResponse
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.UpdateScheduleRequest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.WiremockConfig.mockServerConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import java.util.UUID
@@ -85,6 +87,19 @@ class RemandAndSentencingMockServer : WireMockServer(mockServerConfig(9007)) {
           aResponse()
             .withHeader("Content-Type", "application/json")
             .withStatus(status.value()),
+        ),
+    )
+  }
+
+  fun givenSuccessfulUpdate(uuid: UUID, request: UpdateScheduleRequest) {
+    stubFor(
+      put(urlPathEqualTo("/court-appearance-schedule/$uuid"))
+        .withBearerToken()
+        .withRequestBody(equalToJson(jsonMapper().writeValueAsString(request)))
+        .willReturn(
+          aResponse()
+            .withHeader("Content-Type", "application/json")
+            .withStatus(204),
         ),
     )
   }
