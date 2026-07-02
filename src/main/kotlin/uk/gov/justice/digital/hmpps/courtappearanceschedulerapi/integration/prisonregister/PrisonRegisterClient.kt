@@ -1,14 +1,14 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonregister
 
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.retryOnTransientException
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Prison
 
-@Service
+@Component
 class PrisonRegisterClient(
   @Qualifier("prisonRegisterApiWebClient") private val webClient: WebClient,
 ) {

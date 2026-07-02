@@ -7,6 +7,8 @@ integration:
     url: "https://manage-users-api.hmpps.service.justice.gov.uk"
   nomis-migration:
     url: "https://prisoner-nomis-migration.hmpps.service.justice.gov.uk"
+  prison-api:
+    url: "https://prison-api.prison.service.justice.gov.uk/api"
   prison-register:
     url: "https://prison-register.hmpps.service.justice.gov.uk"
   prisoner-search:

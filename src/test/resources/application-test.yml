@@ -14,6 +14,8 @@ integration:
     url:  "http://localhost:8095"
   nomis-migration:
     url: "http://localhost:9990"
+  prison-api:
+    url: "http://localhost:9004/api"
   prison-register:
     url: "http://localhost:9005"
   prisoner-search:
