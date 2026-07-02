@@ -71,6 +71,23 @@ class ReconciliationIntTest(
   }
 
   @Test
+  fun `first movement used when movement recorded after court appearance`() {
+    val casAppearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
+    rasMockServer.givenReconciliationAppearances(casAppearance.person.identifier, listOf(casAppearance.schedule(false)))
+    prisonApi.givenMovementsFor(
+      casAppearance.person.identifier,
+      listOf(
+        prisonerMovement(toAgency = casAppearance.prisonCode, dateTime = casAppearance.start.plusHours(1)),
+        prisonerMovement(toAgency = prisonCode(), dateTime = casAppearance.start.plusDays(1)),
+      ),
+    )
+
+    personReconciliation.reconcile(casAppearance.person.identifier)
+
+    verify(telemetryClient, never()).trackEvent(any(), any(), any())
+  }
+
+  @Test
   fun `missing ids are identified`() {
     val casAppearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
     val rasAppearance = rasMockServer.givenReconciliationAppearances(
