@@ -49,7 +49,7 @@ class ReconcilePerson(
     }
   }
 
-  private fun CourtAppearanceSchedule.prisonCodeAtStart(): String = prisonApi.mostRecentAdmissionBefore(personIdentifier, start)?.toAgency ?: "UKN"
+  private fun CourtAppearanceSchedule.prisonCodeAtStart(): String = prisonApi.admissionBefore(personIdentifier, start)?.toAgency ?: "UKN"
 
   private fun propertyReconcilers(): List<PropertyReconciler> = listOf(
     PropertyReconciler("prisonCode", { it.prisonCodeAtStart() }, { it.prisonCode }),
