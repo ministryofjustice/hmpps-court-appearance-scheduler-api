@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
@@ -10,7 +10,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceCo
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.retryOnTransientException
 import java.util.UUID
 
-@Service
+@Component
 class RemandAndSentencingClient(
   @Qualifier("remandAndSentencingWebClient") private val webClient: WebClient,
   private val serviceConfig: ServiceConfig,

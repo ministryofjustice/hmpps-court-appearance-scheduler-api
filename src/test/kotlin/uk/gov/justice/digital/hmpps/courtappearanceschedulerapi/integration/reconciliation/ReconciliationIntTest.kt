@@ -12,11 +12,14 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.Reconcili
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.CourtAppearanceReconcileActive
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonApiMockServer.Companion.prisonerMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonRegisterMockServer.Companion.prison
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerApiExtension.Companion.prisonApi
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerRegisterExtension.Companion.prisonRegister
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchExtension.Companion.prisonerSearch
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
@@ -35,7 +38,7 @@ class ReconciliationIntTest(
       prisonerSearch.givenPrisonersAt(prison.code, (index + 1) * 5)
     }
     assertThat(prisoners).hasSize(30)
-    prisoners.forEach { rasMockServer.givenReconciliationAppearances(it.prisonerNumber, listOf()) }
+    prisoners.forEach { rasMockServer.givenReconciliationAppearances(it.prisonerNumber, emptyList()) }
 
     trigger.activeReconciliation()
     trigger.activeReconciliation()
@@ -53,6 +56,14 @@ class ReconciliationIntTest(
   fun `matching reconciliation results does not send telemetry events`() {
     val casAppearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
     rasMockServer.givenReconciliationAppearances(casAppearance.person.identifier, listOf(casAppearance.schedule(false)))
+    prisonApi.givenMovementsFor(
+      casAppearance.person.identifier,
+      listOf(
+        prisonerMovement(toAgency = prisonCode(), dateTime = casAppearance.start.minusDays(2)),
+        prisonerMovement(toAgency = casAppearance.prisonCode, dateTime = casAppearance.start.minusDays(1)),
+        prisonerMovement(toAgency = prisonCode(), dateTime = casAppearance.start.plusDays(1)),
+      ),
+    )
 
     personReconciliation.reconcile(casAppearance.person.identifier)
 
@@ -92,40 +103,21 @@ class ReconciliationIntTest(
           .copy(courtCode = courtCode(), start = casAppearance.start.plusHours(2), comments = word(30)),
       ),
     ).single()
+    prisonApi.givenMovementsFor(casAppearance.person.identifier, emptyList())
 
     personReconciliation.reconcile(casAppearance.person.identifier)
 
-    verify(telemetryClient).trackEvent(
-      "Property Mismatch",
-      mapOf(
-        "personIdentifier" to casAppearance.person.identifier,
-        "propertyName" to "courtCode",
-        "casId" to "${casAppearance.id}",
-        "rasId" to "${rasAppearance.id}",
-      ),
-      mapOf(),
-    )
-
-    verify(telemetryClient).trackEvent(
-      "Property Mismatch",
-      mapOf(
-        "personIdentifier" to casAppearance.person.identifier,
-        "propertyName" to "start",
-        "casId" to "${casAppearance.id}",
-        "rasId" to "${rasAppearance.id}",
-      ),
-      mapOf(),
-    )
-
-    verify(telemetryClient).trackEvent(
-      "Property Mismatch",
-      mapOf(
-        "personIdentifier" to casAppearance.person.identifier,
-        "propertyName" to "comments",
-        "casId" to "${casAppearance.id}",
-        "rasId" to "${rasAppearance.id}",
-      ),
-      mapOf(),
-    )
+    listOf("prisonCode", "courtCode", "start", "comments").forEach {
+      verify(telemetryClient).trackEvent(
+        "Property Mismatch",
+        mapOf(
+          "personIdentifier" to casAppearance.person.identifier,
+          "propertyName" to it,
+          "casId" to "${casAppearance.id}",
+          "rasId" to "${rasAppearance.id}",
+        ),
+        mapOf(),
+      )
+    }
   }
 }

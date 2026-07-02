@@ -40,6 +40,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wire
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.HmppsAuthApiExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.ManageUsersExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.NomisMigrationExtension
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerApiExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerRegisterExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension
@@ -61,6 +62,7 @@ import java.util.concurrent.TimeUnit
     CourterRegisterExtension::class,
     ManageUsersExtension::class,
     NomisMigrationExtension::class,
+    PrisonerApiExtension::class,
     PrisonerRegisterExtension::class,
     PrisonerSearchExtension::class,
     RemandAndSentencingExtension::class,

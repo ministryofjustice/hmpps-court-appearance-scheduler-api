@@ -34,7 +34,7 @@ interface CourtMovementOperations {
       occurredAt: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
       comments: String? = word(10) + " " + word(10),
       legacyId: String? = null,
-      id: UUID? = newUuid(),
+      id: UUID = newUuid(),
     ): MovementProvider = { person, reason ->
       CourtAppearanceMovement(
         null,
@@ -46,6 +46,7 @@ interface CourtMovementOperations {
         occurredAt,
         comments,
         legacyId,
+        id,
       )
     }
   }

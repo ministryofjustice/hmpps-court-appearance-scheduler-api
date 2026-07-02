@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.CourtAppearanceReconcilePrison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.InternalEventEmitter
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonregister.PrisonRegisterClient
+import java.time.LocalDate
 
 @Service
 class ReconcileActive(
@@ -21,6 +22,7 @@ class ReconcileActive(
 ) {
   fun reconcile() {
     try {
+      if (rhr.findByTypeAndRequestedOn(CourtAppearanceReconcileActive.EVENT_TYPE, LocalDate.now()) != null) return
       transactionTemplate.execute {
         rhr.save(ReconciliationHistory(CourtAppearanceReconcileActive.EVENT_TYPE))
       }
