@@ -10,6 +10,9 @@ import java.time.LocalDateTime
     JsonSubTypes.Type(value = CourtAppearanceReconcilePrison::class, name = CourtAppearanceReconcilePrison.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceReconcilePerson::class, name = CourtAppearanceReconcilePerson.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceReconcileActive::class, name = CourtAppearanceReconcileActive.EVENT_TYPE),
+
+    JsonSubTypes.Type(value = CourtAppearancePushAll::class, name = CourtAppearancePushAll.EVENT_TYPE),
+    JsonSubTypes.Type(value = CourtAppearancePushPerson::class, name = CourtAppearancePushPerson.EVENT_TYPE),
   ],
 )
 sealed interface InternalEvent {
@@ -39,5 +42,21 @@ class CourtAppearanceReconcileActive : InternalEvent {
 
   companion object {
     const val EVENT_TYPE = "court-appearance.reconcile.active"
+  }
+}
+
+class CourtAppearancePushAll : InternalEvent {
+  override val type: String = EVENT_TYPE
+
+  companion object {
+    const val EVENT_TYPE = "court-appearance.push.all"
+  }
+}
+
+data class CourtAppearancePushPerson(val identifier: String) : InternalEvent {
+  override val type: String = EVENT_TYPE
+
+  companion object {
+    const val EVENT_TYPE = "court-appearance.push.person"
   }
 }

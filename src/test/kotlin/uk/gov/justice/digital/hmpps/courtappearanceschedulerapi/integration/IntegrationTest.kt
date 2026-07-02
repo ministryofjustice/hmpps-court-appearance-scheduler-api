@@ -36,6 +36,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.conf
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.container.LocalStackContainer
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.container.LocalStackContainer.setLocalStackProperties
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.container.PostgresContainer
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourterRegisterExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.HmppsAuthApiExtension
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.ManageUsersExtension
@@ -93,6 +94,8 @@ abstract class IntegrationTest {
   protected lateinit var hmppsQueueService: HmppsQueueService
 
   @Autowired protected lateinit var trigger: ReconciliationTrigger
+
+  @MockitoSpyBean protected lateinit var rasClient: RemandAndSentencingClient
 
   @MockitoSpyBean protected lateinit var prisonReconciliation: ReconcilePrison
 

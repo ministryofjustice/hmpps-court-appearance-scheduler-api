@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
@@ -22,13 +23,13 @@ class RemandAndSentencingClient(
     .retryOnTransientException()
     .block()!!
 
-  fun findCourtAppearanceSchedules(ids: Set<UUID>): CourtAppearanceSchedulesResponse = if (ids.isEmpty() || !serviceConfig.enableRasClient) {
+  fun findCourtAppearanceSchedules(uuids: Set<UUID>): CourtAppearanceSchedulesResponse = if (uuids.isEmpty() || !serviceConfig.enableRasClient) {
     CourtAppearanceSchedulesResponse(emptyList())
   } else {
     webClient
       .post()
       .uri("/search/court-appearance-schedules")
-      .bodyValue(CourtAppearanceSchedulesRequest(ids))
+      .bodyValue(CourtAppearanceSchedulesRequest(uuids))
       .retrieve()
       .bodyToMono<CourtAppearanceSchedulesResponse>()
       .retryOnTransientException()
@@ -36,6 +37,13 @@ class RemandAndSentencingClient(
   }
 
   fun findCourtAppearanceSchedule(uuid: UUID): CourtAppearanceSchedule? = findCourtAppearanceSchedules(setOf(uuid)).courtAppearances.find { it.id == uuid }
+
+  fun updateCourtAppearanceSchedule(uuid: UUID, request: UpdateScheduleRequest): Mono<ResponseEntity<Void>> = webClient.put()
+    .uri("/court-appearance-schedule/{uuid}", uuid)
+    .bodyValue(request)
+    .retrieve()
+    .toBodilessEntity()
+    .retryOnTransientException()
 
   fun canDeleteAppearance(uuid: UUID): Boolean = try {
     webClient.get()

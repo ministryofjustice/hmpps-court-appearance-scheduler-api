@@ -7,6 +7,8 @@ import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.Notification
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.PushCourtAppearanceData
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.PushPersonAppearanceData
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcileActive
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcilePerson
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcilePrison
@@ -17,6 +19,8 @@ class InternalEventListener(
   private val active: ReconcileActive,
   private val prison: ReconcilePrison,
   private val person: ReconcilePerson,
+  private val pushAll: PushCourtAppearanceData,
+  private val pushPerson: PushPersonAppearanceData,
 ) {
   @SqsListener(
     "internalevents",
@@ -31,6 +35,9 @@ class InternalEventListener(
         is CourtAppearanceReconcileActive -> active.reconcile()
         is CourtAppearanceReconcilePrison -> prison.reconcile(event.prisonCode)
         is CourtAppearanceReconcilePerson -> person.reconcile(event.identifier)
+
+        is CourtAppearancePushAll -> pushAll.toRemandAndSentencing()
+        is CourtAppearancePushPerson -> pushPerson.toRemandAndSentencing(event.identifier)
       }
     } catch (ex: Exception) {
       Sentry.captureException(ex)
