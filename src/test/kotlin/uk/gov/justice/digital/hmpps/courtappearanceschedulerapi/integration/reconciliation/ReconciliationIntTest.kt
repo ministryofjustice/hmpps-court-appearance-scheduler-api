@@ -17,6 +17,9 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.Data
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonApiMockServer.Companion.prisonerMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonRegisterMockServer.Companion.prison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerApiExtension.Companion.prisonApi
@@ -25,11 +28,14 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wire
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.schedule
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class ReconciliationIntTest(
+  @Autowired pso: PersonSummaryOperations,
   @Autowired cao: CourtAppearanceOperations,
   @Autowired private val rhr: ReconciliationHistoryRepository,
 ) : IntegrationTest(),
+  PersonSummaryOperations by pso,
   CourtAppearanceOperations by cao {
   @Test
   fun `reconciliation is triggered successfully`() {
@@ -136,5 +142,33 @@ class ReconciliationIntTest(
         mapOf(),
       )
     }
+  }
+
+  @Test
+  fun `reasons are negotiated correctly`() {
+    val person = givenPersonSummary(personSummary())
+    val prisonCode = prisonCode()
+    val casAppearances = listOf(
+      givenCourtAppearance(courtAppearance(person.identifier, prisonCode, externalReference = externalReference(), reasonCode = "CA")),
+      givenCourtAppearance(courtAppearance(person.identifier, prisonCode, externalReference = externalReference(), reasonCode = "CRT")),
+      givenCourtAppearance(courtAppearance(person.identifier, prisonCode, externalReference = externalReference(), reasonCode = "VLCR")),
+      givenCourtAppearance(courtAppearance(person.identifier, prisonCode, externalReference = externalReference(), reasonCode = "VL")),
+    )
+    rasMockServer.givenReconciliationAppearances(
+      person.identifier,
+      casAppearances.map {
+        it.schedule(false).copy(reason = CourtAppearanceSchedule.ScheduleReason(if (it.external) "CRT" else "VL"))
+      },
+    )
+    prisonApi.givenMovementsFor(
+      person.identifier,
+      listOf(
+        prisonerMovement(toAgency = prisonCode, dateTime = LocalDateTime.now().minusDays(30)),
+      ),
+    )
+
+    personReconciliation.reconcile(person.identifier)
+
+    verify(telemetryClient, never()).trackEvent(any(), any(), any())
   }
 }

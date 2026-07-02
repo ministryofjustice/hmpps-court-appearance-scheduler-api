@@ -65,7 +65,7 @@ class ReconcilePerson(
     PropertyReconciler("courtCode", { it.courtCode }, { it.courtCode }),
     PropertyReconciler("start", { it.start }, { it.start }),
     PropertyReconciler("isDuplicate", { it.isDuplicate }, { it.status.code == UNSCHEDULED }),
-    PropertyReconciler("reasonCode", { it.reason.code }, { it.reason.code }),
+    PropertyReconciler("reasonCode", { it.reason.code }, { if (it.external) "CRT" else "VL" }),
     PropertyReconciler("comments", { it.comments }, { it.comments }),
   )
 }
