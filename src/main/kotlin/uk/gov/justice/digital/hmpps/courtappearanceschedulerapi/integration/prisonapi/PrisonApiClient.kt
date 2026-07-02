@@ -11,12 +11,6 @@ import java.time.LocalDateTime
 class PrisonApiClient(
   @Qualifier("prisonApiWebClient") private val webClient: WebClient,
 ) {
-  fun admissionBefore(personIdentifier: String, before: LocalDateTime): PrisonerMovement? {
-    val admissions = movementsFor(personIdentifier).filter { it.isAdmission() }.sortedByDescending { it.movementDateTime }
-    val previousAdmission = admissions.firstOrNull { before.isAfter(it.movementDateTime) }
-    return previousAdmission ?: admissions.lastOrNull()
-  }
-
   fun movementsFor(personIdentifier: String): List<PrisonerMovement> = webClient.get()
     .uri { builder ->
       builder.path(MOVEMENTS_URL)
@@ -31,4 +25,10 @@ class PrisonApiClient(
   companion object {
     const val MOVEMENTS_URL = "/movements/offender/{personIdentifier}"
   }
+}
+
+fun List<PrisonerMovement>.admissionBefore(before: LocalDateTime): PrisonerMovement? {
+  val admissions = filter { it.isAdmission() }.sortedByDescending { it.movementDateTime }
+  val previousAdmission = admissions.firstOrNull { before.isAfter(it.movementDateTime) }
+  return previousAdmission ?: admissions.lastOrNull()
 }
