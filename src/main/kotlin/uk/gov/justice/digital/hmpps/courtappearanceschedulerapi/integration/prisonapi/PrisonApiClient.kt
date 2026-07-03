@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.retryOnTransientException
-import java.time.LocalDateTime
 
 @Component
 class PrisonApiClient(
@@ -15,7 +14,7 @@ class PrisonApiClient(
     .uri { builder ->
       builder.path(MOVEMENTS_URL)
       builder.queryParam("allBookings", true)
-      builder.queryParam("movementTypes", PrisonerMovement.ADMISSION_TYPE)
+      builder.queryParam("movementTypes", PrisonerMovement.ADMISSION_TYPE, PrisonerMovement.RELEASE_TYPE)
       builder.build(personIdentifier)
     }.retrieve()
     .bodyToMono<List<PrisonerMovement>>()
@@ -25,10 +24,4 @@ class PrisonApiClient(
   companion object {
     const val MOVEMENTS_URL = "/movements/offender/{personIdentifier}"
   }
-}
-
-fun List<PrisonerMovement>.admissionBefore(before: LocalDateTime): PrisonerMovement? {
-  val admissions = filter { it.isAdmission() }.sortedByDescending { it.movementDateTime }
-  val previousAdmission = admissions.firstOrNull { before.isAfter(it.movementDateTime) }
-  return previousAdmission ?: admissions.lastOrNull()
 }

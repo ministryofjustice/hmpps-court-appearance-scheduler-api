@@ -7,8 +7,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus.Code.UNSCHEDULED
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonApiClient
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonerMovement
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.admissionBefore
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.locationAt
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import java.time.LocalDateTime
@@ -36,7 +35,7 @@ class ReconcilePerson(
       val allKeys = rasAppearances.keys + casAppearances.keys
       if (allKeys.isNotEmpty()) {
         val movements = prisonApi.movementsFor(identifier)
-        issues += allKeys.flatMap { compare(rasAppearances[it], casAppearances[it], movements::admissionBefore) }
+        issues += allKeys.flatMap { compare(rasAppearances[it], casAppearances[it], movements::locationAt) }
       }
     }
 
@@ -48,11 +47,11 @@ class ReconcilePerson(
   private fun compare(
     ras: CourtAppearanceSchedule?,
     cas: CourtAppearance?,
-    admissionBefore: (LocalDateTime) -> PrisonerMovement?,
+    locationAt: (LocalDateTime) -> String,
   ): List<ReconciliationIssue> = if (ras == null || cas == null) {
     emptyList()
   } else {
-    propertyReconcilers { start -> admissionBefore(start)?.toAgency ?: "UNK" }
+    propertyReconcilers { start -> locationAt(start) }
       .mapNotNull {
         it.reconcile(ras, cas)?.let { propertyName ->
           PropertyMismatch(cas.person.identifier, cas.id, ras.id, propertyName)
