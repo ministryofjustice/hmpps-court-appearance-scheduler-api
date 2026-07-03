@@ -12,8 +12,10 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.conf
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.UpdateScheduleRequest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.schedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.PushPersonAppearanceData
 
 class PushCourtAppearanceIntTest(
@@ -38,8 +40,22 @@ class PushCourtAppearanceIntTest(
       )
     }
     (1..10).forEach { _ ->
-      givenCourtAppearance(courtAppearance(person.identifier, reasonCode = reasonCodes.random(), externalReference = null))
+      givenCourtAppearance(
+        courtAppearance(
+          person.identifier,
+          reasonCode = reasonCodes.random(),
+          externalReference = null,
+        ),
+      )
     }
+
+    rasMockServer.givenReconciliationAppearances(
+      person.identifier,
+      rasAppearances.map {
+        it.schedule(false)
+          .copy(comments = null, reason = CourtAppearanceSchedule.ScheduleReason(reasonCodes.random()))
+      },
+    )
 
     val pushRequests = rasAppearances.map { it.externalReference!!.uuid to it.asUpdateRequest() }
     pushRequests.forEach { rasMockServer.givenSuccessfulUpdate(it.first, it.second) }

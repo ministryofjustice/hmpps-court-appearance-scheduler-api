@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext.Companion.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.set
@@ -37,11 +38,15 @@ class ResyncForPerson(
   private val movementRepository: CourtAppearanceMovementRepository,
   private val msa: MigrationSystemAuditRepository,
   private val personSummaryService: PersonSummaryService,
+  private val serviceConfig: ServiceConfig,
 ) {
   fun all(personIdentifier: String, request: ResyncCourtEvents): ResyncResponse {
     SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS, migratingData = true).set()
-    val rasScheduleInfo =
-      rasClient.findCourtAppearanceSchedules(request.rasIds()).courtAppearances.associateBy { it.id }
+    val rasScheduleInfo = if (serviceConfig.enableRasClient && request.includesRas()) {
+      rasClient.findScheduleAppearancesFor(personIdentifier).courtAppearances.associateBy { it.id }
+    } else {
+      emptyMap()
+    }
     val scheduleInfoProvider = { uuid: UUID -> rasScheduleInfo[uuid] }
     val person = personSummaryService.getWithSave(personIdentifier)
     val reasonsMap = reasonRepository.findAll().associateBy { it.code }

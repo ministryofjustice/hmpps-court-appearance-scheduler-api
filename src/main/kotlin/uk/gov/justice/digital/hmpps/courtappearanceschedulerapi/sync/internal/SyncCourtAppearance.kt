@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext.Companion.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.set
@@ -28,6 +29,7 @@ class SyncCourtAppearance(
   private val reasonRepository: CourtAppearanceReasonRepository,
   private val statusRepository: CourtAppearanceStatusRepository,
   private val appearanceRepository: CourtAppearanceRepository,
+  private val serviceConfig: ServiceConfig,
 ) {
 
   fun sync(personIdentifier: String, request: SyncCourtEvent): ReferenceId {
@@ -36,7 +38,11 @@ class SyncCourtAppearance(
         .copy(requestAt = occurredAt, username = user.username, caseloadId = user.activeCaseloadId)
         .set()
     }
-    val rasScheduleInfo = request.courtEvent.externalReferenceUrn?.uuid?.let(rasClient::findCourtAppearanceSchedule)
+    val rasScheduleInfo = if (serviceConfig.enableRasClient) {
+      request.courtEvent.externalReferenceUrn?.uuid?.let(rasClient::findCourtAppearanceSchedule)
+    } else {
+      null
+    }
     val person = personSummaryService.getWithSave(personIdentifier)
     val appearance = (
       request.courtEvent.dpsId?.let { appearanceRepository.findByIdOrNull(it) }

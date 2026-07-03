@@ -7,14 +7,12 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 import reactor.core.publisher.Mono
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.retryOnTransientException
 import java.util.UUID
 
 @Component
 class RemandAndSentencingClient(
   @Qualifier("remandAndSentencingWebClient") private val webClient: WebClient,
-  private val serviceConfig: ServiceConfig,
 ) {
   fun findScheduleAppearancesFor(personIdentifier: String): CourtAppearanceSchedulesResponse = webClient.get()
     .uri("/person/{personIdentifier}/court-appearance-schedules", personIdentifier)
@@ -23,7 +21,7 @@ class RemandAndSentencingClient(
     .retryOnTransientException()
     .block()!!
 
-  fun findCourtAppearanceSchedules(uuids: Set<UUID>): CourtAppearanceSchedulesResponse = if (uuids.isEmpty() || !serviceConfig.enableRasClient) {
+  fun findCourtAppearanceSchedules(uuids: Set<UUID>): CourtAppearanceSchedulesResponse = if (uuids.isEmpty()) {
     CourtAppearanceSchedulesResponse(emptyList())
   } else {
     webClient
