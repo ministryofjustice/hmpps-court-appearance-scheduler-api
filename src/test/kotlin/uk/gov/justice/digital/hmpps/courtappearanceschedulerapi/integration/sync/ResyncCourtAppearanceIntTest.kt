@@ -104,7 +104,7 @@ class ResyncCourtAppearanceIntTest(
       ),
       listOf(resyncCourtEventMovement()),
     )
-    rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(prisoner.prisonerNumber) })
+    rasMockServer.givenReconciliationAppearances(prisoner.prisonerNumber, request.courtEvents.mapNotNull { it.courtEvent.schedule(prisoner.prisonerNumber) })
     val res = resync(prisoner.prisonerNumber, request).successResponse<ResyncResponse>()
 
     res.courtEvents.forEach { ce ->
@@ -180,7 +180,7 @@ class ResyncCourtAppearanceIntTest(
         ),
       ),
     )
-    rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(prisoner.prisonerNumber) })
+    rasMockServer.givenReconciliationAppearances(prisoner.prisonerNumber, request.courtEvents.mapNotNull { it.courtEvent.schedule(prisoner.prisonerNumber) })
     val res = resync(prisoner.prisonerNumber, request).successResponse<ResyncResponse>()
 
     res.courtEvents.single().also { ce ->
@@ -231,7 +231,7 @@ class ResyncCourtAppearanceIntTest(
         ),
       ),
     )
-    rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(prisoner.prisonerNumber) })
+    rasMockServer.givenReconciliationAppearances(prisoner.prisonerNumber, request.courtEvents.mapNotNull { it.courtEvent.schedule(prisoner.prisonerNumber) })
     val res = resync(prisoner.prisonerNumber, request).successResponse<ResyncResponse>()
 
     res.courtEvents.single().also { ce ->
@@ -279,7 +279,7 @@ class ResyncCourtAppearanceIntTest(
         ),
       ),
     )
-    rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(person.identifier) })
+    rasMockServer.givenReconciliationAppearances(person.identifier, request.courtEvents.mapNotNull { it.courtEvent.schedule(person.identifier) })
     val res = resync(person.identifier, request).successResponse<ResyncResponse>()
 
     res.courtEvents.single().also { ce ->
@@ -325,10 +325,11 @@ class ResyncCourtAppearanceIntTest(
 
   @Test
   fun `200 ok - can remove all data`() {
-    val schedule =
-      givenCourtAppearance(courtAppearance(movements = listOf(movement(CourtAppearanceMovement.Direction.OUT))))
+    val schedule = givenCourtAppearance(courtAppearance(movements = listOf(movement(CourtAppearanceMovement.Direction.OUT))))
     val scheduled = schedule.movements.single()
     val unscheduled = givenUnscheduledMovement(unscheduledMovement(schedule.person.identifier, schedule.prisonCode))
+    rasMockServer.givenReconciliationAppearances(schedule.person.identifier, emptyList())
+
     val res = resync(schedule.person.identifier, resyncRequest()).successResponse<ResyncResponse>()
     assertThat(res.courtEvents).isEmpty()
     assertThat(res.unscheduledMovements).isEmpty()
@@ -400,7 +401,7 @@ class ResyncCourtAppearanceIntTest(
     val courtEvent = request.courtEvents.first()
     val originalMsa = MigrationSystemAudit(schedule.id, courtEvent.created.at, courtEvent.created.by, null, null)
     msaRepository.save(originalMsa)
-    rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(person.identifier) })
+    rasMockServer.givenReconciliationAppearances(person.identifier, request.courtEvents.mapNotNull { it.courtEvent.schedule(person.identifier) })
 
     val res = resync(person.identifier, request).successResponse<ResyncResponse>()
     assertThat(res.courtEvents.first().dpsId).isEqualTo(schedule.id)
@@ -507,6 +508,7 @@ class ResyncCourtAppearanceIntTest(
           courtCode = courtCode,
         ),
       )
+    rasMockServer.givenReconciliationAppearances(person.identifier, emptyList())
 
     val request = resyncRequest(
       courtEvents = listOf(
@@ -624,7 +626,7 @@ class ResyncCourtAppearanceIntTest(
         ),
       ),
     )
-    rasMockServer.givenCourtAppearanceSchedules(request.courtEvents.mapNotNull { it.courtEvent.schedule(person.identifier) })
+    rasMockServer.givenReconciliationAppearances(person.identifier, request.courtEvents.mapNotNull { it.courtEvent.schedule(person.identifier) })
     val res = resync(person.identifier, request).successResponse<ResyncResponse>()
     assertThat(res.courtEvents.size).isEqualTo(2)
 
