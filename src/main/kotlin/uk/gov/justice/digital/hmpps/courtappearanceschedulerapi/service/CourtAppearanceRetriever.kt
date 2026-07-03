@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Prison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.asAppearanceOrigin
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.asReason
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.asStatus
+import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
@@ -47,10 +48,14 @@ class CourtAppearanceRetriever(
     comments,
     status.asStatus(),
     externalReference?.asAppearanceOrigin(),
-    status.code == CourtAppearanceStatus.Code.SCHEDULED &&
-      externalReference?.takeIf { it.service == ExternalReferenceService.REMAND_AND_SENTENCING }
-        ?.let { rasClient.canDeleteAppearance(it.uuid) } ?: true,
+    isCancellable(),
   )
+
+  private fun CourtAppearance.isCancellable(): Boolean {
+    val rasReference = externalReference?.takeIf { it.service == ExternalReferenceService.REMAND_AND_SENTENCING }
+    return (status.code == CourtAppearanceStatus.Code.SCHEDULED && rasReference == null) ||
+      rasReference?.uuid?.let { start.isAfter(LocalDateTime.now()) && rasClient.canDeleteAppearance(it) } == true
+  }
 
   private fun CourtAppearance.person(): Person = with(person) {
     Person(identifier, firstName, lastName, prisonCode, cellLocation)

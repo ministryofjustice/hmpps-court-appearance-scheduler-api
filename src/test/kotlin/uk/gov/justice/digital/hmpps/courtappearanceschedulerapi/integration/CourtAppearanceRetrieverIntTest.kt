@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wire
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Appearance
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 class CourtAppearanceRetrieverIntTest(
@@ -63,6 +64,7 @@ class CourtAppearanceRetrieverIntTest(
     res.verifyAgainst(ca)
     assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
+    assertThat(res.cancellable).isTrue
   }
 
   @Test
@@ -83,6 +85,7 @@ class CourtAppearanceRetrieverIntTest(
     res.verifyAgainst(ca)
     assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
+    assertThat(res.cancellable).isFalse
   }
 
   @Test
@@ -103,7 +106,13 @@ class CourtAppearanceRetrieverIntTest(
   fun `200 can retrieve court appearance with external reference and delete supported`() {
     val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
-    val ca = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code, externalReference = externalReference()))
+    val ca = givenCourtAppearance(
+      courtAppearance(
+        prisonCode = prison.code,
+        courtCode = court.code,
+        externalReference = externalReference(),
+      ),
+    )
     rasMockServer.givenDeletionStatus(ca.externalReference!!.uuid, AppearanceDeletionStatus.SUPPORTED)
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
@@ -117,8 +126,34 @@ class CourtAppearanceRetrieverIntTest(
   fun `200 can retrieve court appearance with external reference and delete not supported`() {
     val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
-    val ca = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code, externalReference = externalReference()))
+    val ca = givenCourtAppearance(
+      courtAppearance(
+        prisonCode = prison.code,
+        courtCode = court.code,
+        externalReference = externalReference(),
+      ),
+    )
     rasMockServer.givenDeletionStatus(ca.externalReference!!.uuid, AppearanceDeletionStatus.NOT_SUPPORTED)
+
+    val res = getAppearance(ca.id).successResponse<Appearance>()
+    res.verifyAgainst(ca)
+    assertThat(res.prison).isEqualTo(prison)
+    assertThat(res.court).isEqualTo(court)
+    assertThat(res.cancellable).isFalse
+  }
+
+  @Test
+  fun `200 can retrieve court appearance with external reference and delete not permitted`() {
+    val prison = prisonRegister.givenPrison()
+    val court = courtRegister.givenCourt()
+    val ca = givenCourtAppearance(
+      courtAppearance(
+        start = LocalDateTime.now().minusDays(2),
+        prisonCode = prison.code,
+        courtCode = court.code,
+        externalReference = externalReference(),
+      ),
+    )
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
