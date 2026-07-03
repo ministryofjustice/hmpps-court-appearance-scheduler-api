@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.pris
 interface PersonSummaryOperations {
   fun givenPersonSummary(personSummary: PersonSummary): PersonSummary
   fun findPersonSummary(personIdentifier: String): PersonSummary?
+  fun findAllPeople(): List<PersonSummary>
 
   companion object {
     fun personSummary(
@@ -39,4 +40,6 @@ class PersonSummaryOperationsImpl(
   override fun givenPersonSummary(personSummary: PersonSummary): PersonSummary = personSummaryRepository.save(personSummary)
 
   override fun findPersonSummary(personIdentifier: String): PersonSummary? = personSummaryRepository.findByIdOrNull(personIdentifier)
+
+  override fun findAllPeople(): List<PersonSummary> = personSummaryRepository.findAll()
 }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReconciliationHistoryRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.CourtAppearanceReconcileActive
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.CourtAppearanceReconcileEnhanced
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
@@ -17,6 +18,8 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.Data
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonApiMockServer.Companion.prisonerMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonRegisterMockServer.Companion.prison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerApiExtension.Companion.prisonApi
@@ -27,9 +30,11 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wire
 import java.time.LocalDate
 
 class ReconciliationIntTest(
+  @Autowired pso: PersonSummaryOperations,
   @Autowired cao: CourtAppearanceOperations,
   @Autowired private val rhr: ReconciliationHistoryRepository,
 ) : IntegrationTest(),
+  PersonSummaryOperations by pso,
   CourtAppearanceOperations by cao {
   @Test
   fun `active prisoner reconciliation is triggered successfully`() {
@@ -40,14 +45,33 @@ class ReconciliationIntTest(
     assertThat(prisoners).hasSize(30)
     prisoners.forEach { rasMockServer.givenReconciliationAppearances(it.prisonerNumber, emptyList()) }
 
+    // trigger it twice to simulate multiple pods
     trigger.activeReconciliation()
     trigger.activeReconciliation()
 
     prisons.forEach { verify(prisonReconciliation, timeout(1000).times(1)).reconcile(it.code) }
     prisoners.forEach { verify(personReconciliation, timeout(1000).times(1)).reconcile(it.prisonerNumber) }
 
-    val rec = rhr.findAll().single()
+    val rec = rhr.findAll().single { it.type == CourtAppearanceReconcileActive.EVENT_TYPE }
     assertThat(rec.type).isEqualTo(CourtAppearanceReconcileActive.EVENT_TYPE)
+    assertThat(rec.requestedOn).isEqualTo(LocalDate.now())
+    assertThat(rec.version).isEqualTo(0)
+  }
+
+  @Test
+  fun `enhanced reconciliation is triggered successfully`() {
+    givenPersonSummary(personSummary())
+    val people = findAllPeople()
+    people.forEach { rasMockServer.givenReconciliationAppearances(it.identifier, emptyList()) }
+
+    // trigger it twice to simulate multiple pods
+    trigger.enhancedReconciliation()
+    trigger.enhancedReconciliation()
+
+    people.forEach { verify(personReconciliation, timeout(1000).times(1)).reconcile(it.identifier) }
+
+    val rec = rhr.findAll().single { it.type == CourtAppearanceReconcileEnhanced.EVENT_TYPE }
+    assertThat(rec.type).isEqualTo(CourtAppearanceReconcileEnhanced.EVENT_TYPE)
     assertThat(rec.requestedOn).isEqualTo(LocalDate.now())
     assertThat(rec.version).isEqualTo(0)
   }
