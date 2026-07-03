@@ -32,7 +32,7 @@ class ReconciliationIntTest(
 ) : IntegrationTest(),
   CourtAppearanceOperations by cao {
   @Test
-  fun `reconciliation is triggered successfully`() {
+  fun `active prisoner reconciliation is triggered successfully`() {
     val prisons = prisonRegister.givenNamedPrisons(setOf(prison(), prison(), prison()))
     val prisoners = prisons.flatMapIndexed { index, prison ->
       prisonerSearch.givenPrisonersAt(prison.code, (index + 1) * 5)
@@ -71,8 +71,8 @@ class ReconciliationIntTest(
   }
 
   @Test
-  fun `first movement used when movement recorded after court appearance`() {
-    val casAppearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
+  fun `OUT used when no movement before start`() {
+    val casAppearance = givenCourtAppearance(courtAppearance(prisonCode = "OUT", externalReference = externalReference()))
     rasMockServer.givenReconciliationAppearances(casAppearance.person.identifier, listOf(casAppearance.schedule(false)))
     prisonApi.givenMovementsFor(
       casAppearance.person.identifier,
