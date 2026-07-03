@@ -10,6 +10,7 @@ import java.time.LocalDateTime
     JsonSubTypes.Type(value = CourtAppearanceReconcilePrison::class, name = CourtAppearanceReconcilePrison.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceReconcilePerson::class, name = CourtAppearanceReconcilePerson.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearanceReconcileActive::class, name = CourtAppearanceReconcileActive.EVENT_TYPE),
+    JsonSubTypes.Type(value = CourtAppearanceReconcileEnhanced::class, name = CourtAppearanceReconcileEnhanced.EVENT_TYPE),
 
     JsonSubTypes.Type(value = CourtAppearancePushAll::class, name = CourtAppearancePushAll.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearancePushPerson::class, name = CourtAppearancePushPerson.EVENT_TYPE),
@@ -42,6 +43,14 @@ class CourtAppearanceReconcileActive : InternalEvent {
 
   companion object {
     const val EVENT_TYPE = "court-appearance.reconcile.active"
+  }
+}
+
+class CourtAppearanceReconcileEnhanced : InternalEvent {
+  override val type: String = EVENT_TYPE
+
+  companion object {
+    const val EVENT_TYPE = "court-appearance.reconcile.enhanced"
   }
 }
 

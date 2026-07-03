@@ -10,12 +10,14 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.Notificat
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.PushCourtAppearanceData
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.PushPersonAppearanceData
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcileActive
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcileEnhanced
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcilePerson
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcilePrison
 
 @Component
 class InternalEventListener(
   private val jsonMapper: JsonMapper,
+  private val enhanced: ReconcileEnhanced,
   private val active: ReconcileActive,
   private val prison: ReconcilePrison,
   private val person: ReconcilePerson,
@@ -32,6 +34,7 @@ class InternalEventListener(
     val event = jsonMapper.readValue<InternalEvent>(notification.message)
     try {
       when (event) {
+        is CourtAppearanceReconcileEnhanced -> enhanced.reconcile()
         is CourtAppearanceReconcileActive -> active.reconcile()
         is CourtAppearanceReconcilePrison -> prison.reconcile(event.prisonCode)
         is CourtAppearanceReconcilePerson -> person.reconcile(event.identifier)

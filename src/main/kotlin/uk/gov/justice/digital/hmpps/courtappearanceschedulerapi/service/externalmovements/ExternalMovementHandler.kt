@@ -12,7 +12,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.app
 class ExternalMovementHandler(private val caRepository: CourtAppearanceRepository) {
   @Transactional
   fun handle(emre: ExternalMovementRecordedEvent) {
-    if (emre.directionCode != "IN" || emre.movementType != "ADM" || emre.personIdentifier == null || emre.prisonCode == null) return
+    if (!emre.isReleaseOrAdmission() || emre.personIdentifier == null || emre.prisonCode == null) return
     caRepository.findAll(
       appearanceMatchesPersonIdentifier(emre.personIdentifier, null)
         .and(appearanceStatusCodeIn(setOf(CourtAppearanceStatus.Code.SCHEDULED))),
