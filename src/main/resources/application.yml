@@ -124,6 +124,15 @@ logging:
   level:
     org.springframework: INFO
 
+hmpps.sqs.queues:
+  hmppsdomaineventsqueue:
+    propagateTracing: false
+  internalevents:
+    propagateTracing: false
+  offendereventsqueue:
+    propagateTracing: false
+
+
 service:
   active-prisons:
   domain-events:

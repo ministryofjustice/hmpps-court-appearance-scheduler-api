@@ -56,9 +56,7 @@
         "telemetryType": "dependency",
         "attributes": [
           {
-            "key": "db.statement",
-            "value": "select[\\s]*.*hmpps_domain_event.*",
-            "matchType": "regexp"
+            "key": "db.statement"
           }
         ],
         "percentage": 0

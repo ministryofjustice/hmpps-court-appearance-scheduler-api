@@ -80,7 +80,3 @@ service:
   api-base-url: "http://local-api"
   appearance-expiration:
     cron: "-"
-  ras:
-    enable-with-resync: true
-    enable-with-sync: true
-    send-updates: true
