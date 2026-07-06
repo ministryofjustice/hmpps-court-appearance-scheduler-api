@@ -54,7 +54,7 @@ class InternalEventEmitter(private val jsonMapper: JsonMapper, private val queue
               .builder()
               .id(UUID.randomUUID().toString())
               .messageBody(jsonMapper.writeValueAsString(notification))
-              .messageAttributes(mapOf("noTracing" to MessageAttributeValue.builder().dataType("String").stringValue("true").build()))
+              .messageAttributes(notification.attributes.map { a -> a.key to MessageAttributeValue.builder().dataType(a.value.type).stringValue(a.value.value).build() }.toMap())
               .build()
           },
         ).build()
