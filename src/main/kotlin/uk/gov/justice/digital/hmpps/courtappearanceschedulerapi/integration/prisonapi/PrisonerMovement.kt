@@ -30,3 +30,5 @@ fun List<PrisonerMovement>.movementBefore(before: LocalDateTime): PrisonerMoveme
   val ofInterest = filter { it.responsibilityChangeMovement() }.sortedByDescending { it.movementDateTime }
   return ofInterest.firstOrNull { before.isAfter(it.movementDateTime) }
 }
+
+fun List<PrisonerMovement>.mostRecent(): PrisonerMovement? = maxByOrNull { it.movementDateTime }

@@ -24,6 +24,10 @@ class InternalEventEmitter(private val jsonMapper: JsonMapper, private val queue
     queueService.findByQueueId("internalevents") ?: throw IllegalStateException("Queue not available")
   }
 
+  fun publishInternalEvent(event: InternalEvent) {
+    publishInternalEvents(listOf(event))
+  }
+
   fun publishInternalEvents(events: Collection<InternalEvent>) {
     events.asSequence().chunked(10).forEach { queue.publishBatch(it) }
   }

@@ -2,10 +2,9 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.rec
 
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.times
+import org.mockito.kotlin.timeout
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
@@ -13,7 +12,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.conf
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.UpdateScheduleRequest
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.asUpdateRequest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.schedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.PushPersonAppearanceData
@@ -62,15 +61,7 @@ class PushCourtAppearanceIntTest(
 
     ppa.toRemandAndSentencing(person.identifier)
 
-    verify(rasClient, times(10)).updateCourtAppearanceSchedule(any(), any())
+    verify(rasClient, timeout(1000).times(10)).updateCourtAppearanceSchedule(any(), any())
     pushRequests.forEach { verify(rasClient).updateCourtAppearanceSchedule(it.first, it.second) }
   }
-
-  private fun CourtAppearance.asUpdateRequest() = UpdateScheduleRequest(
-    prisonCode,
-    courtCode,
-    reason.code,
-    start,
-    comments,
-  )
 }

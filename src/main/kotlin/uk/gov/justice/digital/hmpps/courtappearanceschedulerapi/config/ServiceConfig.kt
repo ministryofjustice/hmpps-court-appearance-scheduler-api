@@ -23,9 +23,10 @@ data class ServiceConfig(
   val domainEvents: DomainEventConfig,
   val uiBaseUrl: String,
   val apiBaseUrl: String,
-  val enableRasClient: Boolean,
+  val ras: RasConfig,
 ) {
-  data class DomainEventConfig(val pollInterval: Duration, val batchSize: Int)
+  data class DomainEventConfig(val pollInterval: Duration, val batchSize: Int, val disabledEvents: Set<String> = setOf())
+  data class RasConfig(val enableWithResync: Boolean, val enableWithSync: Boolean, val sendUpdates: Boolean)
 }
 
 @Component
