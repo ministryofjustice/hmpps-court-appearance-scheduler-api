@@ -19,7 +19,7 @@ integration:
 service:
   active-prisons:
   domain-events:
-    poll-interval: PT10s
+    poll-interval: PT1s
     disabled-events:
       - "court-appearance.inserted"
       - "court-appearance.updated"
