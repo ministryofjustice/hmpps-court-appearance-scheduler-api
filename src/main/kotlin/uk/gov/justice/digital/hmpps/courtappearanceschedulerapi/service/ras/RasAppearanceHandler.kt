@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.app
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonSummaryService
+import java.time.LocalDateTime
 
 @Transactional
 @Service
@@ -57,7 +58,7 @@ class RasAppearanceHandler(
       cas.relocate(RelocateAppearance(ras.courtCode))
       cas.recategorise(RecategoriseAppearance(ras.reason.code), reasonRepository::getReasonByCode)
       cas.applyComments(ChangeAppearanceComments(ras.comments))
-      cas.calculateStatus(statusRepository::getStatusByCode, ras.start.isBefore(mrm.movementDateTime), ras.isDuplicate)
+      cas.calculateStatus(statusRepository::getStatusByCode, ras.start.isBefore(mrm?.movementDateTime ?: LocalDateTime.now()), ras.isDuplicate)
     } ?: run {
       appearanceRepository.save(ras.asEntity())
     }
@@ -78,6 +79,6 @@ class RasAppearanceHandler(
       comments,
       externalReference,
       null,
-    ).calculateStatus(statusRepository::getStatusByCode, start.isBefore(mrm.movementDateTime), isDuplicate)
+    ).calculateStatus(statusRepository::getStatusByCode, start.isBefore(mrm?.movementDateTime ?: LocalDateTime.now()), isDuplicate)
   }
 }

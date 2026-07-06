@@ -31,4 +31,4 @@ fun List<PrisonerMovement>.movementBefore(before: LocalDateTime): PrisonerMoveme
   return ofInterest.firstOrNull { before.isAfter(it.movementDateTime) }
 }
 
-fun List<PrisonerMovement>.mostRecent(): PrisonerMovement = maxBy { it.movementDateTime }
+fun List<PrisonerMovement>.mostRecent(): PrisonerMovement? = maxByOrNull { it.movementDateTime }
