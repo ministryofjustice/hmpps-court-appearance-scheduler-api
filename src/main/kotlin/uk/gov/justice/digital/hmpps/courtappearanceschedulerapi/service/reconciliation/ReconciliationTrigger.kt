@@ -25,7 +25,7 @@ class ReconciliationTrigger(
 
   private fun trigger(event: InternalEvent) {
     try {
-      iee.publishInternalEvents(setOf(event))
+      iee.publishInternalEvent(event)
     } catch (e: Exception) {
       Sentry.captureException(e)
     } finally {

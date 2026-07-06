@@ -16,6 +16,9 @@ import org.springframework.http.HttpStatus
 import tools.jackson.module.kotlin.jsonMapper
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.AppearanceDeletionStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.AppearanceDeletionStatusResponse
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
@@ -24,6 +27,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.UpdateScheduleRequest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.WiremockConfig.mockServerConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
+import java.time.LocalDateTime
 import java.util.UUID
 
 class RemandAndSentencingMockServer : WireMockServer(mockServerConfig(9007)) {
@@ -101,6 +105,26 @@ class RemandAndSentencingMockServer : WireMockServer(mockServerConfig(9007)) {
             .withHeader("Content-Type", "application/json")
             .withStatus(204),
         ),
+    )
+  }
+
+  companion object {
+    fun rasSchedule(
+      personIdentifier: String = personIdentifier(),
+      courtCode: String = courtCode(),
+      reasonCode: String = "CRT",
+      start: LocalDateTime = LocalDateTime.now().plusDays(7),
+      isDuplicate: Boolean = false,
+      comments: String? = word(20),
+      id: UUID = newUuid(),
+    ) = CourtAppearanceSchedule(
+      id,
+      personIdentifier,
+      courtCode,
+      CourtAppearanceSchedule.ScheduleReason(reasonCode),
+      start,
+      isDuplicate,
+      comments,
     )
   }
 }

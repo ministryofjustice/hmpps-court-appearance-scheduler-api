@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.Schedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.Notification
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.PushCourtAppearanceData
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.PushPersonAppearanceData
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.PushSingleAppearanceData
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcileActive
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcileEnhanced
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.ReconcilePerson
@@ -23,6 +24,7 @@ class InternalEventListener(
   private val person: ReconcilePerson,
   private val pushAll: PushCourtAppearanceData,
   private val pushPerson: PushPersonAppearanceData,
+  private val pushSingle: PushSingleAppearanceData,
 ) {
   @SqsListener(
     "internalevents",
@@ -41,6 +43,7 @@ class InternalEventListener(
 
         is CourtAppearancePushAll -> pushAll.toRemandAndSentencing()
         is CourtAppearancePushPerson -> pushPerson.toRemandAndSentencing(event.identifier)
+        is CourtAppearancePushSingle -> pushSingle.toExternalService(event.externalReference)
       }
     } catch (ex: Exception) {
       Sentry.captureException(ex)

@@ -1,10 +1,11 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.events
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.externalmovements.ExternalMovementHandler
