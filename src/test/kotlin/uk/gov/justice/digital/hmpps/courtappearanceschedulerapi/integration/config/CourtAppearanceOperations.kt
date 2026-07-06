@@ -30,6 +30,7 @@ typealias CourtAppearanceProvider = (PersonProvider, ReasonProvider, StatusProvi
 interface CourtAppearanceOperations {
   fun givenCourtAppearance(caProvider: CourtAppearanceProvider): CourtAppearance
   fun findCourtAppearance(id: UUID): CourtAppearance?
+  fun findByExternalReference(externalReference: ExternalReference): CourtAppearance?
 
   companion object {
     fun courtAppearance(
@@ -92,4 +93,6 @@ class CourtAppearanceOperationsImpl(
   }
 
   override fun findCourtAppearance(id: UUID): CourtAppearance? = appearanceRepository.findByIdOrNull(id)
+
+  override fun findByExternalReference(externalReference: ExternalReference): CourtAppearance? = appearanceRepository.findByExternalReference(externalReference)
 }

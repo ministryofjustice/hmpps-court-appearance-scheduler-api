@@ -34,7 +34,7 @@ class PrisonApiMockServer : WireMockServer(mockServerConfig(9004)) {
     fun prisonerMovement(
       toAgency: String = prisonCode(),
       movementType: String = PrisonerMovement.ADMISSION_TYPE,
-      dateTime: LocalDateTime = LocalDateTime.now(),
+      dateTime: LocalDateTime = LocalDateTime.now().minusDays(1),
     ) = PrisonerMovement(toAgency, movementType, dateTime.toLocalDate(), dateTime.toLocalTime())
   }
 }

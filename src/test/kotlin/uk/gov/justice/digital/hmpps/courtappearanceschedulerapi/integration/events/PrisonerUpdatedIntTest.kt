@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.events
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -10,6 +10,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.Pe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PrisonerUpdated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PrisonerUpdatedInformation
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.verifyAgainst

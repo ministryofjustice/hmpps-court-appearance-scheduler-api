@@ -20,8 +20,14 @@ service:
   active-prisons:
   domain-events:
     poll-interval: PT10s
+    disabled-events:
+      - "court-appearance.inserted"
+      - "court-appearance.updated"
   ui-base-url: "https://court-appearance-scheduler-ui.hmpps.service.justice.gov.uk"
   api-base-url: "https://court-appearance-scheduler-api.hmpps.service.justice.gov.uk"
   appearance-expiration:
     cron: "0 30 2 * * *"
-  enable-ras-client: false
+  ras:
+    enable-with-resync: false
+    enable-with-sync: false
+    send-updates: false

@@ -129,4 +129,7 @@ service:
   domain-events:
     poll-interval: PT0s
     batch-size: 10
-  enable-ras-client: false
+  ras:
+    enable-with-resync: true
+    enable-with-sync: true
+    send-updates: true

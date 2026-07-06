@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.events
 
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.envers.RevisionType
@@ -14,14 +14,15 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.Ra
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceInformation
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.ras.CourtAppearanceDeletedHandler
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.ras.RasAppearanceHandler
 import java.util.UUID
 
 class RasCourtAppearanceDeletedIntTest(
   @Autowired cao: CourtAppearanceOperations,
-  @Autowired private val cadHandler: CourtAppearanceDeletedHandler,
+  @Autowired private val cadHandler: RasAppearanceHandler,
 ) : IntegrationTest(),
   CourtAppearanceOperations by cao {
 
