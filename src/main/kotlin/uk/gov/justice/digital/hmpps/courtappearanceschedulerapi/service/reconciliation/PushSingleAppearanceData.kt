@@ -15,7 +15,7 @@ class PushSingleAppearanceData(
   fun toExternalService(externalReference: ExternalReference) {
     if (externalReference.service != ExternalReferenceService.REMAND_AND_SENTENCING) return
     caRepository.findByExternalReference(externalReference)?.let { ca ->
-      rasClient.updateCourtAppearanceSchedule(externalReference.uuid, ca.asUpdateRequest())
+      rasClient.updateCourtAppearanceSchedule(externalReference.uuid, ca.asUpdateRequest()).block()
     }
   }
 }
