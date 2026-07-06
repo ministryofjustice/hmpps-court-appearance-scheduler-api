@@ -5,6 +5,8 @@ import org.hibernate.envers.RevisionType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
+import org.mockito.kotlin.timeout
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
@@ -27,6 +29,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.Data
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.asUpdateRequest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditHistory
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditedAction
@@ -377,6 +380,47 @@ class CourtAppearanceModificationsIntTest(
       saved,
       setOf(CourtAppearanceRelocated(saved.person.identifier, saved.id, null).publication(saved.id)),
     )
+  }
+
+  @Test
+  fun `200 sends update request to remand and sentencing if external reference`() {
+    val ca = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
+    val username = username()
+    val action = ChangeAppearanceComments(word(20))
+    val reason = word(20)
+
+    val updateRequest = ca.asUpdateRequest().copy(comments = action.comments)
+    rasMockServer.givenSuccessfulUpdate(ca.externalReference!!.uuid, updateRequest)
+
+    val res = applyAction(ca.id, action, reason, username).successResponse<AuditHistory>()
+    with(res.content.single()) {
+      assertThat(domainEvents).containsExactly(CourtAppearanceCommentsChanged.EVENT_TYPE)
+      assertThat(this.reason).isEqualTo(reason)
+      assertThat(changes).containsExactly(
+        AuditedAction.Change(
+          CourtAppearance::comments.name,
+          ca.comments,
+          action.comments,
+        ),
+      )
+    }
+
+    val saved = requireNotNull(findCourtAppearance(ca.id))
+    assertThat(saved.comments).isEqualTo(action.comments)
+
+    verifyAudit(
+      saved,
+      RevisionType.MOD,
+      setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
+      SchedulerContext.get().copy(username = username, reason = reason),
+    )
+
+    verifyEventPublications(
+      saved,
+      setOf(CourtAppearanceCommentsChanged(saved.person.identifier, saved.id, ca.externalReference).publication(saved.id)),
+    )
+
+    verify(rasClient, timeout(1000).times(1)).updateCourtAppearanceSchedule(ca.externalReference!!.uuid, updateRequest)
   }
 
   private fun applyAction(

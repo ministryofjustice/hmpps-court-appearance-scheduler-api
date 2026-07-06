@@ -42,7 +42,7 @@ class ResyncForPerson(
 ) {
   fun all(personIdentifier: String, request: ResyncCourtEvents): ResyncResponse {
     SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS, migratingData = true).set()
-    val rasScheduleInfo = if (serviceConfig.enableRasClient && request.includesRas()) {
+    val rasScheduleInfo = if (serviceConfig.ras.enableWithResync && request.includesRas()) {
       rasClient.findScheduleAppearancesFor(personIdentifier).courtAppearances.associateBy { it.id }
     } else {
       emptyMap()

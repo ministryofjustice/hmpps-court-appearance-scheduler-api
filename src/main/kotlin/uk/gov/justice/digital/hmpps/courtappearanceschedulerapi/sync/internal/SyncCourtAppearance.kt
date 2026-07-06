@@ -38,7 +38,7 @@ class SyncCourtAppearance(
         .copy(requestAt = occurredAt, username = user.username, caseloadId = user.activeCaseloadId)
         .set()
     }
-    val rasScheduleInfo = if (serviceConfig.enableRasClient) {
+    val rasScheduleInfo = if (serviceConfig.ras.enableWithSync) {
       request.courtEvent.externalReferenceUrn?.uuid?.let(rasClient::findCourtAppearanceSchedule)
     } else {
       null

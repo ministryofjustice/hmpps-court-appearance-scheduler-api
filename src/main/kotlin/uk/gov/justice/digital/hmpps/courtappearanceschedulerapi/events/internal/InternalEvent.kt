@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal
 
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import java.time.LocalDateTime
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXISTING_PROPERTY, property = "type")
@@ -14,6 +15,7 @@ import java.time.LocalDateTime
 
     JsonSubTypes.Type(value = CourtAppearancePushAll::class, name = CourtAppearancePushAll.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearancePushPerson::class, name = CourtAppearancePushPerson.EVENT_TYPE),
+    JsonSubTypes.Type(value = CourtAppearancePushSingle::class, name = CourtAppearancePushSingle.EVENT_TYPE),
   ],
 )
 sealed interface InternalEvent {
@@ -67,5 +69,13 @@ data class CourtAppearancePushPerson(val identifier: String) : InternalEvent {
 
   companion object {
     const val EVENT_TYPE = "court-appearance.push.person"
+  }
+}
+
+data class CourtAppearancePushSingle(val externalReference: ExternalReference) : InternalEvent {
+  override val type: String = EVENT_TYPE
+
+  companion object {
+    const val EVENT_TYPE = "court-appearance.push.single"
   }
 }
