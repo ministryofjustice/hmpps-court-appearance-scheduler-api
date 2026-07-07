@@ -128,7 +128,7 @@ final class CourtAppearance(
     private set
 
   @Column(name = "comments", length = Integer.MAX_VALUE)
-  var comments: String? = comments?.trim()
+  var comments: String? = comments
     private set
 
   @Convert(converter = ExternalReferenceConverter::class)

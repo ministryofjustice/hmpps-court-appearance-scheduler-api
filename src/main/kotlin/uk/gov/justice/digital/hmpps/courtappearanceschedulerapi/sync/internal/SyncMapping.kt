@@ -52,7 +52,7 @@ fun CourtAppearance.updateFrom(
   applyExternalIdentifiers(request.externalReferenceUrn, request.eventId)
   relocate(RelocateAppearance(request.scheduledCourtCode))
   recategorise(RecategoriseAppearance(request.type), reason)
-  reschedule(RescheduleAppearance(request.start, null))
+  reschedule(RescheduleAppearance(request.start, request.end))
   applyComments(ChangeAppearanceComments(request.commentText))
   syncStatus(status, request.shouldBeCompleted(), request.currentTerm, rasScheduleInfo)
 }

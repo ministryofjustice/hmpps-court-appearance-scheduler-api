@@ -13,6 +13,7 @@ infix fun CourtAppearance.verifyAgainst(request: CourtEvent) {
   assertThat(legacyId).isEqualTo(request.eventId)
   assertThat(externalReference).isEqualTo(request.externalReferenceUrn)
   assertThat(start.toLocalDate()).isEqualTo(request.start.toLocalDate())
+  assertThat(end?.toLocalDate()).isEqualTo(request.end.toLocalDate())
   assertThat(reason.code).isEqualTo(request.type)
   assertThat(comments).isEqualTo(request.commentText)
   request.externalCourtEventType?.also { assertThat(external).isEqualTo(it) }

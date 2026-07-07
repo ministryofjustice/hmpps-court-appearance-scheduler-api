@@ -39,7 +39,7 @@ interface CourtAppearanceOperations {
       courtCode: String = courtCode(),
       reasonCode: String = "CRT",
       start: LocalDateTime = LocalDate.now().plusDays(7).atTime(6, 0),
-      end: LocalDateTime? = start.toLocalDate().atTime(23, 59, 59),
+      end: LocalDateTime? = maxOf(start.toLocalDate().atTime(17, 0), start),
       comments: String? = word(25),
       externalReference: ExternalReference? = null,
       legacyId: Long? = null,
