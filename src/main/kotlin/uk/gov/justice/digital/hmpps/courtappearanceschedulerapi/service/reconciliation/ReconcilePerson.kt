@@ -4,7 +4,7 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus.Code.UNSCHEDULED
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonApiClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.locationAt
@@ -60,19 +60,34 @@ class ReconcilePerson(
   }
 
   private fun propertyReconcilers(prisonCodeAt: (LocalDateTime) -> String): List<PropertyReconciler> = listOf(
-    PropertyReconciler("prisonCode", { prisonCodeAt(it.start) }, { it.prisonCode }),
-    PropertyReconciler("courtCode", { it.courtCode }, { it.courtCode }),
-    PropertyReconciler("start", { it.start }, { it.start }),
-    PropertyReconciler("isDuplicate", { it.isDuplicate }, { it.status.code == UNSCHEDULED }),
-    PropertyReconciler("reasonCode", { it.reason.code }, { it.reason.code }),
-    PropertyReconciler("comments", { it.comments }, { it.comments }),
+    DuplicateReconciler(),
+    EqualityReconciler("prisonCode", { prisonCodeAt(it.start) }, { it.prisonCode }),
+    EqualityReconciler("courtCode", { it.courtCode }, { it.courtCode }),
+    EqualityReconciler("start", { it.start }, { it.start }),
+    EqualityReconciler("reasonCode", { it.reason.code }, { it.reason.code }),
+    EqualityReconciler("comments", { it.comments }, { it.comments }),
   )
 }
 
-class PropertyReconciler(
-  val propertyName: String,
+interface PropertyReconciler {
+  val propertyName: String
+  fun reconcile(rasSchedule: CourtAppearanceSchedule, casSchedule: CourtAppearance): String?
+}
+
+class EqualityReconciler(
+  override val propertyName: String,
   val ras: (CourtAppearanceSchedule) -> Any?,
   val cas: (CourtAppearance) -> Any?,
-) {
-  fun reconcile(rasSchedule: CourtAppearanceSchedule, casSchedule: CourtAppearance): String? = if (ras(rasSchedule) == cas(casSchedule)) null else propertyName
+) : PropertyReconciler {
+  override fun reconcile(rasSchedule: CourtAppearanceSchedule, casSchedule: CourtAppearance): String? = if (ras(rasSchedule) == cas(casSchedule)) null else propertyName
+}
+
+class DuplicateReconciler(
+  override val propertyName: String = "isDuplicate",
+) : PropertyReconciler {
+  override fun reconcile(rasSchedule: CourtAppearanceSchedule, casSchedule: CourtAppearance): String? = if (rasSchedule.isDuplicate && casSchedule.status.code != CourtAppearanceStatus.Code.UNSCHEDULED) {
+    propertyName
+  } else {
+    null
+  }
 }

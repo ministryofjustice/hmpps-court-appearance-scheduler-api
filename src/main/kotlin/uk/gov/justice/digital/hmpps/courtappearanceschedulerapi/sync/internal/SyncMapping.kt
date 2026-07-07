@@ -96,7 +96,7 @@ fun CourtAppearanceMovement.updateFrom(
 ) = apply {
   movePerson(person)
   moveSchedule(ChangeMovementSchedule(schedule), status)
-  applyDirection(ChangeMovementDirection(direction))
+  applyDirection(ChangeMovementDirection(request.direction))
   applyOccurredAt(ChangeMovementOccurredAt(request.occurredAt))
   recategorise(RecategoriseMovement(request.reasonCode), reason)
   relocate(RelocateMovement(request.courtCode))

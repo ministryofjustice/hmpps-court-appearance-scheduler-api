@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.Ap
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementRecategorised
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementRecorded
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementRelocated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementReversed
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceCompleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
@@ -232,10 +233,11 @@ class SyncCourtMovementIntTest(
       courtEventMovement(
         bookingId = bookingId,
         sequenceNumber = movementSeq,
-        fromAgencyId = movement.prisonCode,
+        toAgencyId = movement.prisonCode,
         date = movement.occurredAt.toLocalDate(),
         time = movement.occurredAt.toLocalTime(),
         reasonCode = "VL",
+        directionCode = "IN",
       ),
     )
 
@@ -265,6 +267,7 @@ class SyncCourtMovementIntTest(
         AppearanceMovementCommentsChanged(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id),
         AppearanceMovementRecategorised(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id),
         AppearanceMovementRelocated(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id),
+        AppearanceMovementReversed(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id),
       ),
     )
   }
