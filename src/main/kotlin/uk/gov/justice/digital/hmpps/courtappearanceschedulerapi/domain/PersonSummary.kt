@@ -11,10 +11,12 @@ import jakarta.persistence.criteria.Predicate
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.FIRST_NAME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.IDENTIFIER
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.LAST_NAME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.PRISON_CODE
+import java.util.stream.Stream
 
 @Entity
 @Table(name = "person_summary")
@@ -73,7 +75,10 @@ final class PersonSummary(
   }
 }
 
-interface PersonSummaryRepository : JpaRepository<PersonSummary, String>
+interface PersonSummaryRepository : JpaRepository<PersonSummary, String> {
+  @Query("select identifier from PersonSummary")
+  fun findIdentifiers(): Stream<String>
+}
 
 fun <T> Join<T, PersonSummary>.matchesName(cb: CriteriaBuilder, name: String): Predicate {
   val matches = name.replace(",", " ").split("\\s".toRegex())
