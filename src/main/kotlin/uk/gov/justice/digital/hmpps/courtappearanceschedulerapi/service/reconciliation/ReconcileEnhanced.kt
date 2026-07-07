@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.CourtAppearanceReconcilePerson
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.InternalEventEmitter
 import java.time.LocalDate
+import kotlin.streams.asSequence
 
 @Service
 class ReconcileEnhanced(
@@ -26,7 +27,10 @@ class ReconcileEnhanced(
       transactionTemplate.execute {
         rhr.save(ReconciliationHistory(CourtAppearanceReconcileEnhanced.EVENT_TYPE))
       }
-      iee.publishInternalEvents(psr.findAll().map { CourtAppearanceReconcilePerson(it.identifier) })
+      transactionTemplate.executeWithoutResult {
+        psr.findIdentifiers().map { CourtAppearanceReconcilePerson(it) }
+          .asSequence().chunked(10).forEach(iee::publishInternalEvents)
+      }
     } catch (_: DataIntegrityViolationException) {
       // another pod started the job already
     } catch (e: Exception) {

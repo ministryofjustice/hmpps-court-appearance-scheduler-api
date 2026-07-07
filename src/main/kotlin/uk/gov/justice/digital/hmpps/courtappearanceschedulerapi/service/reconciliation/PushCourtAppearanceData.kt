@@ -9,7 +9,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSum
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReconciliationHistory
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReconciliationHistoryRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.CourtAppearancePushAll
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.CourtAppearancePushPerson
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.CourtAppearanceReconcilePerson
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.InternalEventEmitter
 import java.time.LocalDate
 import kotlin.streams.asSequence
@@ -19,7 +19,7 @@ class PushCourtAppearanceData(
   private val iee: InternalEventEmitter,
   private val transactionTemplate: TransactionTemplate,
   private val rhr: ReconciliationHistoryRepository,
-  private val personSummaryRepository: PersonSummaryRepository,
+  private val psr: PersonSummaryRepository,
 ) {
   fun toRemandAndSentencing() {
     try {
@@ -28,8 +28,8 @@ class PushCourtAppearanceData(
         rhr.save(ReconciliationHistory(CourtAppearancePushAll.EVENT_TYPE))
       }
       transactionTemplate.executeWithoutResult {
-        personSummaryRepository.findIdentifiers().map { CourtAppearancePushPerson(it) }
-          .asSequence().chunked(10).forEach { iee.publishInternalEvents(it) }
+        psr.findIdentifiers().map { CourtAppearanceReconcilePerson(it) }
+          .asSequence().chunked(10).forEach(iee::publishInternalEvents)
       }
     } catch (_: DataIntegrityViolationException) {
       // another pod started the job already
