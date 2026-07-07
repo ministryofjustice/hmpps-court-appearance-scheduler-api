@@ -29,5 +29,6 @@ infix fun CourtAppearanceMovement.verifyAgainst(request: CourtEventMovement) {
   assertThat(prisonCode).isEqualTo(request.prisonCode)
   assertThat(comments).isEqualTo(request.commentText)
   assertThat(reason.code).isEqualTo(request.reasonCode)
+  assertThat(direction).isEqualTo(request.direction)
   assertThat(occurredAt.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(request.occurredAt.truncatedTo(ChronoUnit.SECONDS))
 }

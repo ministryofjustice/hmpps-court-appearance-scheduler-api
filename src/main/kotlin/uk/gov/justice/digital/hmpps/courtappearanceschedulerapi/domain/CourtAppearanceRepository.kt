@@ -95,8 +95,10 @@ fun appearanceReasonCodeIn(reasonCodes: Set<String>) = Specification<CourtAppear
   status.get<String>(CourtAppearanceReason::code.name).`in`(reasonCodes)
 }
 
-fun startsOnOrAfter(start: LocalDate) = Specification<CourtAppearance> { ca, _, cb ->
-  cb.greaterThanOrEqualTo(ca.get(CourtAppearance::start.name), start.atStartOfDay())
+fun startsOnOrAfter(start: LocalDate) = startsAtOrAfter(start.atStartOfDay())
+
+fun startsAtOrAfter(start: LocalDateTime) = Specification<CourtAppearance> { ca, _, cb ->
+  cb.greaterThanOrEqualTo(ca.get(CourtAppearance::start.name), start)
 }
 
 fun startsOnOrBefore(end: LocalDate) = Specification<CourtAppearance> { ca, _, cb ->
