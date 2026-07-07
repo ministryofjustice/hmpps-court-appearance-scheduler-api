@@ -26,9 +26,7 @@ class PushCourtAppearanceData(
   fun toRemandAndSentencing() {
     try {
       if (rhr.findByTypeAndRequestedOn(CourtAppearancePushAll.EVENT_TYPE, LocalDate.now()) != null) return
-      transactionTemplate.execute {
-        rhr.save(ReconciliationHistory(CourtAppearancePushAll.EVENT_TYPE))
-      }
+      rhr.save(ReconciliationHistory(CourtAppearancePushAll.EVENT_TYPE))
       personSummaryRepository.findIdentifiers().map { CourtAppearancePushPerson(it) }
         .asSequence().chunked(10).forEach { iee.publishInternalEvents(it) }
     } catch (_: DataIntegrityViolationException) {
