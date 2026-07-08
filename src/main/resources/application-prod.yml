@@ -28,5 +28,4 @@ service:
   appearance-expiration:
     cron: "0 30 2 * * *"
   ras:
-    enable-with-resync: false
     send-updates: false
