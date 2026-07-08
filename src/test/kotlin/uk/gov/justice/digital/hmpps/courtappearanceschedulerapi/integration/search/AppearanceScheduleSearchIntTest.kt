@@ -152,6 +152,7 @@ class AppearanceScheduleSearchIntTest(
         prisonCode = prison.code,
         courtCode = court.code,
         start = LocalDate.now().atTime(10, 0),
+        end = LocalDate.now().atTime(23, 59),
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
       ),
     )

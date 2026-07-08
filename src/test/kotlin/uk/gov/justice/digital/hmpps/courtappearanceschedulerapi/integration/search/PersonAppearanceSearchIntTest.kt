@@ -169,6 +169,7 @@ class PersonAppearanceSearchIntTest(
         courtCode = court.code,
         personIdentifier = person.identifier,
         start = LocalDate.now().atTime(10, 0),
+        end = LocalDate.now().atTime(23, 59),
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
       ),
     )
