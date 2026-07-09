@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.pris
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearancePrison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
@@ -51,9 +52,12 @@ class RasAppearanceHandler(
 
   private fun handleUpsert(event: RasAppearanceEvent) {
     rasClient.findCourtAppearanceSchedule(event.additionalInformation.courtAppearanceId)?.also { ras ->
-      val mrm = prisonApi.movementsFor(event.getPersonIdentifier()).mostRecent()
+      val movements = prisonApi.movementsFor(event.getPersonIdentifier())
+      val mrm = movements.mostRecent()
+      val prisonCode = movements.locationAt(ras.start)
       appearanceRepository.findByExternalReference(event.externalReference())?.also { cas ->
         if (cas.person.identifier != ras.personIdentifier) throw ConflictException("Court appearance person conflict")
+        cas.applyResponsibility(ChangeAppearancePrison(prisonCode))
         cas.reschedule(RescheduleAppearance(ras.start, cas.end))
         cas.relocate(RelocateAppearance(ras.courtCode))
         cas.recategorise(RecategoriseAppearance(ras.reason.code), reasonRepository::getReasonByCode)
