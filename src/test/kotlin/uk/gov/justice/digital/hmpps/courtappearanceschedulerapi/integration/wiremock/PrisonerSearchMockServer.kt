@@ -68,7 +68,6 @@ class PrisonerSearchServer : WireMockServer(mockServerConfig(9000)) {
       firstName,
       lastName,
       prisonCode,
-      prisonCode,
       cellLocation,
     )
   }
