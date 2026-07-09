@@ -166,7 +166,7 @@ class CourtAppearanceRetrieverIntTest(
     assertThat(person.personIdentifier).isEqualTo(ca.person.identifier)
     assertThat(person.firstName).isEqualTo(ca.person.firstName)
     assertThat(person.lastName).isEqualTo(ca.person.lastName)
-    assertThat(prison.code).isEqualTo(ca.prisonCode)
+    assertThat(prison.code).isEqualTo(ca.person.prisonCode)
     assertThat(court.code).isEqualTo(ca.courtCode)
     assertThat(start).isEqualTo(ca.start)
     assertThat(end).isEqualTo(ca.end)

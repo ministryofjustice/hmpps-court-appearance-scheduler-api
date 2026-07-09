@@ -46,10 +46,6 @@ interface CourtAppearanceRepository :
 
 fun CourtAppearanceRepository.getAppearance(id: UUID) = findByIdOrNull(id) ?: throw NotFoundException("Court appearance not found")
 
-fun appearanceMatchesPrisonCode(prisonCode: String) = Specification<CourtAppearance> { ca, _, cb ->
-  cb.equal(ca.get<String>(CourtAppearance::prisonCode.name), prisonCode)
-}
-
 fun appearanceMatchesCourtCodeIn(courtCodes: Set<String>) = Specification<CourtAppearance> { ca, _, _ ->
   ca.get<String>(CourtAppearance::courtCode.name).`in`(courtCodes)
 }

@@ -113,7 +113,7 @@ class ScheduleCourtAppearanceIntTest(
       assertThat(identifier).isEqualTo(prisoner.prisonerNumber)
       assertThat(firstName).isEqualTo(prisoner.firstName)
       assertThat(lastName).isEqualTo(prisoner.lastName)
-      assertThat(this.prisonCode).isEqualTo(prisoner.lastPrisonId)
+      assertThat(this.prisonCode).isEqualTo(prisoner.prisonId)
     }
 
     verifyAudit(

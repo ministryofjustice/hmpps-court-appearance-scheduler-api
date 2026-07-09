@@ -14,7 +14,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPersonIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPersonName
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPersonPrisonCode
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPrisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceNotUnscheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearancePersonIdentifierIn
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceReasonCodeIn
@@ -59,7 +58,7 @@ class SearchCourtAppearances(
   }
 
   private fun Page<CourtAppearance>.asScheduleResponse(): CourtAppearanceSearchResponse {
-    val (prisonCodes, courtCodes) = map { it.prisonCode to it.courtCode }.unzip()
+    val (prisonCodes, courtCodes) = map { it.person.prisonCode!! to it.courtCode }.unzip()
     val (prisons, courts) = Mono.zip(
       prisonRegister.findPrisons(prisonCodes.toSet()),
       courtRegister.findCourts(courtCodes.toSet()),
@@ -78,7 +77,6 @@ class SearchCourtAppearances(
 
   private fun CourtAppearanceSearchRequest.asSpecification(prisonCode: String): Specification<CourtAppearance> = (
     listOfNotNull(
-      appearanceMatchesPrisonCode(prisonCode),
       startsOnOrAfter(start),
       startsOnOrBefore(end),
       query?.let {
@@ -101,7 +99,6 @@ class SearchCourtAppearances(
 
   private fun AppearanceScheduleSearchRequest.asSpecification(prisonCode: String): Specification<CourtAppearance> = (
     listOfNotNull(
-      appearanceMatchesPrisonCode(prisonCode),
       startsOnOrAfter(start),
       startsOnOrBefore(end),
       personIdentifiers.takeIf { it.isNotEmpty() }?.let { appearancePersonIdentifierIn(it, prisonCode) }
@@ -114,7 +111,7 @@ class SearchCourtAppearances(
   private fun CourtAppearance.asResult(prison: PrisonProvider, court: CourtProvider) = CourtAppearanceResult(
     id,
     person(),
-    prison(prisonCode),
+    prison(person.prisonCode!!),
     court(courtCode),
     reason.asReason(),
     external,

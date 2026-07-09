@@ -9,7 +9,6 @@ data class Prisoner(
   val firstName: String,
   val lastName: String,
   val prisonId: String?,
-  val lastPrisonId: String?,
   val cellLocation: String?,
 ) {
   companion object {
@@ -18,7 +17,6 @@ data class Prisoner(
       Prisoner::firstName.name,
       Prisoner::lastName.name,
       Prisoner::prisonId.name,
-      Prisoner::lastPrisonId.name,
       Prisoner::cellLocation.name,
     )
 
