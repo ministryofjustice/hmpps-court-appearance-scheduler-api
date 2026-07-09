@@ -30,7 +30,7 @@ class CourtAppearanceRetriever(
   fun byId(id: UUID): Appearance {
     val appearance = appearanceRepository.getAppearance(id)
     val (prison, court) = Mono.zip(
-      prisonRegister.findPrison(appearance.person.prisonCode ?: appearance.prisonCode),
+      prisonRegister.findPrison(appearance.person.prisonCode ?: "OUT"),
       courtRegister.findCourt(appearance.courtCode),
     ).map { it.t1 to it.t2 }.block()!!
     return appearance.toModel(prison, court)
