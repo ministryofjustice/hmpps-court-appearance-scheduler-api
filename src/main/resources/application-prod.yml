@@ -20,6 +20,9 @@ service:
   active-prisons:
   domain-events:
     poll-interval: PT0.5s
+    disabled-events:
+      - "court-appearance.inserted"
+      - "court-appearance.updated"
   ui-base-url: "https://court-appearance-scheduler-ui.hmpps.service.justice.gov.uk"
   api-base-url: "https://court-appearance-scheduler-api.hmpps.service.justice.gov.uk"
   appearance-expiration:
@@ -28,3 +31,5 @@ service:
     cron: "0 30 5 * * 2-7"
   enhanced-reconciliation:
     cron: "0 30 5 * * 1"
+  ras:
+    send-updates: false
