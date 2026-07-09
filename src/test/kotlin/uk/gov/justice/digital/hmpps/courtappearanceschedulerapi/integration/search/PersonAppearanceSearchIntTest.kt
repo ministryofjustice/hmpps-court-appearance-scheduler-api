@@ -112,7 +112,7 @@ class PersonAppearanceSearchIntTest(
   fun `can find appearances by date`() {
     val prison = prisonRegister.givenPrison()
     val courts = courtRegister.givenCourts(setOf(court(), court()))
-    val person = givenPersonSummary(personSummary())
+    val person = givenPersonSummary(personSummary(prisonCode = prison.code))
     val start = LocalDate.now().plusDays(2)
     val end = start.plusDays(3)
 
@@ -120,7 +120,6 @@ class PersonAppearanceSearchIntTest(
       val startDateTime = LocalDateTime.of(start.minusDays(1).plusDays(it.toLong()), LocalTime.of(10, 0))
       givenCourtAppearance(
         courtAppearance(
-          prisonCode = prison.code,
           personIdentifier = person.identifier,
           start = startDateTime,
           reasonCode = if (it % 2 == 0) "VL" else "CRT",
@@ -129,10 +128,9 @@ class PersonAppearanceSearchIntTest(
       )
     }
 
-    val res = searchAppearances(
-      person.identifier,
-      searchRequest(start = start, end = end),
-    ).successResponse<CourtAppearanceSearchResponse>()
+    val res = searchAppearances(person.identifier, searchRequest(start = start, end = end))
+      .successResponse<CourtAppearanceSearchResponse>()
+
     assertThat(res.content).hasSize(4)
     assertThat(res.metadata.totalElements).isEqualTo(4)
     assertThat(res.content.map { it.id }).containsExactlyElementsOf(appearances.subList(1, 5).map { it.id })
@@ -142,11 +140,10 @@ class PersonAppearanceSearchIntTest(
   fun `can filter and sort appearances by status`() {
     val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
-    val person = givenPersonSummary(personSummary())
+    val person = givenPersonSummary(personSummary(prisonCode = prison.code))
 
     val expired = givenCourtAppearance(
       courtAppearance(
-        prisonCode = prison.code,
         courtCode = court.code,
         personIdentifier = person.identifier,
         start = LocalDate.now().minusDays(1).atTime(9, 0),
@@ -155,7 +152,6 @@ class PersonAppearanceSearchIntTest(
     assertThat(expired.status.code).isEqualTo(CourtAppearanceStatus.Code.EXPIRED)
     val scheduled = givenCourtAppearance(
       courtAppearance(
-        prisonCode = prison.code,
         courtCode = court.code,
         personIdentifier = person.identifier,
         start = LocalDate.now().atTime(6, 0),
@@ -165,7 +161,6 @@ class PersonAppearanceSearchIntTest(
     assertThat(scheduled.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
     val inProgress = givenCourtAppearance(
       courtAppearance(
-        prisonCode = prison.code,
         courtCode = court.code,
         personIdentifier = person.identifier,
         start = LocalDate.now().atTime(10, 0),
@@ -176,7 +171,6 @@ class PersonAppearanceSearchIntTest(
     assertThat(inProgress.status.code).isEqualTo(CourtAppearanceStatus.Code.IN_PROGRESS)
     val completed = givenCourtAppearance(
       courtAppearance(
-        prisonCode = prison.code,
         courtCode = court.code,
         personIdentifier = person.identifier,
         start = LocalDate.now().minusDays(1).atTime(10, 0),
@@ -238,12 +232,11 @@ class PersonAppearanceSearchIntTest(
   fun `can filter appearances by reason and external flag`() {
     val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
-    val person = givenPersonSummary(personSummary())
+    val person = givenPersonSummary(personSummary(prisonCode = prison.code))
 
     val videoAppearances = listOf(
       givenCourtAppearance(
         courtAppearance(
-          prisonCode = prison.code,
           courtCode = court.code,
           personIdentifier = person.identifier,
           reasonCode = "VL",
@@ -252,7 +245,6 @@ class PersonAppearanceSearchIntTest(
       ),
       givenCourtAppearance(
         courtAppearance(
-          prisonCode = prison.code,
           courtCode = court.code,
           personIdentifier = person.identifier,
           reasonCode = "VL",
@@ -263,7 +255,6 @@ class PersonAppearanceSearchIntTest(
     val inPersonAppearances = listOf(
       givenCourtAppearance(
         courtAppearance(
-          prisonCode = prison.code,
           courtCode = court.code,
           personIdentifier = person.identifier,
           reasonCode = "CRT",
@@ -272,7 +263,6 @@ class PersonAppearanceSearchIntTest(
       ),
       givenCourtAppearance(
         courtAppearance(
-          prisonCode = prison.code,
           courtCode = court.code,
           personIdentifier = person.identifier,
           reasonCode = "CRT",

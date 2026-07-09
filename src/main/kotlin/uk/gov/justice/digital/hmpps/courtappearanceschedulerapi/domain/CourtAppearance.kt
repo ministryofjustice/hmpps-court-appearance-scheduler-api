@@ -261,7 +261,6 @@ final class CourtAppearance(
 
   companion object {
     fun changeableProperties() = listOf(
-      CourtAppearance::prisonCode,
       CourtAppearance::courtCode,
       CourtAppearance::comments,
       CourtAppearance::start,

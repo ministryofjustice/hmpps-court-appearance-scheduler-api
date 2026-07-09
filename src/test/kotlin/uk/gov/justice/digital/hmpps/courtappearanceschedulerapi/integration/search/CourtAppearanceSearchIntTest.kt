@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.conf
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourtRegisterMockServer.Companion.court
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourterRegisterExtension.Companion.courtRegister
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonRegisterMockServer.Companion.prison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerRegisterExtension.Companion.prisonRegister
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.CourtAppearanceSearchRequest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.CourtAppearanceSearchResponse
@@ -108,7 +109,8 @@ class CourtAppearanceSearchIntTest(
     val court = courtRegister.givenCourt()
 
     val scheduled = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code))
-    val unscheduled = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code, unschedule = true))
+    val unscheduled =
+      givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code, unschedule = true))
     assertThat(unscheduled.status.code).isEqualTo(CourtAppearanceStatus.Code.UNSCHEDULED)
 
     val res = searchAppearances(prison.code, searchRequest()).successResponse<CourtAppearanceSearchResponse>()
@@ -127,6 +129,29 @@ class CourtAppearanceSearchIntTest(
     givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code))
 
     val res = searchAppearances(prison.code, searchRequest(query = toFind.person.identifier))
+      .successResponse<CourtAppearanceSearchResponse>()
+
+    assertThat(res.content).hasSize(1)
+    assertThat(res.metadata.totalElements).isEqualTo(1)
+    assertThat(res.content.single().id).isEqualTo(toFind.id)
+  }
+
+  @Test
+  fun `can find person appearances not at current prison`() {
+    val personPrison = prisonRegister.givenPrison()
+    val anotherPrison = prison()
+    val court = courtRegister.givenCourt()
+    val person = givenPersonSummary(personSummary(prisonCode = personPrison.code))
+
+    val toFind = givenCourtAppearance(
+      courtAppearance(
+        personIdentifier = person.identifier,
+        prisonCode = anotherPrison.code,
+        courtCode = court.code,
+      ),
+    )
+
+    val res = searchAppearances(personPrison.code, searchRequest(query = toFind.person.identifier))
       .successResponse<CourtAppearanceSearchResponse>()
 
     assertThat(res.content).hasSize(1)
