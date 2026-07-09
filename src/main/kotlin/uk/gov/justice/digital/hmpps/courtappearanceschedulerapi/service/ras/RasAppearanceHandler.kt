@@ -50,17 +50,22 @@ class RasAppearanceHandler(
   }
 
   private fun handleUpsert(event: RasAppearanceEvent) {
-    val ras = requireNotNull(rasClient.findCourtAppearanceSchedule(event.additionalInformation.courtAppearanceId))
-    val mrm = prisonApi.movementsFor(event.getPersonIdentifier()).mostRecent()
-    appearanceRepository.findByExternalReference(event.externalReference())?.also { cas ->
-      if (cas.person.identifier != ras.personIdentifier) throw ConflictException("Court appearance person conflict")
-      cas.reschedule(RescheduleAppearance(ras.start, cas.end))
-      cas.relocate(RelocateAppearance(ras.courtCode))
-      cas.recategorise(RecategoriseAppearance(ras.reason.code), reasonRepository::getReasonByCode)
-      cas.applyComments(ChangeAppearanceComments(ras.comments))
-      cas.calculateStatus(statusRepository::getStatusByCode, ras.start.isBefore(mrm?.movementDateTime ?: LocalDateTime.now()), ras.isDuplicate)
-    } ?: run {
-      appearanceRepository.save(ras.asEntity())
+    rasClient.findCourtAppearanceSchedule(event.additionalInformation.courtAppearanceId)?.also { ras ->
+      val mrm = prisonApi.movementsFor(event.getPersonIdentifier()).mostRecent()
+      appearanceRepository.findByExternalReference(event.externalReference())?.also { cas ->
+        if (cas.person.identifier != ras.personIdentifier) throw ConflictException("Court appearance person conflict")
+        cas.reschedule(RescheduleAppearance(ras.start, cas.end))
+        cas.relocate(RelocateAppearance(ras.courtCode))
+        cas.recategorise(RecategoriseAppearance(ras.reason.code), reasonRepository::getReasonByCode)
+        cas.applyComments(ChangeAppearanceComments(ras.comments))
+        cas.calculateStatus(
+          statusRepository::getStatusByCode,
+          ras.start.isBefore(mrm?.movementDateTime ?: LocalDateTime.now()),
+          ras.isDuplicate,
+        )
+      } ?: run {
+        appearanceRepository.save(ras.asEntity())
+      }
     }
   }
 
