@@ -24,3 +24,7 @@ service:
   api-base-url: "https://court-appearance-scheduler-api-preprod.hmpps.service.justice.gov.uk"
   appearance-expiration:
     cron: "0 0 7 * * *"
+  reconciliation:
+    cron: "0 0 17 * * 1-4"
+  enhanced-reconciliation:
+    cron: "0 0 17 * * 5"

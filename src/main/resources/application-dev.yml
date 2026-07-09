@@ -25,7 +25,9 @@ service:
   appearance-expiration:
     cron: "0 0 7 * * *"
   reconciliation:
-    cron: "0 0 17 * * *"
+    cron: "0 0 17 * * 1-4"
+  enhanced-reconciliation:
+    cron: "0 0 17 * * 5"
 
 springdoc:
   api-docs:

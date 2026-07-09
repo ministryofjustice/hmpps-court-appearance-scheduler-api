@@ -15,6 +15,8 @@ data class PrisonerMovement(
   val movementDateTime: LocalDateTime = LocalDateTime.of(movementDate, movementTime)
   fun responsibilityChangeMovement() = movementType in MOVEMENTS_OF_INTEREST && toAgency != null
 
+  fun responsiblePrisonCode(): String? = toAgency?.takeIf { movementType == ADMISSION_TYPE }
+
   companion object {
     const val ADMISSION_TYPE = "ADM"
     const val RELEASE_TYPE = "REL"
@@ -24,7 +26,7 @@ data class PrisonerMovement(
   }
 }
 
-fun List<PrisonerMovement>.locationAt(at: LocalDateTime): String = movementBefore(at)?.toAgency ?: DEFAULT_LOCATION
+fun List<PrisonerMovement>.locationAt(at: LocalDateTime): String = movementBefore(at)?.responsiblePrisonCode() ?: DEFAULT_LOCATION
 
 fun List<PrisonerMovement>.movementBefore(before: LocalDateTime): PrisonerMovement? {
   val ofInterest = filter { it.responsibilityChangeMovement() }.sortedByDescending { it.movementDateTime }
