@@ -17,7 +17,6 @@ integration:
     url: "https://remand-and-sentencing-api-dev.hmpps.service.justice.gov.uk"
 
 service:
-  active-prisons: "***"
   domain-events:
     poll-interval: PT1s
   ui-base-url: "https://court-appearance-scheduler-ui-dev.hmpps.service.justice.gov.uk"
