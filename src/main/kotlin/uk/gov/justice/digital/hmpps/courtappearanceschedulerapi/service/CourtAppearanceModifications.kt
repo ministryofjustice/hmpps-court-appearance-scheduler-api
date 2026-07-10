@@ -67,20 +67,22 @@ class CourtAppearanceModifications(
     }
   }
 
-  private fun CourtAppearance.canBeDeleted(): Boolean {
-    val rasId = externalReference?.takeIf { it.service == ExternalReferenceService.REMAND_AND_SENTENCING }?.uuid
-    return status.code == CourtAppearanceStatus.Code.SCHEDULED &&
-      when (rasId) {
-        null -> true
-        else -> rasClient.deleteAppearance(rasId)
-      }
-  }
-
   private fun CourtAppearance.handleCancel() {
-    if (canBeDeleted()) {
+    val rasReference = externalReference?.takeIf { it.service == ExternalReferenceService.REMAND_AND_SENTENCING }
+    if (rasReference != null && rasClient.deleteAppearance(rasReference.uuid)) {
+      handleCancelRasAppearance(this)
+    } else if (rasReference == null && status.code == CourtAppearanceStatus.Code.SCHEDULED) {
       appearanceRepository.delete(this)
     } else {
       throw ConflictException("Appearance cannot be deleted.")
+    }
+  }
+
+  private fun handleCancelRasAppearance(ras: CourtAppearance) {
+    if (ras.movements.isEmpty()) {
+      appearanceRepository.delete(ras)
+    } else {
+      ras.applyExternalIdentifiers(null, ras.legacyId)
     }
   }
 }
