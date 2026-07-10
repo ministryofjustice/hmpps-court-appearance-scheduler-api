@@ -27,6 +27,6 @@ class DuplicateReconciler(
   }
 
   companion object {
-    private val INACTIVE_STATES = setOf(CourtAppearanceStatus.Code.UNSCHEDULED, CourtAppearanceStatus.Code.EXPIRED)
+    private val INACTIVE_STATES = setOf(CourtAppearanceStatus.Code.UNSCHEDULED, CourtAppearanceStatus.Code.EXPIRED, CourtAppearanceStatus.Code.COMPLETED)
   }
 }
