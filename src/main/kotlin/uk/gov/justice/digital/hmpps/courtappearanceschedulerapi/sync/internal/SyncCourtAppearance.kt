@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalR
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceService.REMAND_AND_SENTENCING
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReasonByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getStatusByCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonApiClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ReferenceId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonSummaryService
@@ -25,11 +26,12 @@ import java.util.UUID
 @Service
 class SyncCourtAppearance(
   private val rasClient: RemandAndSentencingClient,
+  private val prisonClient: PrisonApiClient,
+  private val serviceConfig: ServiceConfig,
   private val personSummaryService: PersonSummaryService,
   private val reasonRepository: CourtAppearanceReasonRepository,
   private val statusRepository: CourtAppearanceStatusRepository,
   private val appearanceRepository: CourtAppearanceRepository,
-  private val serviceConfig: ServiceConfig,
 ) {
 
   fun sync(personIdentifier: String, request: SyncCourtEvent): ReferenceId {
@@ -43,6 +45,7 @@ class SyncCourtAppearance(
     } else {
       null
     }
+    val prisonerMovements = request.courtEvent.externalReferenceUrn?.let { prisonClient.movementsFor(personIdentifier) } ?: emptyList()
     val person = personSummaryService.getWithSave(personIdentifier)
     val appearance = (
       request.courtEvent.dpsId?.let { appearanceRepository.findByIdOrNull(it) }
@@ -54,6 +57,7 @@ class SyncCourtAppearance(
       reasonRepository::getReasonByCode,
       statusRepository::getStatusByCode,
       rasScheduleInfo,
+      prisonerMovements,
     )
       ?: appearanceRepository.save(
         request.courtEvent.asEntity(
@@ -61,6 +65,7 @@ class SyncCourtAppearance(
           reasonRepository::getReasonByCode,
           statusRepository::getStatusByCode,
           rasScheduleInfo,
+          prisonerMovements,
         ),
       )
     return ReferenceId(appearance.id)

@@ -45,6 +45,8 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.conf
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync.SyncGenerator.courtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync.SyncGenerator.courtEventMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonApiMockServer.Companion.prisonerMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerApiExtension.Companion.prisonApi
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchExtension.Companion.prisonerSearch
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchServer.Companion.prisoner
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
@@ -93,6 +95,7 @@ class ResyncCourtAppearanceIntTest(
   fun `200 ok - can migrate data`() {
     val prisonCode = prisonCode()
     val prisoner = prisonerSearch.givenPrisoner(prisoner(prisonCode))
+    prisonApi.givenMovementsFor(prisoner.prisonerNumber, listOf(prisonerMovement(prisonCode)))
 
     val request = resyncRequest(
       listOf(
@@ -168,6 +171,7 @@ class ResyncCourtAppearanceIntTest(
   fun `200 ok - can migrate completed appearances with future date`() {
     val prisonCode = prisonCode()
     val prisoner = prisonerSearch.givenPrisoner(prisoner(prisonCode))
+    prisonApi.givenMovementsFor(prisoner.prisonerNumber, listOf(prisonerMovement(prisonCode, dateTime = LocalDateTime.now().plusDays(8))))
 
     val request = resyncRequest(
       listOf(
@@ -175,7 +179,6 @@ class ResyncCourtAppearanceIntTest(
           courtEvent(
             date = LocalDate.now().plusDays(7),
             externalReference = externalReference(),
-            status = "COMP",
           ),
         ),
       ),
@@ -185,6 +188,7 @@ class ResyncCourtAppearanceIntTest(
 
     res.courtEvents.single().also { ce ->
       val saved = requireNotNull(findCourtAppearance(ce.dpsId))
+      assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.COMPLETED)
       val ceDetail = request.courtEvents.first { it.courtEvent.eventId == ce.eventId }
       saved verifyAgainst ceDetail.courtEvent
       val msa = requireNotNull(msaRepository.findByIdOrNull(saved.id))
@@ -218,6 +222,7 @@ class ResyncCourtAppearanceIntTest(
   fun `200 ok - can migrate unscheduled appearance`() {
     val prisonCode = prisonCode()
     val prisoner = prisonerSearch.givenPrisoner(prisoner(prisonCode))
+    prisonApi.givenMovementsFor(prisoner.prisonerNumber, listOf(prisonerMovement(prisonCode)))
 
     val request = resyncRequest(
       listOf(
@@ -270,6 +275,7 @@ class ResyncCourtAppearanceIntTest(
   fun `200 ok - can migrate completed appearance without IN movement`() {
     val prisonCode = prisonCode()
     val person = givenPersonSummary(personSummary(prisonCode = prisonCode))
+    prisonApi.givenMovementsFor(person.identifier, listOf(prisonerMovement(prisonCode, dateTime = LocalDateTime.now())))
 
     val request = resyncRequest(
       listOf(
@@ -329,6 +335,7 @@ class ResyncCourtAppearanceIntTest(
     val scheduled = schedule.movements.single()
     val unscheduled = givenUnscheduledMovement(unscheduledMovement(schedule.person.identifier, schedule.prisonCode))
     rasMockServer.givenReconciliationAppearances(schedule.person.identifier, emptyList())
+    prisonApi.givenMovementsFor(schedule.person.identifier, listOf(prisonerMovement(schedule.prisonCode)))
 
     val res = resync(schedule.person.identifier, resyncRequest()).successResponse<ResyncResponse>()
     assertThat(res.courtEvents).isEmpty()
@@ -387,6 +394,7 @@ class ResyncCourtAppearanceIntTest(
     )
     val scheduled = schedule.movements.single()
     val unscheduled = givenUnscheduledMovement(unscheduledMovement(person.identifier, prisonCode))
+    prisonApi.givenMovementsFor(person.identifier, listOf(prisonerMovement(prisonCode)))
 
     val request = resyncRequest(
       courtEvents = listOf(
@@ -509,6 +517,7 @@ class ResyncCourtAppearanceIntTest(
         ),
       )
     rasMockServer.givenReconciliationAppearances(person.identifier, emptyList())
+    prisonApi.givenMovementsFor(person.identifier, listOf(prisonerMovement(prisonCode)))
 
     val request = resyncRequest(
       courtEvents = listOf(
@@ -627,6 +636,7 @@ class ResyncCourtAppearanceIntTest(
       ),
     )
     rasMockServer.givenReconciliationAppearances(person.identifier, request.courtEvents.mapNotNull { it.courtEvent.schedule(person.identifier) })
+    prisonApi.givenMovementsFor(person.identifier, listOf(prisonerMovement(prisonCode)))
     val res = resync(person.identifier, request).successResponse<ResyncResponse>()
     assertThat(res.courtEvents.size).isEqualTo(2)
 

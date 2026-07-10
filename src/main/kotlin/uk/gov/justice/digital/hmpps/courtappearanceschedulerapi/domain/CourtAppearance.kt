@@ -218,7 +218,8 @@ final class CourtAppearance(
     }
   }
 
-  private fun isCompleted() = movements.any { it.direction == IN } ||
+  private fun isCompleted() = (::status.isInitialized && status.code == CourtAppearanceStatus.Code.COMPLETED) ||
+    movements.any { it.direction == IN } ||
     (movements.isNotEmpty() && isInThePast())
 
   private fun isInProgress() = movements.isNotEmpty() && !isInThePast()
