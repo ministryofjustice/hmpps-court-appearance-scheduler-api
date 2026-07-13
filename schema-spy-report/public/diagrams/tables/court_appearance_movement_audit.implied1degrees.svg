@@ -37,6 +37,7 @@
 <text text-anchor="start" x="233" y="-264.3" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">version</text>
 <polygon fill="none" stroke="#000000" points="473,-257.2 473,-279.2 567,-279.2 567,-257.2 473,-257.2"/>
 <text text-anchor="start" x="476" y="-264.9" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">int4[10]</text>
+<polygon fill="#ffffff" stroke="transparent" points="213,-235.2 213,-257.2 473,-257.2 473,-235.2 213,-235.2"/>
 <polygon fill="none" stroke="#000000" points="213,-235.2 213,-257.2 473,-257.2 473,-235.2 213,-235.2"/>
 <text text-anchor="start" x="233" y="-242.3" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">court_appearance_id</text>
 <polygon fill="none" stroke="#000000" points="473,-235.2 473,-257.2 567,-257.2 567,-235.2 473,-235.2"/>
