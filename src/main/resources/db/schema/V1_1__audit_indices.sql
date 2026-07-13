@@ -1,0 +1,2 @@
+create index concurrently if not exists idx_court_appearance_audit_external_reference on court_appearance_audit(external_reference);
+create index concurrently if not exists idx_court_appearance_movement_audit_appearance_id on court_appearance_movement_audit(court_appearance_id);
