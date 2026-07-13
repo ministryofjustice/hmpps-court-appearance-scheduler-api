@@ -17,7 +17,6 @@ integration:
     url: "https://remand-and-sentencing-api.hmpps.service.justice.gov.uk"
 
 service:
-  active-prisons:
   domain-events:
     poll-interval: PT0.5s
     disabled-events:
