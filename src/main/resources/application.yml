@@ -134,7 +134,7 @@ hmpps.sqs.queues:
 
 
 service:
-  active-prisons:
+  active-prisons: "***"
   domain-events:
     poll-interval: PT0s
     batch-size: 10
