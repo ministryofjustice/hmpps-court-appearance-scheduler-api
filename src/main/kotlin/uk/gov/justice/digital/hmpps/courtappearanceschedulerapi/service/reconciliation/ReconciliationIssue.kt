@@ -37,3 +37,11 @@ data class PropertyMismatch(
     "rasId" to rasId.toString(),
   )
 }
+
+data class PersonIdentifierMismatch(
+  override val personIdentifier: String,
+  val otherIdentifiers: Set<String>,
+) : ReconciliationIssue {
+  override val name: String = "Person Identifier Mismatch"
+  override fun telemetryProperties(): Map<String, String> = super.telemetryProperties() + mapOf("otherIdentifiers" to otherIdentifiers.joinToString(", "))
+}
