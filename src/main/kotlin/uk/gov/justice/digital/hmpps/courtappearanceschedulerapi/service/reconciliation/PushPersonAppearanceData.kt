@@ -18,7 +18,7 @@ class PushPersonAppearanceData(
 ) {
   fun toRemandAndSentencing(identifier: String) {
     val rasAppearances = rasClient.findScheduleAppearancesFor(identifier).courtAppearances.associateBy { it.id }
-    val appearances = caRepository.findByPersonIdentifierAndExternalReferenceIsNotNull(identifier)
+    val appearances = caRepository.findByExternalReferenceIn(rasAppearances.values.map { it.externalReference }.toSet())
       .filter { it.externalReference?.service == ExternalReferenceService.REMAND_AND_SENTENCING && it diff rasAppearances[it.externalReference!!.uuid] }
 
     iee.publishInternalEvents(appearances.mapNotNull { ca -> ca.externalReference?.let { CourtAppearancePushSingle(it) } })
