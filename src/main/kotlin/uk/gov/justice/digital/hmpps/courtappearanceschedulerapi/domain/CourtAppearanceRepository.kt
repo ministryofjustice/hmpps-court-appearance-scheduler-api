@@ -42,6 +42,8 @@ interface CourtAppearanceRepository :
 
   @EntityGraph(attributePaths = ["person", "reason", "status", "movements.reason"])
   fun findByPersonIdentifierAndExternalReferenceIsNotNull(personIdentifier: String): List<CourtAppearance>
+
+  fun findByExternalReferenceIn(refs: Set<ExternalReference>): List<CourtAppearance>
 }
 
 fun CourtAppearanceRepository.getAppearance(id: UUID) = findByIdOrNull(id) ?: throw NotFoundException("Court appearance not found")

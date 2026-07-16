@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.CourtAppearanceReconcileEnhanced
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
@@ -96,7 +97,8 @@ class ReconciliationIntTest(
 
   @Test
   fun `OUT used when no movement before start`() {
-    val casAppearance = givenCourtAppearance(courtAppearance(prisonCode = "OUT", externalReference = externalReference()))
+    val casAppearance =
+      givenCourtAppearance(courtAppearance(prisonCode = "OUT", externalReference = externalReference()))
     rasMockServer.givenReconciliationAppearances(casAppearance.person.identifier, listOf(casAppearance.schedule(false)))
     prisonApi.givenMovementsFor(
       casAppearance.person.identifier,
@@ -119,6 +121,9 @@ class ReconciliationIntTest(
       listOf(casAppearance.schedule(false).copy(id = newUuid())),
     ).single()
 
+    rasMockServer.givenCourtAppearanceSchedules(emptyList())
+    prisonApi.givenMovementsFor(casAppearance.person.identifier, emptyList())
+
     personReconciliation.reconcile(casAppearance.person.identifier)
 
     verify(telemetryClient).trackEvent(
@@ -129,6 +134,32 @@ class ReconciliationIntTest(
         "rasCount" to "1",
         "casMissing" to listOf(rasAppearance.id).joinToString(", "),
         "rasMissing" to listOf(casAppearance.externalReference!!.uuid).joinToString(", "),
+      ),
+      mapOf(),
+    )
+  }
+
+  @Test
+  fun `missing ids found on another person are identified`() {
+    val casAppearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
+    val casFound = givenCourtAppearance(courtAppearance(prisonCode = casAppearance.prisonCode, externalReference = externalReference()))
+    rasMockServer.givenReconciliationAppearances(
+      casAppearance.person.identifier,
+      listOf(
+        casFound.schedule(false).copy(personIdentifier = casAppearance.person.identifier),
+      ),
+    )
+
+    val rasFound = rasMockServer.givenCourtAppearanceSchedule(casAppearance.schedule(false).copy(personIdentifier = personIdentifier()))
+    prisonApi.givenMovementsFor(casAppearance.person.identifier, listOf(prisonerMovement(casAppearance.prisonCode)))
+
+    personReconciliation.reconcile(casAppearance.person.identifier)
+
+    verify(telemetryClient).trackEvent(
+      "Person Identifier Mismatch",
+      mapOf(
+        "personIdentifier" to casAppearance.person.identifier,
+        "otherIdentifiers" to listOf(casFound.person.identifier, rasFound.personIdentifier).joinToString(", "),
       ),
       mapOf(),
     )
