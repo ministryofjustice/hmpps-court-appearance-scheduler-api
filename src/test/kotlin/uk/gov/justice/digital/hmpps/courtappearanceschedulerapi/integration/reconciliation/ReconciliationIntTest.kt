@@ -1,7 +1,10 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.reconciliation
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.MethodOrderer
+import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestMethodOrder
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.timeout
@@ -30,6 +33,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wire
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.schedule
 import java.time.LocalDate
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class ReconciliationIntTest(
   @Autowired pso: PersonSummaryOperations,
   @Autowired cao: CourtAppearanceOperations,
@@ -37,6 +41,7 @@ class ReconciliationIntTest(
 ) : IntegrationTest(),
   PersonSummaryOperations by pso,
   CourtAppearanceOperations by cao {
+
   @Test
   fun `active prisoner reconciliation is triggered successfully`() {
     val prisons = prisonRegister.givenNamedPrisons(setOf(prison(), prison(), prison()))
@@ -77,8 +82,10 @@ class ReconciliationIntTest(
     assertThat(rec.version).isEqualTo(0)
   }
 
+  @Order(1)
   @Test
   fun `matching reconciliation results does not send telemetry events`() {
+    verify(telemetryClient, never()).trackEvent(any(), any(), any())
     val casAppearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
     rasMockServer.givenReconciliationAppearances(casAppearance.person.identifier, listOf(casAppearance.schedule(false)))
     prisonApi.givenMovementsFor(
@@ -95,8 +102,10 @@ class ReconciliationIntTest(
     verify(telemetryClient, never()).trackEvent(any(), any(), any())
   }
 
+  @Order(2)
   @Test
   fun `OUT used when no movement before start`() {
+    verify(telemetryClient, never()).trackEvent(any(), any(), any())
     val casAppearance =
       givenCourtAppearance(courtAppearance(prisonCode = "OUT", externalReference = externalReference()))
     rasMockServer.givenReconciliationAppearances(casAppearance.person.identifier, listOf(casAppearance.schedule(false)))

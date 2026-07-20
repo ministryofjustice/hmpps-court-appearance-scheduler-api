@@ -381,20 +381,21 @@ class ResyncCourtAppearanceIntTest(
 
   @Test
   fun `200 ok - can merge, updating records`() {
+    val prevPrisonCode = prisonCode()
     val prisonCode = prisonCode()
     val person = givenPersonSummary(personSummary(prisonCode = prisonCode))
     val externalReference = externalReference()
     val schedule = givenCourtAppearance(
       courtAppearance(
         personIdentifier = person.identifier,
-        prisonCode = prisonCode,
+        prisonCode = prevPrisonCode,
         externalReference = externalReference,
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
       ),
     )
     val scheduled = schedule.movements.single()
     val unscheduled = givenUnscheduledMovement(unscheduledMovement(person.identifier, prisonCode))
-    prisonApi.givenMovementsFor(person.identifier, listOf(prisonerMovement(prisonCode)))
+    prisonApi.givenMovementsFor(person.identifier, listOf(prisonerMovement(prevPrisonCode), prisonerMovement(prisonCode)))
 
     val request = resyncRequest(
       courtEvents = listOf(

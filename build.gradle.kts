@@ -8,8 +8,8 @@ plugins {
   kotlin("plugin.jpa") version "2.4.10"
 }
 
-val hmppsKotlinVersion = "2.5.0"
-val sentryVersion = "8.48.0"
+val hmppsKotlinVersion = "3.0.0"
+val sentryVersion = "8.49.0"
 val springDocVersion = "3.0.3"
 val sqsStarterVersion = "7.4.0"
 val swaggerParserVersion = "2.1.45"

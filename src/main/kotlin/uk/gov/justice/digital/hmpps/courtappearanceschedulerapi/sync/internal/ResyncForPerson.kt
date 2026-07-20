@@ -128,10 +128,9 @@ class ResyncForPerson(
     prisonerMovements: List<PrisonerMovement>,
   ): CourtEventMapping {
     val rasScheduleInfo = courtEvent.externalReferenceUrn?.uuid?.let { scheduleInfoProvider(it) }
-    val pms = courtEvent.externalReferenceUrn?.let { prisonerMovements } ?: emptyList()
     val appearance = appearanceProvider(courtEvent.dpsId, requireNotNull(courtEvent.eventId))
-      ?.updateFrom(person, courtEvent, reasonProvider, statusProvider, rasScheduleInfo, pms)
-      ?: appearanceRepository.save(courtEvent.asEntity(person, reasonProvider, statusProvider, rasScheduleInfo, pms))
+      ?.updateFrom(person, courtEvent, reasonProvider, statusProvider, rasScheduleInfo, prisonerMovements)
+      ?: appearanceRepository.save(courtEvent.asEntity(person, reasonProvider, statusProvider, rasScheduleInfo, prisonerMovements))
     val scheduledMovements = movements.map {
       it.resync(person, appearance, movementProvider, reasonProvider, statusProvider, migrationAuditProvider)
     }
