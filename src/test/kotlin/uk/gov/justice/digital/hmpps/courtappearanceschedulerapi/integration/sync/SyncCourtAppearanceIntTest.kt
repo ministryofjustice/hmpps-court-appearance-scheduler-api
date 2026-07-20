@@ -180,6 +180,11 @@ class SyncCourtAppearanceIntTest(
   @Test
   fun `200 ok scheduled appearance id returned if legacy id already exists`() {
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
+    prisonApi.givenMovementsFor(
+      appearance.person.identifier,
+      listOf(prisonerMovement(appearance.prisonCode, dateTime = appearance.start.minusDays(1))),
+    )
+
     val request = with(appearance) {
       syncRequest(
         courtEvent(
@@ -231,7 +236,8 @@ class SyncCourtAppearanceIntTest(
       appearance,
       RevisionType.MOD,
       setOf(CourtAppearance::class.simpleName!!),
-      SchedulerContext.get().copy(username = request.user.username, caseloadId = request.user.activeCaseloadId, source = DataSource.NOMIS),
+      SchedulerContext.get()
+        .copy(username = request.user.username, caseloadId = request.user.activeCaseloadId, source = DataSource.NOMIS),
     )
   }
 
@@ -242,7 +248,13 @@ class SyncCourtAppearanceIntTest(
     prisonApi.givenMovementsFor(appearance.person.identifier, listOf(prisonerMovement(appearance.prisonCode)))
 
     val request =
-      syncRequest(courtEvent(appearance.prisonCode, eventId = appearance.legacyId!!, externalReference = externalReference(uuid = rasScheduleInfo.id)))
+      syncRequest(
+        courtEvent(
+          appearance.prisonCode,
+          eventId = appearance.legacyId!!,
+          externalReference = externalReference(uuid = rasScheduleInfo.id),
+        ),
+      )
     val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -288,7 +300,8 @@ class SyncCourtAppearanceIntTest(
     val prisonCode = requireNotNull(person.prisonCode)
     prisonApi.givenMovementsFor(person.identifier, listOf(prisonerMovement(prisonCode, dateTime = LocalDateTime.now())))
 
-    val request = syncRequest(courtEvent(prisonCode, date = LocalDate.now().minusDays(1), externalReference = externalReference()))
+    val request =
+      syncRequest(courtEvent(prisonCode, date = LocalDate.now().minusDays(1), externalReference = externalReference()))
     rasMockServer.givenCourtAppearanceSchedule(request.courtEvent.schedule(person.identifier)!!)
     val response = syncAppearance(person.identifier, request).successResponse<ReferenceId>()
 
@@ -306,14 +319,27 @@ class SyncCourtAppearanceIntTest(
 
     verifyEventPublications(
       saved,
-      setOf(CourtAppearanceRecorded(saved.person.identifier, saved.id, saved.externalReference, DataSource.NOMIS).publication(saved.id)),
+      setOf(
+        CourtAppearanceRecorded(
+          saved.person.identifier,
+          saved.id,
+          saved.externalReference,
+          DataSource.NOMIS,
+        ).publication(saved.id),
+      ),
     )
   }
 
   @Test
   fun `200 ok - court appearance completed on update`() {
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId(), start = LocalDateTime.now().minusDays(1)))
-    prisonApi.givenMovementsFor(appearance.person.identifier, listOf(prisonerMovement(appearance.prisonCode, dateTime = LocalDateTime.now())))
+    prisonApi.givenMovementsFor(
+      appearance.person.identifier,
+      listOf(
+        prisonerMovement(appearance.prisonCode, dateTime = appearance.start.minusDays(1)),
+        prisonerMovement(dateTime = appearance.start.plusDays(1)),
+      ),
+    )
 
     val request = syncRequest(
       courtEvent(
@@ -404,6 +430,8 @@ class SyncCourtAppearanceIntTest(
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
     assertThat(appearance.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
 
+    prisonApi.givenMovementsFor(appearance.person.identifier, listOf(prisonerMovement(appearance.prisonCode)))
+
     val request = syncRequest(
       courtEvent(
         scheduledPrisonCode = appearance.prisonCode,
@@ -448,6 +476,10 @@ class SyncCourtAppearanceIntTest(
   fun `200 ok - unscheduled court appearance scheduled by sync`() {
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId(), unschedule = true))
     assertThat(appearance.status.code).isEqualTo(CourtAppearanceStatus.Code.UNSCHEDULED)
+    prisonApi.givenMovementsFor(
+      appearance.person.identifier,
+      listOf(prisonerMovement(appearance.prisonCode, dateTime = appearance.start.minusDays(1))),
+    )
 
     val request = syncRequest(
       courtEvent(
@@ -518,7 +550,7 @@ class SyncCourtAppearanceIntTest(
 
   private fun syncRequest(
     courtEvent: CourtEvent = courtEvent(),
-    user: User = syncUser(activeCaseloadId = courtEvent.scheduledPrisonCode),
+    user: User = syncUser(),
     occurredAt: LocalDateTime = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS),
   ) = SyncCourtEvent(occurredAt, user, courtEvent)
 

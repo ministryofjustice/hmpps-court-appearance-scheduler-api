@@ -8,7 +8,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventM
 import java.time.temporal.ChronoUnit
 
 infix fun CourtAppearance.verifyAgainst(request: CourtEvent) {
-  assertThat(prisonCode).isEqualTo(request.scheduledPrisonCode)
   assertThat(courtCode).isEqualTo(request.scheduledCourtCode)
   assertThat(legacyId).isEqualTo(request.eventId)
   assertThat(externalReference).isEqualTo(request.externalReferenceUrn)

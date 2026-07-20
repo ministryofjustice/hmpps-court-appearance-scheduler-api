@@ -16,7 +16,7 @@ import java.util.UUID
 
 object SyncGenerator {
   fun courtEvent(
-    scheduledPrisonCode: String = prisonCode(),
+    scheduledPrisonCode: String? = null,
     scheduledCourtCode: String = courtCode(),
     type: String = "CRT",
     status: String = "SCH",

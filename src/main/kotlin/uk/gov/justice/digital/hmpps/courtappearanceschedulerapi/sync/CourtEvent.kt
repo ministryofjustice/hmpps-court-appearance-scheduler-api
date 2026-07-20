@@ -13,7 +13,7 @@ import java.util.UUID
 data class CourtEvent(
   val dpsId: UUID?,
   @JsonProperty("prisonCodeAtTimeOfScheduling")
-  val scheduledPrisonCode: String,
+  val scheduledPrisonCode: String?,
   @JsonProperty("agyLocId")
   val scheduledCourtCode: String,
   val eventId: Long?,

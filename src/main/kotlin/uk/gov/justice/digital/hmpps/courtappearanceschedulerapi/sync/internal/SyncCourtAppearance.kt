@@ -45,7 +45,7 @@ class SyncCourtAppearance(
     } else {
       null
     }
-    val prisonerMovements = request.courtEvent.externalReferenceUrn?.let { prisonClient.movementsFor(personIdentifier) } ?: emptyList()
+    val prisonerMovements = prisonClient.movementsFor(personIdentifier)
     val person = personSummaryService.getWithSave(personIdentifier)
     val appearance = (
       request.courtEvent.dpsId?.let { appearanceRepository.findByIdOrNull(it) }

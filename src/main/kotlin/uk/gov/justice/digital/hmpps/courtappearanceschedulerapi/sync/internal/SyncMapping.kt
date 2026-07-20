@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSum
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReasonProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.StatusProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonerMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.locationAt
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.mostRecent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
@@ -32,7 +33,7 @@ fun CourtEvent.asEntity(
   movements: List<PrisonerMovement>,
 ): CourtAppearance = CourtAppearance(
   person,
-  scheduledPrisonCode,
+  movements.locationAt(start),
   scheduledCourtCode,
   reason(type),
   start,
@@ -57,7 +58,7 @@ fun CourtAppearance.updateFrom(
   movements: List<PrisonerMovement>,
 ): CourtAppearance = apply {
   movePerson(personSummary)
-  applyResponsibility(ChangeAppearancePrison(request.scheduledPrisonCode))
+  applyResponsibility(ChangeAppearancePrison(movements.locationAt(request.start)))
   applyExternalIdentifiers(request.externalReferenceUrn, request.eventId)
   relocate(RelocateAppearance(request.scheduledCourtCode))
   recategorise(RecategoriseAppearance(request.type), reason)

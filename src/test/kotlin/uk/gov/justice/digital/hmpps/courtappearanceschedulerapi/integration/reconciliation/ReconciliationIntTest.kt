@@ -79,6 +79,7 @@ class ReconciliationIntTest(
 
   @Test
   fun `matching reconciliation results does not send telemetry events`() {
+    verify(telemetryClient, never()).trackEvent(any(), any(), any())
     val casAppearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
     rasMockServer.givenReconciliationAppearances(casAppearance.person.identifier, listOf(casAppearance.schedule(false)))
     prisonApi.givenMovementsFor(
@@ -97,6 +98,7 @@ class ReconciliationIntTest(
 
   @Test
   fun `OUT used when no movement before start`() {
+    verify(telemetryClient, never()).trackEvent(any(), any(), any())
     val casAppearance =
       givenCourtAppearance(courtAppearance(prisonCode = "OUT", externalReference = externalReference()))
     rasMockServer.givenReconciliationAppearances(casAppearance.person.identifier, listOf(casAppearance.schedule(false)))
