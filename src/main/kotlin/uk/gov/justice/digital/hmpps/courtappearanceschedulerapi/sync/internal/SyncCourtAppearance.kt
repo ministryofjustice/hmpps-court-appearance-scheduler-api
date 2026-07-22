@@ -7,12 +7,9 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceCo
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext.Companion.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.set
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceReasonRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatusRepository
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceEntity.COURT_APPEARANCE
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceService.REMAND_AND_SENTENCING
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReasonByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getStatusByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonApiClient
@@ -71,18 +68,9 @@ class SyncCourtAppearance(
     return ReferenceId(appearance.id)
   }
 
-  fun delete(id: UUID): Boolean = appearanceRepository.findByIdOrNull(id)?.let { appearance ->
+  fun delete(id: UUID) = appearanceRepository.findByIdOrNull(id)?.let { appearance ->
     SchedulerContext.get().copy(username = SYSTEM_USERNAME).set()
-    if (appearance.movements.isEmpty()) {
-      appearanceRepository.delete(appearance)
-      true
-    } else {
-      if (appearance.isRasAppearance()) {
-        appearance.applyExternalIdentifiers(null, appearance.legacyId)
-      }
-      false
-    }
-  } ?: true
-
-  private fun CourtAppearance.isRasAppearance(): Boolean = externalReference?.takeIf { it.service == REMAND_AND_SENTENCING && it.entity == COURT_APPEARANCE } != null
+    appearance.movements.toList().forEach(appearance::removeMovement)
+    appearanceRepository.delete(appearance)
+  }
 }

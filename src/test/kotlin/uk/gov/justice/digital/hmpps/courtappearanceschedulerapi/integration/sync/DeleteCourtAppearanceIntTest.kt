@@ -6,15 +6,16 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext.Companion.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceCancelled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
@@ -42,35 +43,32 @@ class DeleteCourtAppearanceIntTest(
   }
 
   @Test
-  fun `409 conflict when appearance has movements`() {
-    val appearance = givenCourtAppearance(courtAppearance(movements = listOf(movement(CourtAppearanceMovement.Direction.OUT))))
-    deleteAppearance(appearance.id).errorResponse(HttpStatus.CONFLICT)
-  }
-
-  @Test
-  fun `409 conflict - RaS appearance with movements unlinked from RaS`() {
+  fun `204 - appearance with movements deleted - movements orphaned`() {
     val appearance = givenCourtAppearance(
-      courtAppearance(
-        externalReference = externalReference(),
-        movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
-      ),
+      courtAppearance(movements = listOf(movement(CourtAppearanceMovement.Direction.OUT))),
     )
-    deleteAppearance(appearance.id).errorResponse(HttpStatus.CONFLICT)
+    deleteAppearance(appearance.id).expectStatus().isNoContent
 
-    val updated = requireNotNull(findCourtAppearance(appearance.id))
-    assertThat(updated.externalReference).isNull()
+    assertThat(findCourtAppearance(appearance.id)).isNull()
 
     verifyAudit(
-      updated,
-      RevisionType.MOD,
-      setOf(CourtAppearance::class.simpleName!!),
+      appearance,
+      RevisionType.DEL,
+      setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearance::class.simpleName!!, CourtAppearanceMovement::class.simpleName!!),
       SchedulerContext.get()
         .copy(username = SYSTEM_USERNAME, caseloadId = null, source = DataSource.NOMIS),
     )
 
     verifyEventPublications(
-      updated,
-      setOf(),
+      appearance,
+      setOf(
+        CourtAppearanceCancelled(
+          appearance.person.identifier,
+          appearance.id,
+          appearance.externalReference,
+          DataSource.NOMIS,
+        ).publication(appearance.id),
+      ),
     )
   }
 

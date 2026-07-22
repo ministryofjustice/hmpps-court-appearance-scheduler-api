@@ -10,7 +10,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReason
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getStatusByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceDeleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceEvent
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.ConflictException
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonApiClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.locationAt
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.mostRecent
@@ -42,11 +41,8 @@ class RasAppearanceHandler(
   private fun handleDelete(event: RasAppearanceDeleted) {
     appearanceRepository.findByExternalReference(event.externalReference())
       ?.also {
-        if (it.movements.isEmpty()) {
-          appearanceRepository.delete(it)
-        } else {
-          it.applyExternalIdentifiers(null, it.legacyId)
-        }
+        it.movements.toList().forEach(it::removeMovement)
+        appearanceRepository.delete(it)
       }
   }
 
@@ -56,7 +52,6 @@ class RasAppearanceHandler(
       val mrm = movements.mostRecent()
       val prisonCode = movements.locationAt(ras.start)
       appearanceRepository.findByExternalReference(event.externalReference())?.also { cas ->
-        if (cas.person.identifier != ras.personIdentifier) throw ConflictException("Court appearance person conflict")
         cas.applyResponsibility(ChangeAppearancePrison(prisonCode))
         cas.reschedule(RescheduleAppearance(ras.start, cas.end))
         cas.relocate(RelocateAppearance(ras.courtCode))
@@ -88,6 +83,10 @@ class RasAppearanceHandler(
       comments,
       externalReference,
       null,
-    ).calculateStatus(statusRepository::getStatusByCode, start.isBefore(mrm?.movementDateTime ?: LocalDateTime.now()), isDuplicate)
+    ).calculateStatus(
+      statusRepository::getStatusByCode,
+      start.isBefore(mrm?.movementDateTime ?: LocalDateTime.now()),
+      isDuplicate,
+    )
   }
 }

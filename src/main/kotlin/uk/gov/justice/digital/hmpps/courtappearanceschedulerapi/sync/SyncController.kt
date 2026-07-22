@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.OpenApiTags
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.ConflictException
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ReferenceId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal.SyncCourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal.SyncCourtMovement
@@ -50,7 +49,7 @@ class SyncController(
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/court-appearances/{id}")
   fun deleteCourtAppearance(@PathVariable id: UUID) {
-    if (!appearance.delete(id)) throw ConflictException("Cannot delete a scheduled appearance with a recorded movement.")
+    appearance.delete(id)
   }
 
   @ResponseStatus(HttpStatus.NO_CONTENT)
