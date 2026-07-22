@@ -17,14 +17,17 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.Data
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtMovementOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.ras.RasAppearanceHandler
 import java.util.UUID
 
 class RasCourtAppearanceDeletedIntTest(
   @Autowired cao: CourtAppearanceOperations,
+  @Autowired cam: CourtMovementOperations,
   @Autowired private val cadHandler: RasAppearanceHandler,
 ) : IntegrationTest(),
-  CourtAppearanceOperations by cao {
+  CourtAppearanceOperations by cao,
+  CourtMovementOperations by cam {
 
   @Test
   fun `no exceptions if records do not exist`() {
@@ -60,17 +63,19 @@ class RasCourtAppearanceDeletedIntTest(
   }
 
   @Test
-  fun `does not delete a court appearance with movements - ras reference removed`() {
-    val noDelete = givenCourtAppearance(
+  fun `can delete a court appearance with movements`() {
+    val toDelete = givenCourtAppearance(
       courtAppearance(
         externalReference = externalReference(),
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
       ),
     )
-    val event = event(noDelete.externalReference!!.uuid)
+    val event = event(toDelete.externalReference!!.uuid)
     cadHandler.handle(event)
-    val updated = requireNotNull(findCourtAppearance(noDelete.id))
-    assertThat(updated.externalReference).isNull()
+
+    assertThat(findCourtAppearance(toDelete.id)).isNull()
+    val movement = requireNotNull(findCourtMovement(toDelete.movements.first().id))
+    assertThat(movement.courtAppearance).isNull()
   }
 }
 
