@@ -31,6 +31,7 @@ object SyncGenerator {
 
   fun courtEventMovement(
     scheduleId: UUID? = null,
+    scheduleExternalReference: ExternalReference? = null,
     bookingId: Long = newId(),
     sequenceNumber: Int = newId().toInt(),
     directionCode: String = "OUT",
@@ -44,6 +45,7 @@ object SyncGenerator {
   ): CourtEventMovement = CourtEventMovement(
     dpsId,
     scheduleId,
+    scheduleExternalReference,
     bookingId,
     sequenceNumber,
     LocalDateTime.of(date, time),

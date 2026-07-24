@@ -61,6 +61,7 @@ private fun CourtAppearanceMovement.asMovement(): CourtEventMovement {
   return CourtEventMovement(
     id,
     courtAppearance?.id,
+    courtAppearance?.externalReference,
     legacyIdParts?.get(0)?.toLong(),
     legacyIdParts?.get(1)?.toInt(),
     occurredAt,

@@ -34,10 +34,11 @@ class SyncCourtMovement(
         .set()
     }
     val person = personSummaryService.getWithSave(personIdentifier)
-    val schedule = request.movement.scheduleId?.let { appearanceRepository.getAppearance(it) }
+    val schedule = request.movement.scheduleId?.let(appearanceRepository::getAppearance)
+      ?: request.movement.scheduleExternalReference?.let(appearanceRepository::findByExternalReference)
     val movement = (
-      request.movement.dpsId?.let { movementRepository.findByIdOrNull(it) }
-        ?: request.movement.legacyId?.let { movementRepository.findByLegacyId(it) }
+      request.movement.dpsId?.let(movementRepository::findByIdOrNull)
+        ?: request.movement.legacyId?.let(movementRepository::findByLegacyId)
       )
       ?.updateFrom(person, schedule, request.movement, reasonRepository::getReasonByCode, statusRepository::getStatusByCode)
       ?: movementRepository.save(
