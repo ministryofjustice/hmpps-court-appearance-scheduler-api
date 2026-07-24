@@ -40,6 +40,8 @@ data class CourtEventMovement(
   val dpsId: UUID?,
   @JsonProperty("dpsCourtAppearanceScheduleId")
   val scheduleId: UUID?,
+  @JsonProperty("dpsCourtAppearanceExternalReference")
+  val scheduleExternalReference: ExternalReference?,
   @JsonProperty("offenderBookId")
   val bookingId: Long?,
   @JsonProperty("movementSeq")

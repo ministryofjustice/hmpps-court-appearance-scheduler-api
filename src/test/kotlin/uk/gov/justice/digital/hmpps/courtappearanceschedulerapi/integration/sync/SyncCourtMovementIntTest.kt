@@ -23,6 +23,8 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.Ap
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementRelocated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementReversed
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceCompleted
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceStarted
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
@@ -174,6 +176,53 @@ class SyncCourtMovementIntTest(
           DataSource.NOMIS,
         ).publication(updatedAppearance.id),
         AppearanceMovementRecorded(movement.person.identifier, movement.id, DataSource.NOMIS).publication(movement.id),
+      ),
+    )
+  }
+
+  @Test
+  fun `200 ok - new scheduled movement created and applied to RaS appearance`() {
+    val appearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
+    val prisonCode = appearance.prisonCode
+
+    val request = syncRequest(
+      courtEventMovement(
+        scheduleId = null,
+        scheduleExternalReference = appearance.externalReference,
+        fromAgencyId = prisonCode,
+      ),
+    )
+    val response = syncMovement(appearance.person.identifier, request).successResponse<ReferenceId>()
+
+    val saved = requireNotNull(findCourtMovement(response.id))
+    saved verifyAgainst request.movement
+    assertThat(saved.courtAppearance?.status?.code).isEqualTo(CourtAppearanceStatus.Code.IN_PROGRESS)
+
+    verifyAudit(
+      saved,
+      RevisionType.ADD,
+      setOf(
+        HmppsDomainEvent::class.simpleName!!,
+        CourtAppearanceMovement::class.simpleName!!,
+        CourtAppearance::class.simpleName!!,
+      ),
+      SchedulerContext.get().copy(
+        username = request.user.username,
+        caseloadId = request.user.activeCaseloadId,
+        source = DataSource.NOMIS,
+      ),
+    )
+
+    verifyEventPublications(
+      saved,
+      setOf(
+        CourtAppearanceStarted(
+          saved.person.identifier,
+          appearance.id,
+          appearance.externalReference,
+          DataSource.NOMIS,
+        ).publication(appearance.id),
+        AppearanceMovementRecorded(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id),
       ),
     )
   }
