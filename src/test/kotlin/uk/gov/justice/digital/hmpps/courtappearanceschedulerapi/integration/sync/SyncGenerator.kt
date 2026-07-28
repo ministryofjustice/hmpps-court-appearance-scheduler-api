@@ -16,7 +16,6 @@ import java.util.UUID
 
 object SyncGenerator {
   fun courtEvent(
-    scheduledPrisonCode: String? = null,
     scheduledCourtCode: String = courtCode(),
     type: String = "CRT",
     status: String = "SCH",
@@ -27,7 +26,7 @@ object SyncGenerator {
     eventId: Long = newId(),
     externalReference: ExternalReference? = null,
     dpsId: UUID? = null,
-  ): CourtEvent = CourtEvent(dpsId, scheduledPrisonCode, scheduledCourtCode, eventId, LocalDateTime.of(date, startTime), type, status, commentText, externalReference, null, currentTerm)
+  ): CourtEvent = CourtEvent(dpsId, scheduledCourtCode, eventId, LocalDateTime.of(date, startTime), type, status, commentText, externalReference, null, currentTerm)
 
   fun courtEventMovement(
     scheduleId: UUID? = null,

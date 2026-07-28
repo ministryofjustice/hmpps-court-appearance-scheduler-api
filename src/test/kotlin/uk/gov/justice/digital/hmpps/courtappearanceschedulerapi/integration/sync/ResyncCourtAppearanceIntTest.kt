@@ -526,7 +526,6 @@ class ResyncCourtAppearanceIntTest(
           courtEvent = courtEvent(
             dpsId = schedule.id,
             eventId = schedule.legacyId!!,
-            scheduledPrisonCode = prisonCode,
             scheduledCourtCode = courtCode,
             date = schedule.start.toLocalDate(),
             startTime = schedule.start.toLocalTime(),
@@ -616,7 +615,6 @@ class ResyncCourtAppearanceIntTest(
           courtEvent = courtEvent(
             dpsId = existing.id,
             eventId = existing.legacyId!!,
-            scheduledPrisonCode = prisonCode,
             scheduledCourtCode = courtCode,
             date = existing.start.toLocalDate(),
             startTime = existing.start.toLocalTime(),
@@ -626,7 +624,6 @@ class ResyncCourtAppearanceIntTest(
         ),
         resyncCourtEvent(
           courtEvent = courtEvent(
-            scheduledPrisonCode = prisonCode,
             scheduledCourtCode = courtCode,
             date = existing.start.toLocalDate(),
             startTime = existing.start.toLocalTime(),
