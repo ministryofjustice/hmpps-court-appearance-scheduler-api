@@ -9,6 +9,7 @@
             <child catalog="appearance" column="legacy_id" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="public" table="court_appearance_audit"/>
             <child catalog="appearance" column="rev_id" foreignKey="fk_court_appearance_audit_revision" implied="false" onDeleteCascade="false" schema="public" table="court_appearance_audit"/>
             <child catalog="appearance" column="rev_id" foreignKey="fk_court_appearance_movement_audit_revision" implied="false" onDeleteCascade="false" schema="public" table="court_appearance_movement_audit"/>
+            <child catalog="appearance" column="rev_id" foreignKey="fk_domain_event_audit_revision" implied="false" onDeleteCascade="false" schema="public" table="hmpps_domain_event_audit"/>
          </column>
          <column autoUpdated="false" defaultValue="null" digits="6" id="1" name="timestamp" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
          <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="source" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
@@ -222,7 +223,9 @@
          </index>
       </table>
       <table catalog="appearance" name="hmpps_domain_event_audit" remarks="" schema="public" type="TABLE">
-         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="rev_id" nullable="false" remarks="" size="19" type="int8" typeCode="-5"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="0" name="rev_id" nullable="false" remarks="" size="19" type="int8" typeCode="-5">
+            <parent catalog="appearance" column="id" foreignKey="fk_domain_event_audit_revision" implied="false" onDeleteCascade="false" schema="public" table="audit_revision"/>
+         </column>
          <column autoUpdated="false" defaultValue="null" digits="0" id="1" name="rev_type" nullable="false" remarks="" size="5" type="int2" typeCode="5"/>
          <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
          <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="version" nullable="false" remarks="" size="10" type="int4" typeCode="4"/>
