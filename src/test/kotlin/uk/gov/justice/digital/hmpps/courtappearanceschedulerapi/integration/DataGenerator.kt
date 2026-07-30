@@ -9,10 +9,16 @@ import java.util.concurrent.ConcurrentSkipListSet
 import java.util.concurrent.atomic.AtomicLong
 
 object DataGenerator {
+  const val DISABLED_EVENTS_PRISON_CODE = "LEI"
+
   private val id = AtomicLong(1)
   private val letters = ('A'..'Z')
   private val usedPrisonCodes = ConcurrentSkipListSet<String>()
   private val usedPersonIdentifiers = ConcurrentSkipListSet<String>()
+
+  init {
+    usedPrisonCodes += DISABLED_EVENTS_PRISON_CODE
+  }
 
   fun newId(): Long = id.getAndIncrement()
   fun personIdentifier(attempts: Int = 10): String {

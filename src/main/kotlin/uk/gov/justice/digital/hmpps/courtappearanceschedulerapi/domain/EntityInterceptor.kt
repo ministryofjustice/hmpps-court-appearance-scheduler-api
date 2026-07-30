@@ -37,9 +37,10 @@ class EntityInterceptor : Interceptor {
   ): Boolean {
     if (entity is DomainEventProducer) {
       val migrating = SchedulerContext.get().migratingData
+      val prisonEventsDisabled = entity is PrisonRelated && entity.prisonCode in sc.disablePrisonEvents
       entity.domainEvents().forEach {
         if (registerDomainEvent(it.entityId, it.event.eventType)) {
-          em.persist(HmppsDomainEvent(it.event, it.entityId).apply { published = migrating || !it.publish })
+          em.persist(HmppsDomainEvent(it.event, it.entityId).apply { published = migrating || prisonEventsDisabled || !it.publish })
         }
       }
     }
@@ -55,9 +56,10 @@ class EntityInterceptor : Interceptor {
   ): Boolean {
     if (entity is DomainEventProducer) {
       val migrating = SchedulerContext.get().migratingData
+      val prisonEventsDisabled = entity is PrisonRelated && entity.prisonCode in sc.disablePrisonEvents
       entity.initialEvents().forEach {
         if (registerDomainEvent(it.entityId, it.event.eventType)) {
-          em.persist(HmppsDomainEvent(it.event, it.entityId).apply { published = migrating || !it.publish })
+          em.persist(HmppsDomainEvent(it.event, it.entityId).apply { published = migrating || prisonEventsDisabled || !it.publish })
         }
       }
     }
@@ -81,9 +83,10 @@ class EntityInterceptor : Interceptor {
   ) {
     if (entity is DomainEventProducer) {
       val migrating = SchedulerContext.get().migratingData
+      val prisonEventsDisabled = entity is PrisonRelated && entity.prisonCode in sc.disablePrisonEvents
       entity.deletionEvents().forEach {
         if (registerDomainEvent(it.entityId, it.event.eventType)) {
-          em.persist(HmppsDomainEvent(it.event, it.entityId).apply { published = migrating || !it.publish })
+          em.persist(HmppsDomainEvent(it.event, it.entityId).apply { published = migrating || prisonEventsDisabled || !it.publish })
         }
       }
     }

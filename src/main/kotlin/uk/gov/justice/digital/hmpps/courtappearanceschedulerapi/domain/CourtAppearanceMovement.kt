@@ -52,7 +52,8 @@ final class CourtAppearanceMovement(
   @Id
   @Column(name = "id", nullable = false)
   override val id: UUID = newUuid(),
-) : DomainEventProducer {
+) : DomainEventProducer,
+  PrisonRelated {
   @Version
   @Column(name = "version", nullable = false)
   override var version: Int? = null
@@ -73,7 +74,7 @@ final class CourtAppearanceMovement(
   @Size(max = 6)
   @NotNull
   @Column(name = "prison_code", nullable = false, length = 6)
-  var prisonCode: String = prisonCode
+  override var prisonCode: String = prisonCode
     private set
 
   @Size(max = 6)
