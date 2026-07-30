@@ -9,7 +9,16 @@ class SecurityConfig {
   @Bean
   fun resourceServerCustomizer() = ResourceServerConfigurationCustomizer {
     unauthorizedRequestPaths {
-      addPaths = setOf("/queue-admin/retry-all-dlqs")
+      addPaths = setOf(
+        "/queue-admin/retry-all-dlqs",
+        "/health/**",
+        "/info",
+        "/ping",
+        "/v3/api-docs/**",
+        "/swagger-ui/**",
+        "/swagger-ui.html",
+        "/swagger-resources/**",
+      )
     }
   }
 }

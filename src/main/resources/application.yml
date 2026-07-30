@@ -118,6 +118,7 @@ springdoc:
     version: OPENAPI_3_0
   swagger-ui:
     enabled: false
+    version: 5.32.11
 
 logging:
   level:
