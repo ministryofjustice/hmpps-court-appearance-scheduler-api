@@ -4,10 +4,12 @@ import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Convert
 import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.NamedAttributeNode
+import jakarta.persistence.NamedEntityGraph
+import jakarta.persistence.NamedSubgraph
 import jakarta.persistence.OneToMany
 import jakarta.persistence.PostLoad
 import jakarta.persistence.Table
@@ -46,6 +48,22 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
+@NamedEntityGraph(
+  name = "court-appearance.full",
+  includeAllAttributes = true,
+  attributeNodes = [
+    NamedAttributeNode("movements", "move"),
+  ],
+  subgraphs = [
+    NamedSubgraph(
+      name = "move",
+      attributeNodes = [
+        NamedAttributeNode("person"),
+        NamedAttributeNode("reason"),
+      ],
+    ),
+  ],
+)
 @Audited
 @Entity
 @Table(name = "court_appearance")
@@ -141,8 +159,7 @@ final class CourtAppearance(
   var legacyId: Long? = legacyId
     private set
 
-  @Fetch(FetchMode.JOIN)
-  @OneToMany(mappedBy = "courtAppearance", cascade = [CascadeType.PERSIST, CascadeType.MERGE], fetch = FetchType.EAGER)
+  @OneToMany(mappedBy = "courtAppearance", cascade = [CascadeType.PERSIST, CascadeType.MERGE])
   val movements: List<CourtAppearanceMovement>
     field = mutableListOf<CourtAppearanceMovement>()
 

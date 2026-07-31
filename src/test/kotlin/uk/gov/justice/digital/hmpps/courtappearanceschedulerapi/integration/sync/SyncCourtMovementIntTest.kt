@@ -137,12 +137,10 @@ class SyncCourtMovementIntTest(
 
   @Test
   fun `200 ok - new scheduled movement created and schedule status updated`() {
-    val appearance =
-      givenCourtAppearance(courtAppearance(movements = listOf(movement(CourtAppearanceMovement.Direction.OUT))))
+    val appearance = givenCourtAppearance(courtAppearance(movements = listOf(movement(CourtAppearanceMovement.Direction.OUT))))
     val prisonCode = appearance.prisonCode
 
-    val request =
-      syncRequest(courtEventMovement(scheduleId = appearance.id, fromAgencyId = prisonCode, directionCode = "IN"))
+    val request = syncRequest(courtEventMovement(scheduleId = appearance.id, fromAgencyId = prisonCode, directionCode = "IN"))
     val response = syncMovement(appearance.person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtMovement(response.id))
@@ -165,17 +163,16 @@ class SyncCourtMovementIntTest(
     )
 
     val updatedAppearance = requireNotNull(saved.courtAppearance)
-    val movement = updatedAppearance.movements.first { it.direction == CourtAppearanceMovement.Direction.IN }
     verifyEventPublications(
       saved,
       setOf(
         CourtAppearanceCompleted(
           saved.person.identifier,
           updatedAppearance.id,
-          null,
+          updatedAppearance.externalReference,
           DataSource.NOMIS,
         ).publication(updatedAppearance.id),
-        AppearanceMovementRecorded(movement.person.identifier, movement.id, DataSource.NOMIS).publication(movement.id),
+        AppearanceMovementRecorded(saved.person.identifier, saved.id, DataSource.NOMIS).publication(saved.id),
       ),
     )
   }
