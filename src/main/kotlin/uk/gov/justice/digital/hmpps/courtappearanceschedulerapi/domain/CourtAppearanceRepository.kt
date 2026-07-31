@@ -11,15 +11,25 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSum
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.PRISON_CODE
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.clashes.ClashRange
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.Optional
 import java.util.UUID
 
 interface CourtAppearanceRepository :
   JpaRepository<CourtAppearance, UUID>,
   JpaSpecificationExecutor<CourtAppearance> {
+
+  @EntityGraph("court-appearance.full")
+  override fun findById(id: UUID): Optional<CourtAppearance>
+
+  @EntityGraph("court-appearance.full")
   fun findByLegacyId(legacyId: Long): CourtAppearance?
+
+  @EntityGraph("court-appearance.full")
   fun findByExternalReference(externalReference: ExternalReference): CourtAppearance?
+
   fun countByPersonIdentifier(personIdentifier: String): Int
 
   @Query(
@@ -38,11 +48,13 @@ interface CourtAppearanceRepository :
   )
   fun findIdsForLegacyIds(legacyIds: Set<Long>): List<UUID>
 
+  @EntityGraph("court-appearance.full")
   fun findByStatusIdAndStartBefore(statusId: UUID, date: LocalDateTime): List<CourtAppearance>
 
-  @EntityGraph(attributePaths = ["person", "reason", "status", "movements.reason"])
+  @EntityGraph("court-appearance.full")
   fun findByPersonIdentifierAndExternalReferenceIsNotNull(personIdentifier: String): List<CourtAppearance>
 
+  @EntityGraph("court-appearance.full")
   fun findByExternalReferenceIn(refs: Set<ExternalReference>): List<CourtAppearance>
 }
 
@@ -53,8 +65,7 @@ fun appearanceMatchesCourtCodeIn(courtCodes: Set<String>) = Specification<CourtA
 }
 
 fun appearanceMatchesPersonPrisonCode(prisonCode: String) = Specification<CourtAppearance> { ca, _, cb ->
-  ca.join<CourtAppearance, PersonSummary>(CourtAppearance::person.name, JoinType.INNER)
-    .matchesPrisonCode(cb, prisonCode)
+  ca.join<CourtAppearance, PersonSummary>(CourtAppearance::person.name, JoinType.INNER).matchesPrisonCode(cb, prisonCode)
 }
 
 fun appearanceMatchesPersonIdentifier(personIdentifier: String, prisonCode: String?) = Specification<CourtAppearance> { ca, _, cb ->
@@ -105,4 +116,17 @@ fun startsOnOrBefore(end: LocalDate) = Specification<CourtAppearance> { ca, _, c
 
 fun appearanceMatchesExternal(external: Boolean) = Specification<CourtAppearance> { ca, _, cb ->
   cb.equal(ca.get<Boolean>(CourtAppearance::external.name), external)
+}
+
+fun clashesFor(personIdentifiers: Set<String>, ranges: Set<ClashRange>) = Specification<CourtAppearance> { ca, _, cb ->
+  val rangeRestrictions = ranges.map {
+    cb.and(
+      cb.greaterThan(ca.get(CourtAppearance::end.name), it.start),
+      cb.lessThan(ca.get(CourtAppearance::start.name), it.end),
+    )
+  }
+  cb.and(
+    ca.get<Any>(CourtAppearance::person.name).get<String>(IDENTIFIER).`in`(personIdentifiers),
+    cb.or(rangeRestrictions),
+  )
 }

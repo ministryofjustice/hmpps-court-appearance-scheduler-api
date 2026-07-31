@@ -96,7 +96,7 @@ class CourtAppearanceModificationsIntTest(
     )
     assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.EXPIRED)
 
-    applyAction(ca.id, CancelAppearance()).errorResponse(HttpStatus.CONFLICT)
+    applyAction(ca.id, CancelAppearance).errorResponse(HttpStatus.CONFLICT)
   }
 
   @Test
@@ -106,7 +106,7 @@ class CourtAppearanceModificationsIntTest(
     )
     assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.IN_PROGRESS)
 
-    applyAction(ca.id, CancelAppearance()).errorResponse(HttpStatus.CONFLICT)
+    applyAction(ca.id, CancelAppearance).errorResponse(HttpStatus.CONFLICT)
   }
 
   @Test
@@ -118,7 +118,7 @@ class CourtAppearanceModificationsIntTest(
     )
     assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.COMPLETED)
 
-    applyAction(ca.id, CancelAppearance()).errorResponse(HttpStatus.CONFLICT)
+    applyAction(ca.id, CancelAppearance).errorResponse(HttpStatus.CONFLICT)
   }
 
   @Test
@@ -127,7 +127,7 @@ class CourtAppearanceModificationsIntTest(
     assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
     rasMockServer.givenDeleteAppearance(ca.externalReference!!.uuid, HttpStatus.SERVICE_UNAVAILABLE)
 
-    applyAction(ca.id, CancelAppearance()).errorResponse(HttpStatus.CONFLICT)
+    applyAction(ca.id, CancelAppearance).errorResponse(HttpStatus.CONFLICT)
   }
 
   @Test
@@ -136,14 +136,14 @@ class CourtAppearanceModificationsIntTest(
     assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
     rasMockServer.givenDeleteAppearance(ca.externalReference!!.uuid, HttpStatus.CONFLICT)
 
-    applyAction(ca.id, CancelAppearance()).errorResponse(HttpStatus.CONFLICT)
+    applyAction(ca.id, CancelAppearance).errorResponse(HttpStatus.CONFLICT)
   }
 
   @Test
   fun `200 - cancel scheduled appearance`() {
     val ca = givenCourtAppearance(courtAppearance())
     assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
-    val action = CancelAppearance()
+    val action = CancelAppearance
     val reason = word(20)
     val username = username()
 
@@ -176,7 +176,7 @@ class CourtAppearanceModificationsIntTest(
     assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
     rasMockServer.givenDeleteAppearance(ca.externalReference!!.uuid, HttpStatus.NO_CONTENT)
 
-    val action = CancelAppearance()
+    val action = CancelAppearance
     val reason = word(20)
     val username = username()
 
