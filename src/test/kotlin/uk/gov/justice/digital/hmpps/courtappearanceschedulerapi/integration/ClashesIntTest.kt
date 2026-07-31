@@ -30,7 +30,7 @@ class ClashesIntTest(
   @Test
   fun `401 unauthorised without a valid token`() {
     webTestClient
-      .get()
+      .post()
       .uri(CLASHES_URL, prisonCode())
       .exchange()
       .expectStatus()

@@ -53,7 +53,7 @@ class SearchCourtAppearances(
 
   fun findSchedules(prisonCode: String, request: AppearanceScheduleSearchRequest): CourtAppearanceSchedules {
     val page = appearanceRepository.findAll(request.asSpecification(prisonCode), request.pageable())
-    val courts = courtRegister.findCourts(page.map { it.courtCode }.toSet()).block()!!.associateBy { it.code }
+    val courts = courtRegister.getCourts(page.map { it.courtCode }.toSet()).associateBy { it.code }
     return page.map { app -> app.asSchedule { courts[it] ?: Court.default(it) } }.asScheduleResponse()
   }
 

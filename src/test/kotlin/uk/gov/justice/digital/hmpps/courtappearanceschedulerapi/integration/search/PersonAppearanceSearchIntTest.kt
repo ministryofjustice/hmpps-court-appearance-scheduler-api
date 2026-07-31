@@ -155,7 +155,7 @@ class PersonAppearanceSearchIntTest(
         courtCode = court.code,
         personIdentifier = person.identifier,
         start = LocalDate.now().atTime(6, 0),
-        end = null,
+        end = LocalDate.now().atTime(23, 59),
       ),
     )
     assertThat(scheduled.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)

@@ -37,7 +37,7 @@ class RetrieveClashes(
     val court = courtSupplier(courtCode)
     return Clash(
       start,
-      end ?: start.toLocalDate().atTime(17, 0),
+      end,
       description(),
       Clash.Location(court.name),
       Clash.AdditionalInformation(court.code),

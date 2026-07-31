@@ -242,7 +242,7 @@ class CourtAppearanceModificationsIntTest(
   fun `200 can reschedule a court appearance with start and end`() {
     val ca = givenCourtAppearance(courtAppearance())
     val username = username()
-    val action = RescheduleAppearance(ca.start.plusDays(1), ca.end!!.plusDays(1))
+    val action = RescheduleAppearance(ca.start.plusDays(1), ca.end.plusDays(1))
     val reason = word(20)
     val res = applyAction(ca.id, action, reason, username).successResponse<AuditHistory>()
     with(res.content.single()) {
@@ -256,40 +256,7 @@ class CourtAppearanceModificationsIntTest(
 
     val saved = requireNotNull(findCourtAppearance(ca.id))
     assertThat(saved.start.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(action.start!!.truncatedTo(ChronoUnit.SECONDS))
-    assertThat(saved.end!!.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(action.end!!.truncatedTo(ChronoUnit.SECONDS))
-
-    verifyAudit(
-      saved,
-      RevisionType.MOD,
-      setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
-      SchedulerContext.get().copy(username = username, reason = reason),
-    )
-
-    verifyEventPublications(
-      saved,
-      setOf(CourtAppearanceRescheduled(saved.person.identifier, saved.id, null).publication(saved.id)),
-    )
-  }
-
-  @Test
-  fun `200 can reschedule a court appearance with start and no end`() {
-    val ca = givenCourtAppearance(courtAppearance(end = null))
-    val username = username()
-    val action = RescheduleAppearance(ca.start.plusDays(1), ca.start.withHour(17).plusDays(1))
-    val reason = word(20)
-    val res = applyAction(ca.id, action, reason, username).successResponse<AuditHistory>()
-    with(res.content.single()) {
-      assertThat(domainEvents).containsExactly(CourtAppearanceRescheduled.EVENT_TYPE)
-      assertThat(this.reason).isEqualTo(reason)
-      assertThat(changes.map { it.propertyName }).containsExactly(
-        CourtAppearance::start.name,
-        CourtAppearance::end.name,
-      )
-    }
-
-    val saved = requireNotNull(findCourtAppearance(ca.id))
-    assertThat(saved.start.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(action.start!!.truncatedTo(ChronoUnit.SECONDS))
-    assertThat(saved.end!!.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(action.end!!.truncatedTo(ChronoUnit.SECONDS))
+    assertThat(saved.end.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(action.end!!.truncatedTo(ChronoUnit.SECONDS))
 
     verifyAudit(
       saved,

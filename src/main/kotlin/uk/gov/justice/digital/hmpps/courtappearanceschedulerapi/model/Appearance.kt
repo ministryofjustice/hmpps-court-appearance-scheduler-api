@@ -13,7 +13,7 @@ data class Appearance(
   val reason: AppearanceReason,
   val external: Boolean,
   val start: LocalDateTime,
-  val end: LocalDateTime?,
+  val end: LocalDateTime,
   val comments: String?,
   val status: AppearanceStatus,
   val origin: AppearanceOrigin?,
