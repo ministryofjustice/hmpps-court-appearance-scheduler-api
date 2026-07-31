@@ -123,7 +123,7 @@ class IntegrationEndpointsIntTest(
     assertThat(courtCode).isEqualTo(appearance.courtCode)
     assertThat(reason.code to reason.description).isEqualTo(appearance.reason.code to appearance.reason.description)
     assertThat(start.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(appearance.start.truncatedTo(ChronoUnit.SECONDS))
-    assertThat(end?.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(appearance.end?.truncatedTo(ChronoUnit.SECONDS))
+    assertThat(end?.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(appearance.end.truncatedTo(ChronoUnit.SECONDS))
     assertThat(comments).isEqualTo(appearance.comments)
   }
 

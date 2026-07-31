@@ -44,7 +44,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.app
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.StartAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.UnscheduleAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.changes
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -73,7 +72,7 @@ final class CourtAppearance(
   courtCode: String,
   reason: CourtAppearanceReason,
   start: LocalDateTime,
-  end: LocalDateTime?,
+  end: LocalDateTime,
   comments: String?,
   externalReference: ExternalReference?,
   legacyId: Long?,
@@ -143,7 +142,7 @@ final class CourtAppearance(
     private set
 
   @Column(name = "end")
-  var end: LocalDateTime? = end
+  var end: LocalDateTime = end
     private set
 
   @Column(name = "comments", length = Integer.MAX_VALUE)
@@ -244,7 +243,7 @@ final class CourtAppearance(
 
   private fun isExpired() = movements.isEmpty() && isInThePast()
 
-  private fun isInThePast() = end?.isBefore(LocalDateTime.now()) ?: start.toLocalDate().isBefore(LocalDate.now())
+  private fun isInThePast() = end.isBefore(LocalDateTime.now())
 
   fun recategorise(action: RecategoriseAppearance, reasonProvider: ReasonProvider) = apply {
     if (action.reasonCode != reason.code) {

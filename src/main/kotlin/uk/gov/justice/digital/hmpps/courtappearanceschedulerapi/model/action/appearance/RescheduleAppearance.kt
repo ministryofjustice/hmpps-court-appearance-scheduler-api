@@ -25,15 +25,11 @@ data class RescheduleAppearance(
 
 fun RescheduleAppearance.changes(
   startProperty: KMutableProperty0<LocalDateTime>,
-  endProperty: KMutableProperty0<LocalDateTime?>,
+  endProperty: KMutableProperty0<LocalDateTime>,
 ): Boolean {
   val startChange = start != null && !start.truncatedTo(SECONDS).isEqual(startProperty.get().truncatedTo(SECONDS))
   val endChange = end != null &&
-    (
-      endProperty.get() == null ||
-        !end.truncatedTo(SECONDS)
-          .isEqual(checkNotNull(endProperty.get()).truncatedTo(SECONDS))
-      )
+    !end.truncatedTo(SECONDS).isEqual(checkNotNull(endProperty.get()).truncatedTo(SECONDS))
   if (startChange) {
     startProperty.set(start.truncatedTo(SECONDS))
   }
