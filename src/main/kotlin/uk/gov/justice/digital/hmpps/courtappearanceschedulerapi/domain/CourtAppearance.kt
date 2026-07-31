@@ -132,7 +132,7 @@ final class CourtAppearance(
   var external: Boolean = reason.external
     private set(value) {
       if (field != value) {
-        appliedActions += if (value) RequestAppearanceInPerson() else RequestAppearanceByVideoLink()
+        appliedActions += if (value) RequestAppearanceInPerson else RequestAppearanceByVideoLink
         field = value
       }
     }
@@ -193,8 +193,8 @@ final class CourtAppearance(
 
   fun addMovement(movement: CourtAppearanceMovement) = apply {
     val action = when (movement.direction) {
-      OUT if (movements.isEmpty()) -> StartAppearance()
-      IN if (movements.none { it.direction == IN }) -> CompleteAppearance()
+      OUT if (movements.isEmpty()) -> StartAppearance
+      IN if (movements.none { it.direction == IN }) -> CompleteAppearance
       else -> null
     }
     movements.add(movement)
@@ -224,11 +224,11 @@ final class CourtAppearance(
     unscheduleOverride: Boolean = false,
   ) = apply {
     val (statusCode, action) = when {
-      unscheduleOverride -> CourtAppearanceStatus.Code.UNSCHEDULED to UnscheduleAppearance()
-      completeOverride || isCompleted() -> CourtAppearanceStatus.Code.COMPLETED to CompleteAppearance()
-      isInProgress() -> CourtAppearanceStatus.Code.IN_PROGRESS to StartAppearance()
-      isExpired() -> CourtAppearanceStatus.Code.EXPIRED to ExpireAppearance()
-      else -> CourtAppearanceStatus.Code.SCHEDULED to ScheduleAppearance()
+      unscheduleOverride -> CourtAppearanceStatus.Code.UNSCHEDULED to UnscheduleAppearance
+      completeOverride || isCompleted() -> CourtAppearanceStatus.Code.COMPLETED to CompleteAppearance
+      isInProgress() -> CourtAppearanceStatus.Code.IN_PROGRESS to StartAppearance
+      isExpired() -> CourtAppearanceStatus.Code.EXPIRED to ExpireAppearance
+      else -> CourtAppearanceStatus.Code.SCHEDULED to ScheduleAppearance
     }
     if (::status.isInitialized.not() || status.code != statusCode) {
       status = statusProvider(statusCode)

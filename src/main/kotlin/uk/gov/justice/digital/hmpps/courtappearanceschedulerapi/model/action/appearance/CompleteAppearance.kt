@@ -4,6 +4,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceCompleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.DomainEvent
 
-class CompleteAppearance : CourtAppearanceAction {
+object CompleteAppearance : CourtAppearanceAction {
   override fun domainEvent(ca: CourtAppearance): DomainEvent<*> = CourtAppearanceCompleted(ca.person.identifier, ca.id, ca.externalReference)
 }
