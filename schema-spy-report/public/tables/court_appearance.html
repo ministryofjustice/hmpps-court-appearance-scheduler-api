@@ -282,10 +282,10 @@
                                     <td></td>
                                 </tr>
                                 <tr>
-                                    <td><span id="end">end</span></td>
+                                    <td class='indexedColumn' title='Indexed'><i class='fa fa-sitemap fa-rotate-120' style='padding-right: 5px;'></i><span id="end">end</span></td>
                                     <td>timestamp</td>
                                     <td>29,6</td>
-                                    <td title='nullable'>√</td>
+                                    <td title=''></td>
                                     <td title=''></td>
                                     <td>null</td>
                                     <td>
@@ -391,6 +391,12 @@
                                     <td>id</td>
                                 </tr>
                                 <tr>
+                                    <td title='Indexed'>idx_court_appearance_person_start_end</td>
+                                    <td>Performance</td>
+                                    <td><span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span></td>
+                                    <td>person_identifier + start + end</td>
+                                </tr>
+                                <tr>
                                     <td title='Indexed'>idx_court_appearance_person_status_start</td>
                                     <td>Performance</td>
                                     <td><span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span>/<span title='Ascending'>Asc</span></td>
@@ -449,12 +455,12 @@
                                 </thead>
                                 <tbody>
                                 <tr>
-                                    <td>court_appearance_status_id_not_null1</td>
-                                    <td>status_id IS NOT NULL</td>
-                                </tr>
-                                <tr>
                                     <td>court_appearance_reason_id_not_null1</td>
                                     <td>reason_id IS NOT NULL</td>
+                                </tr>
+                                <tr>
+                                    <td>court_appearance_status_id_not_null1</td>
+                                    <td>status_id IS NOT NULL</td>
                                 </tr>
                                 </tbody>
                             </table>

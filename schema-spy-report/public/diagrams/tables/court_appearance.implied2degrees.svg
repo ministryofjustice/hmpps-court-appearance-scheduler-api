@@ -64,6 +64,7 @@
 <text text-anchor="start" x="306" y="-207.3262" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">start</text>
 <polygon fill="none" stroke="#000000" points="434,-200.2262 434,-222.2262 528,-222.2262 528,-200.2262 434,-200.2262"/>
 <text text-anchor="start" x="437" y="-207.9262" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">timestamp[29,6]</text>
+<polygon fill="#ffffff" stroke="transparent" points="286,-178.2262 286,-200.2262 434,-200.2262 434,-178.2262 286,-178.2262"/>
 <polygon fill="none" stroke="#000000" points="286,-178.2262 286,-200.2262 434,-200.2262 434,-178.2262 286,-178.2262"/>
 <text text-anchor="start" x="306" y="-185.3262" font-family="Helvetica,sans-Serif" font-size="11.00" fill="#000000">end</text>
 <polygon fill="none" stroke="#000000" points="434,-178.2262 434,-200.2262 528,-200.2262 528,-178.2262 434,-178.2262"/>
