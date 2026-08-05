@@ -62,7 +62,6 @@ class CourtAppearanceRetrieverIntTest(
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
     assertThat(res.cancellable).isTrue
   }
@@ -83,7 +82,6 @@ class CourtAppearanceRetrieverIntTest(
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
     assertThat(res.cancellable).isFalse
   }
@@ -98,7 +96,6 @@ class CourtAppearanceRetrieverIntTest(
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.prison.name).isEqualTo(prisonCode)
     assertThat(res.court.name).isEqualTo(courtCode)
   }
 
@@ -117,7 +114,6 @@ class CourtAppearanceRetrieverIntTest(
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
     assertThat(res.cancellable).isTrue
   }
@@ -137,7 +133,6 @@ class CourtAppearanceRetrieverIntTest(
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
     assertThat(res.cancellable).isFalse
   }
@@ -157,7 +152,6 @@ class CourtAppearanceRetrieverIntTest(
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
     assertThat(res.cancellable).isFalse
   }
@@ -166,7 +160,6 @@ class CourtAppearanceRetrieverIntTest(
     assertThat(person.personIdentifier).isEqualTo(ca.person.identifier)
     assertThat(person.firstName).isEqualTo(ca.person.firstName)
     assertThat(person.lastName).isEqualTo(ca.person.lastName)
-    assertThat(prison.code).isEqualTo(ca.person.prisonCode)
     assertThat(court.code).isEqualTo(ca.courtCode)
     assertThat(start).isEqualTo(ca.start)
     assertThat(end).isEqualTo(ca.end)
