@@ -102,26 +102,6 @@ class ReconciliationIntTest(
     verify(telemetryClient, never()).trackEvent(any(), any(), any())
   }
 
-  @Order(2)
-  @Test
-  fun `OUT used when no movement before start`() {
-    verify(telemetryClient, never()).trackEvent(any(), any(), any())
-    val casAppearance =
-      givenCourtAppearance(courtAppearance(prisonCode = "OUT", externalReference = externalReference()))
-    rasMockServer.givenReconciliationAppearances(casAppearance.person.identifier, listOf(casAppearance.schedule(false)))
-    prisonApi.givenMovementsFor(
-      casAppearance.person.identifier,
-      listOf(
-        prisonerMovement(toAgency = casAppearance.prisonCode, dateTime = casAppearance.start.plusHours(1)),
-        prisonerMovement(toAgency = prisonCode(), dateTime = casAppearance.start.plusDays(1)),
-      ),
-    )
-
-    personReconciliation.reconcile(casAppearance.person.identifier)
-
-    verify(telemetryClient, never()).trackEvent(any(), any(), any())
-  }
-
   @Test
   fun `missing ids are identified`() {
     val casAppearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
@@ -151,7 +131,7 @@ class ReconciliationIntTest(
   @Test
   fun `missing ids found on another person are identified`() {
     val casAppearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
-    val casFound = givenCourtAppearance(courtAppearance(prisonCode = casAppearance.prisonCode, externalReference = externalReference()))
+    val casFound = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
     rasMockServer.givenReconciliationAppearances(
       casAppearance.person.identifier,
       listOf(
@@ -188,7 +168,7 @@ class ReconciliationIntTest(
 
     personReconciliation.reconcile(casAppearance.person.identifier)
 
-    listOf("prisonCode", "courtCode", "start", "comments").forEach {
+    listOf("courtCode", "start", "comments").forEach {
       verify(telemetryClient).trackEvent(
         "Property Mismatch",
         mapOf(

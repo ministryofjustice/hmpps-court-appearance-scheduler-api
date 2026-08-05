@@ -43,7 +43,6 @@ class PushCourtAppearanceIntTest(
         courtAppearance(
           person.identifier,
           reasonCode = reasonCodes.random(),
-          externalReference = null,
         ),
       )
     }

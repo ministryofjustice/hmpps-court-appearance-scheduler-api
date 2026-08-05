@@ -8,7 +8,6 @@ import java.util.UUID
 data class Appearance(
   val id: UUID,
   val person: Person,
-  val prison: Prison,
   val court: Court,
   val reason: AppearanceReason,
   val external: Boolean,

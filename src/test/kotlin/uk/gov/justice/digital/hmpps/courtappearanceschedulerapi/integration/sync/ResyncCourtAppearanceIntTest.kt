@@ -29,7 +29,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.Co
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceRelocated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceRescheduled
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceResponsiblePrisonChanged
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
@@ -333,7 +332,7 @@ class ResyncCourtAppearanceIntTest(
   fun `200 ok - can remove all data`() {
     val schedule = givenCourtAppearance(courtAppearance(movements = listOf(movement(CourtAppearanceMovement.Direction.OUT))))
     val scheduled = schedule.movements.single()
-    val unscheduled = givenUnscheduledMovement(unscheduledMovement(schedule.person.identifier, schedule.prisonCode))
+    val unscheduled = givenUnscheduledMovement(unscheduledMovement(schedule.person.identifier))
     rasMockServer.givenReconciliationAppearances(schedule.person.identifier, emptyList())
     prisonApi.givenMovementsFor(schedule.person.identifier, listOf(prisonerMovement(schedule.prisonCode)))
 
@@ -388,13 +387,12 @@ class ResyncCourtAppearanceIntTest(
     val schedule = givenCourtAppearance(
       courtAppearance(
         personIdentifier = person.identifier,
-        prisonCode = prevPrisonCode,
         externalReference = externalReference,
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
       ),
     )
     val scheduled = schedule.movements.single()
-    val unscheduled = givenUnscheduledMovement(unscheduledMovement(person.identifier, prisonCode))
+    val unscheduled = givenUnscheduledMovement(unscheduledMovement(person.identifier))
     prisonApi.givenMovementsFor(person.identifier, listOf(prisonerMovement(prevPrisonCode), prisonerMovement(prisonCode)))
 
     val request = resyncRequest(
@@ -434,12 +432,6 @@ class ResyncCourtAppearanceIntTest(
     verifyEventPublications(
       scheduled,
       setOf(
-        CourtAppearanceResponsiblePrisonChanged(
-          person.identifier,
-          schedule.id,
-          externalReference,
-          DataSource.NOMIS,
-        ).publication(schedule.id) { false },
         CourtAppearanceRescheduled(
           person.identifier,
           schedule.id,
@@ -501,10 +493,9 @@ class ResyncCourtAppearanceIntTest(
     val schedule = givenCourtAppearance(
       courtAppearance(
         personIdentifier = person.identifier,
-        prisonCode = prisonCode,
         courtCode = courtCode,
-        movements = listOf(movement(CourtAppearanceMovement.Direction.OUT, legacyId = "${bookingId}_1")),
         legacyId = newId(),
+        movements = listOf(movement(CourtAppearanceMovement.Direction.OUT, legacyId = "${bookingId}_1")),
       ),
     )
     val scheduled = schedule.movements.first()
@@ -512,9 +503,8 @@ class ResyncCourtAppearanceIntTest(
       givenUnscheduledMovement(
         unscheduledMovement(
           person.identifier,
-          prisonCode,
-          legacyId = "${bookingId}_2",
           courtCode = courtCode,
+          legacyId = "${bookingId}_2",
         ),
       )
     rasMockServer.givenReconciliationAppearances(person.identifier, emptyList())
@@ -602,10 +592,9 @@ class ResyncCourtAppearanceIntTest(
     val existing = givenCourtAppearance(
       courtAppearance(
         personIdentifier = person.identifier,
-        prisonCode = prisonCode,
         courtCode = courtCode,
-        legacyId = newId(),
         externalReference = externalReference(),
+        legacyId = newId(),
       ),
     )
 

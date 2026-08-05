@@ -3,12 +3,10 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service
 import org.springframework.data.domain.Page
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.stereotype.Service
-import reactor.core.publisher.Mono
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtProvider
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PrisonProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesCourtCodeIn
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesExternal
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPersonIdentifier
@@ -22,10 +20,8 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.startsOnO
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.startsOnOrBefore
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.courtregister.CourtRegisterClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonersearch.Prisoner
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonregister.PrisonRegisterClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Court
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Person
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Prison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.asReason
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.asStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.AppearanceScheduleSearchRequest
@@ -44,7 +40,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.paged.Pers
 class SearchCourtAppearances(
   private val serviceConfig: ServiceConfig,
   private val appearanceRepository: CourtAppearanceRepository,
-  private val prisonRegister: PrisonRegisterClient,
   private val courtRegister: CourtRegisterClient,
 ) {
   fun findForPrison(prisonCode: String, request: CourtAppearanceSearchRequest): CourtAppearanceSearchResponse = appearanceRepository.findAll(request.asSpecification(prisonCode), request.pageable()).asScheduleResponse()
@@ -58,14 +53,8 @@ class SearchCourtAppearances(
   }
 
   private fun Page<CourtAppearance>.asScheduleResponse(): CourtAppearanceSearchResponse {
-    val (prisonCodes, courtCodes) = map { it.person.prisonCode!! to it.courtCode }.unzip()
-    val (prisons, courts) = Mono.zip(
-      prisonRegister.findPrisons(prisonCodes.toSet()),
-      courtRegister.findCourts(courtCodes.toSet()),
-    ).map { t -> t.t1.associateBy { it.code } to t.t2.associateBy { it.code } }.block()!!
-    return map { item ->
-      item.asResult({ prisons[it] ?: Prison.default(it) }, { courts[it] ?: Court.default(it) })
-    }.asResponse()
+    val courts = courtRegister.getCourts(map { it.courtCode }.toSet()).associateBy { it.code }
+    return map { item -> item.asResult { courts[it] ?: Court.default(it) } }.asResponse()
   }
 
   private fun AppearanceSearchRequest.defaults(): List<Specification<CourtAppearance>> = listOfNotNull(
@@ -108,10 +97,9 @@ class SearchCourtAppearances(
 
   private fun String.isPersonIdentifier(): Boolean = matches(Prisoner.PATTERN.toRegex())
 
-  private fun CourtAppearance.asResult(prison: PrisonProvider, court: CourtProvider) = CourtAppearanceResult(
+  private fun CourtAppearance.asResult(court: CourtProvider) = CourtAppearanceResult(
     id,
     person(),
-    prison(person.prisonCode!!),
     court(courtCode),
     reason.asReason(),
     external,

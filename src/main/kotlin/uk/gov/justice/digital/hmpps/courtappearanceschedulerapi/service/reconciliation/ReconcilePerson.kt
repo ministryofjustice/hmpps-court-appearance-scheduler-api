@@ -6,17 +6,13 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppe
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceEntity.COURT_APPEARANCE
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceService.REMAND_AND_SENTENCING
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonApiClient
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.locationAt
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
-import java.time.LocalDateTime
 import java.util.UUID
 
 @Service
 class ReconcilePerson(
-  private val prisonApi: PrisonApiClient,
   private val rasClient: RemandAndSentencingClient,
   private val caRepository: CourtAppearanceRepository,
   private val telemetryClient: TelemetryClient,
@@ -65,8 +61,7 @@ class ReconcilePerson(
     val allCas = casAppearances + casFound
     val allKeys = rasAppearances.keys + casAppearances.keys
     if (allKeys.isNotEmpty()) {
-      val movements = prisonApi.movementsFor(identifier)
-      issues += allKeys.flatMap { compare(allRas[it], allCas[it], movements::locationAt) }
+      issues += allKeys.flatMap { compare(allRas[it], allCas[it]) }
     }
 
     issues.forEach {
@@ -79,21 +74,18 @@ class ReconcilePerson(
   private fun compare(
     ras: CourtAppearanceSchedule?,
     cas: CourtAppearance?,
-    locationAt: (LocalDateTime) -> String,
   ): List<ReconciliationIssue> = if (ras == null || cas == null) {
     emptyList()
   } else {
-    propertyReconcilers { start -> locationAt(start) }
-      .mapNotNull {
-        it.reconcile(ras, cas)?.let { propertyName ->
-          PropertyMismatch(cas.person.identifier, cas.id, ras.id, propertyName)
-        }
+    propertyReconcilers().mapNotNull {
+      it.reconcile(ras, cas)?.let { propertyName ->
+        PropertyMismatch(cas.person.identifier, cas.id, ras.id, propertyName)
       }
+    }
   }
 
-  private fun propertyReconcilers(prisonCodeAt: (LocalDateTime) -> String): List<PropertyReconciler> = listOf(
+  private fun propertyReconcilers(): List<PropertyReconciler> = listOf(
     DuplicateReconciler(),
-    EqualityReconciler("prisonCode", { prisonCodeAt(it.start) }, { it.prisonCode }),
     EqualityReconciler("courtCode", { it.courtCode }, { it.courtCode }),
     EqualityReconciler("start", { it.start }, { it.start }),
     EqualityReconciler("reasonCode", { it.reason.code }, { it.reason.code }),
