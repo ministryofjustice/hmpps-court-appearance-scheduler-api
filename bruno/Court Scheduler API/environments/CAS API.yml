@@ -1,0 +1,14 @@
+name: CAS API
+variables:
+  - name: base_url
+    value: "{{process.env.BASE_URL}}"
+  - name: prison_code
+    value: "{{process.env.PRISON_CODE}}"
+  - name: court_code
+    value: "{{process.env.COURT_CODE}}"
+  - name: person_identifier
+    value: "{{process.env.PERSON_IDENTIFIER}}"
+  - name: integration_appearance_id
+    value: "{{process.env.INTEGRATION_APPEARANCE_ID}}"
+  - name: integration_movement_id
+    value: "{{process.env.INTEGRATION_MOVEMENT_ID}}"
