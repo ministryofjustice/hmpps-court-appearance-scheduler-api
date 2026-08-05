@@ -24,7 +24,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.conf
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.ManageUsersExtension.Companion.manageUsers
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.ManageUsersServer.Companion.user
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerRegisterExtension.Companion.prisonRegister
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditHistory
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditedAction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
@@ -56,8 +55,7 @@ class CourtAppearanceHistoryIntTest(
 
   @Test
   fun `200 can retrieve court appearance history`() {
-    val prison = prisonRegister.givenPrison()
-    val ca = givenCourtAppearance(courtAppearance(prisonCode = prison.code))
+    val ca = givenCourtAppearance(courtAppearance())
 
     val commentsChangedAction = ChangeAppearanceComments(word(25))
     val commentsChangedReason = word(12)

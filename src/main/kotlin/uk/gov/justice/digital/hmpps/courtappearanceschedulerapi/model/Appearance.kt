@@ -8,12 +8,11 @@ import java.util.UUID
 data class Appearance(
   val id: UUID,
   val person: Person,
-  val prison: Prison,
   val court: Court,
   val reason: AppearanceReason,
   val external: Boolean,
   val start: LocalDateTime,
-  val end: LocalDateTime?,
+  val end: LocalDateTime,
   val comments: String?,
   val status: AppearanceStatus,
   val origin: AppearanceOrigin?,

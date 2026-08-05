@@ -4,9 +4,8 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Appearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AppearanceStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Court
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Person
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Prison
 import java.time.LocalDateTime
-import java.util.*
+import java.util.UUID
 
 data class CourtAppearanceSearchResponse(
   override val content: List<CourtAppearanceResult>,
@@ -16,12 +15,11 @@ data class CourtAppearanceSearchResponse(
 data class CourtAppearanceResult(
   val id: UUID,
   val person: Person,
-  val prison: Prison,
   val court: Court,
   val reason: AppearanceReason,
   val external: Boolean,
   val start: LocalDateTime,
-  val end: LocalDateTime?,
+  val end: LocalDateTime,
   val comments: String?,
   val status: AppearanceStatus,
 )

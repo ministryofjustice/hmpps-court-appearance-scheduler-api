@@ -11,7 +11,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReasonPro
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReasonByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
 import java.time.LocalDateTime
@@ -27,7 +26,6 @@ interface CourtMovementOperations {
   companion object {
     fun unscheduledMovement(
       personIdentifier: String = personIdentifier(),
-      prisonCode: String = prisonCode(),
       courtCode: String = courtCode(),
       direction: Direction = Direction.OUT,
       reasonCode: String = "CRT",
@@ -36,10 +34,11 @@ interface CourtMovementOperations {
       legacyId: String? = null,
       id: UUID = newUuid(),
     ): MovementProvider = { person, reason ->
+      val p = person(personIdentifier)
       CourtAppearanceMovement(
         null,
-        person(personIdentifier, prisonCode),
-        prisonCode,
+        p,
+        requireNotNull(p.prisonCode),
         courtCode,
         reason(reasonCode),
         direction,
@@ -61,9 +60,8 @@ class CourtMovementOperationsImpl(
   override fun givenUnscheduledMovement(unscheduled: MovementProvider): CourtAppearanceMovement = transactionTemplate.execute {
     movementRepository.save(
       unscheduled(
-        { personIdentifier, prisonCode ->
-          psOperations.findPersonSummary(personIdentifier)
-            ?: psOperations.givenPersonSummary(personSummary(personIdentifier, prisonCode = prisonCode))
+        { personIdentifier ->
+          psOperations.findPersonSummary(personIdentifier) ?: psOperations.givenPersonSummary(personSummary(personIdentifier))
         },
         reasonRepository::getReasonByCode,
       ),

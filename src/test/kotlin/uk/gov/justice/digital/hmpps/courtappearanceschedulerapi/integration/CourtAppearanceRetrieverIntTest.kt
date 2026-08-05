@@ -55,25 +55,21 @@ class CourtAppearanceRetrieverIntTest(
 
   @Test
   fun `200 can retrieve cancellable court appearance with prison and court`() {
-    val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
-    val ca = givenCourtAppearance(courtAppearance(prisonCode = prison.code, courtCode = court.code))
+    val ca = givenCourtAppearance(courtAppearance(courtCode = court.code))
     assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
     assertThat(res.cancellable).isTrue
   }
 
   @Test
   fun `200 can retrieve non-cancellable court appearance with prison and court`() {
-    val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
     val ca = givenCourtAppearance(
       courtAppearance(
-        prisonCode = prison.code,
         courtCode = court.code,
         start = LocalDate.now().minusDays(1).atTime(10, 0),
         end = LocalDate.now().minusDays(1).atTime(17, 0),
@@ -83,7 +79,6 @@ class CourtAppearanceRetrieverIntTest(
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
     assertThat(res.cancellable).isFalse
   }
@@ -94,21 +89,18 @@ class CourtAppearanceRetrieverIntTest(
     val courtCode = courtCode()
     prisonRegister.givenPrisons(setOf(), setOf(prisonCode))
     courtRegister.givenCourts(setOf(), setOf(courtCode))
-    val ca = givenCourtAppearance(courtAppearance(prisonCode = prisonCode, courtCode = courtCode))
+    val ca = givenCourtAppearance(courtAppearance(courtCode = courtCode))
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.prison.name).isEqualTo(prisonCode)
     assertThat(res.court.name).isEqualTo(courtCode)
   }
 
   @Test
   fun `200 can retrieve court appearance with external reference and delete supported`() {
-    val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
     val ca = givenCourtAppearance(
       courtAppearance(
-        prisonCode = prison.code,
         courtCode = court.code,
         externalReference = externalReference(),
       ),
@@ -117,18 +109,15 @@ class CourtAppearanceRetrieverIntTest(
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
     assertThat(res.cancellable).isTrue
   }
 
   @Test
   fun `200 can retrieve court appearance with external reference and delete not supported`() {
-    val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
     val ca = givenCourtAppearance(
       courtAppearance(
-        prisonCode = prison.code,
         courtCode = court.code,
         externalReference = externalReference(),
       ),
@@ -137,27 +126,23 @@ class CourtAppearanceRetrieverIntTest(
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
     assertThat(res.cancellable).isFalse
   }
 
   @Test
   fun `200 can retrieve court appearance with external reference and delete not permitted`() {
-    val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
     val ca = givenCourtAppearance(
       courtAppearance(
-        start = LocalDateTime.now().minusDays(2),
-        prisonCode = prison.code,
         courtCode = court.code,
+        start = LocalDateTime.now().minusDays(2),
         externalReference = externalReference(),
       ),
     )
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.prison).isEqualTo(prison)
     assertThat(res.court).isEqualTo(court)
     assertThat(res.cancellable).isFalse
   }
@@ -166,7 +151,6 @@ class CourtAppearanceRetrieverIntTest(
     assertThat(person.personIdentifier).isEqualTo(ca.person.identifier)
     assertThat(person.firstName).isEqualTo(ca.person.firstName)
     assertThat(person.lastName).isEqualTo(ca.person.lastName)
-    assertThat(prison.code).isEqualTo(ca.person.prisonCode)
     assertThat(court.code).isEqualTo(ca.courtCode)
     assertThat(start).isEqualTo(ca.start)
     assertThat(end).isEqualTo(ca.end)
