@@ -46,14 +46,12 @@ class PrisonerMergedIntTest(
     val sch = givenCourtAppearance(
       courtAppearance(
         personIdentifier = fromPerson.identifier,
-        prisonCode = prisonCode,
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
       ),
     )
     val uns = givenUnscheduledMovement(
       unscheduledMovement(
         personIdentifier = fromPerson.identifier,
-        prisonCode = prisonCode,
       ),
     )
 
@@ -76,14 +74,12 @@ class PrisonerMergedIntTest(
     val sch = givenCourtAppearance(
       courtAppearance(
         personIdentifier = fromPerson.identifier,
-        prisonCode = prisonCode,
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
       ),
     )
     val uns = givenUnscheduledMovement(
       unscheduledMovement(
         personIdentifier = fromPerson.identifier,
-        prisonCode = prisonCode,
       ),
     )
 

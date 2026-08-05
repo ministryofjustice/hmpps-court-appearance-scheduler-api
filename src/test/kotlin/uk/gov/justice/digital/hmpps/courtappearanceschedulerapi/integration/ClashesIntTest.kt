@@ -57,9 +57,9 @@ class ClashesIntTest(
     val court = courtRegister.givenCourt()
     val appearance = givenCourtAppearance(
       courtAppearance(
+        courtCode = court.code,
         start = CLASH_DATE.atTime(10, 0),
         end = CLASH_DATE.atTime(17, 0),
-        courtCode = court.code,
       ),
     )
 
@@ -92,9 +92,9 @@ class ClashesIntTest(
     val court = courtRegister.givenCourt()
     val appearance = givenCourtAppearance(
       courtAppearance(
+        courtCode = court.code,
         start = CLASH_DATE.atTime(10, 0),
         end = CLASH_DATE.atTime(17, 0),
-        courtCode = court.code,
       ),
     )
 

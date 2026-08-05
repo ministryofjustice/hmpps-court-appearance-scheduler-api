@@ -330,7 +330,7 @@ class SyncCourtAppearanceIntTest(
 
   @Test
   fun `200 ok - court appearance completed on update`() {
-    val appearance = givenCourtAppearance(courtAppearance(legacyId = newId(), start = LocalDateTime.now().minusDays(1)))
+    val appearance = givenCourtAppearance(courtAppearance(start = LocalDateTime.now().minusDays(1), legacyId = newId()))
     prisonApi.givenMovementsFor(
       appearance.person.identifier,
       listOf(

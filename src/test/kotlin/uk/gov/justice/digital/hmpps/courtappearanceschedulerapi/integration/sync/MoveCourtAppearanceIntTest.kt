@@ -71,7 +71,6 @@ class MoveCourtAppearanceIntTest(
     val p1Sch1 = givenCourtAppearance(
       courtAppearance(
         p1.identifier,
-        prisonCode,
         movements = listOf(
           movement(
             CourtAppearanceMovement.Direction.OUT,
@@ -80,9 +79,9 @@ class MoveCourtAppearanceIntTest(
       ),
     )
     val p1Sch1Movement = p1Sch1.movements.first()
-    val p1Sch2 = givenCourtAppearance(courtAppearance(p1.identifier, prisonCode))
-    val p1UnS1 = givenUnscheduledMovement(unscheduledMovement(p1.identifier, prisonCode))
-    val p2Sch1 = givenCourtAppearance(courtAppearance(p2.identifier, prisonCode))
+    val p1Sch2 = givenCourtAppearance(courtAppearance(p1.identifier))
+    val p1UnS1 = givenUnscheduledMovement(unscheduledMovement(p1.identifier))
+    val p2Sch1 = givenCourtAppearance(courtAppearance(p2.identifier))
 
     moveAppearance(moveRequest(p1.identifier, p2.identifier, setOf(p1Sch1.id), setOf(p1UnS1.id)))
 
@@ -130,9 +129,9 @@ class MoveCourtAppearanceIntTest(
     val p1 = givenPersonSummary(personSummary(prisonCode = prisonCode))
     val p2 = prisonerSearch.givenPrisoner(prisoner(prisonCode))
 
-    val p1Sch = givenCourtAppearance(courtAppearance(p1.identifier, prisonCode))
-    val p1Uns = givenUnscheduledMovement(unscheduledMovement(p1.identifier, prisonCode))
-    val p2Sch = givenCourtAppearance(courtAppearance(p2.prisonerNumber, prisonCode))
+    val p1Sch = givenCourtAppearance(courtAppearance(p1.identifier))
+    val p1Uns = givenUnscheduledMovement(unscheduledMovement(p1.identifier))
+    val p2Sch = givenCourtAppearance(courtAppearance(p2.prisonerNumber))
 
     moveAppearance(moveRequest(p1.identifier, p2.prisonerNumber, setOf(p1Sch.id), setOf(p1Uns.id)))
 

@@ -15,7 +15,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReason
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getStatusByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
@@ -24,7 +23,7 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
-typealias PersonProvider = (String, String) -> PersonSummary
+typealias PersonProvider = (String) -> PersonSummary
 typealias CourtAppearanceProvider = (PersonProvider, ReasonProvider, StatusProvider) -> CourtAppearance
 
 interface CourtAppearanceOperations {
@@ -35,7 +34,6 @@ interface CourtAppearanceOperations {
   companion object {
     fun courtAppearance(
       personIdentifier: String = personIdentifier(),
-      prisonCode: String = prisonCode(),
       courtCode: String = courtCode(),
       reasonCode: String = "CRT",
       start: LocalDateTime = LocalDate.now().plusDays(7).atTime(6, 0),
@@ -46,9 +44,10 @@ interface CourtAppearanceOperations {
       movements: List<(CourtAppearance) -> CourtAppearanceMovement> = listOf(),
       unschedule: Boolean = false,
     ): CourtAppearanceProvider = { person, reason, status ->
+      val p = person(personIdentifier)
       CourtAppearance(
-        person(personIdentifier, prisonCode),
-        prisonCode,
+        p,
+        requireNotNull(p.prisonCode),
         courtCode,
         reason(reasonCode),
         start.truncatedTo(ChronoUnit.SECONDS),
@@ -82,9 +81,8 @@ class CourtAppearanceOperationsImpl(
   override fun givenCourtAppearance(caProvider: CourtAppearanceProvider): CourtAppearance = transactionTemplate.execute {
     appearanceRepository.save(
       caProvider(
-        { personIdentifier, prisonCode ->
-          psOperations.findPersonSummary(personIdentifier)
-            ?: psOperations.givenPersonSummary(personSummary(personIdentifier, prisonCode = prisonCode))
+        { personIdentifier ->
+          psOperations.findPersonSummary(personIdentifier) ?: psOperations.givenPersonSummary(personSummary(personIdentifier))
         },
         reasonRepository::getReasonByCode,
         statusRepository::getStatusByCode,
