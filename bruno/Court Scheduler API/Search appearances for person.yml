@@ -1,0 +1,31 @@
+info:
+  name: Search appearances for person
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{base_url}}/search/people/{{person_identifier}}/court-appearances"
+  body:
+    type: json
+    data: |-
+      {
+        "start": "{{date_today}}",
+        "end": "{{date_next_month}}",
+        "status": [
+          "SCHEDULED"
+        ],
+        "external": true,
+        "page": 1,
+        "size": 10,
+        "sort": "start"
+      }
+  auth:
+    type: bearer
+    token: "{{bearer_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

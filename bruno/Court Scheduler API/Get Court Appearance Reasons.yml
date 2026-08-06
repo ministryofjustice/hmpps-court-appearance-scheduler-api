@@ -1,0 +1,17 @@
+info:
+  name: Get Court Appearance Reasons
+  type: http
+  seq: 1
+
+http:
+  method: GET
+  url: "{{base_url}}/court-appearance-reasons"
+  auth:
+    type: bearer
+    token: "{{bearer_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

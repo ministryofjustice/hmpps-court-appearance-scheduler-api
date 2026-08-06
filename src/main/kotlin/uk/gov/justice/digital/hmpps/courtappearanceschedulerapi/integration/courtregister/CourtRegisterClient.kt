@@ -30,4 +30,6 @@ class CourtRegisterClient(
   fun getCourts(ids: Set<String>): List<Court> = findCourts(ids).block()!!
 
   fun findCourt(code: String): Mono<Court> = findCourts(setOf(code)).map { cts -> cts.firstOrNull { it.code == code } ?: Court.default(code) }
+
+  fun getCourt(code: String): Court = findCourt(code).block()!!
 }

@@ -1,0 +1,29 @@
+info:
+  name: Update Court Appearance
+  type: http
+  seq: 6
+
+http:
+  method: PUT
+  url: "{{base_url}}/court-appearances/{{court_appearance_id}}"
+  body:
+    type: json
+    data: |-
+      {
+        "actions": [
+          {
+            "type": "ChangeAppearanceComments",
+            "comments": "Updated comments.  The changes should now be visible in the history"
+          }
+        ],
+        "reason": "A reason for why the change was applied"
+      }
+  auth:
+    type: bearer
+    token: "{{bearer_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
