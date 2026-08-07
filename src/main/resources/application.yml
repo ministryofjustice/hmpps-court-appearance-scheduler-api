@@ -53,6 +53,8 @@ spring:
         do_not_audit_optimistic_locking_field: false
     open-in-view: false
 
+  mvc.servlet.load-on-startup: 1
+
   security:
     oauth2:
       resourceserver:
