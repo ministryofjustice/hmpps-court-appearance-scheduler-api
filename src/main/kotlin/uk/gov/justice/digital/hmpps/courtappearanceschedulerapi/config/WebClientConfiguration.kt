@@ -7,6 +7,7 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
 import org.springframework.security.oauth2.client.endpoint.WebClientReactiveClientCredentialsTokenResponseClient
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.WebClient.Builder
+import org.springframework.web.reactive.function.client.WebClientRequestException
 import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.util.retry.Retry
 import uk.gov.justice.hmpps.kotlin.auth.authorisedWebClient
@@ -29,14 +30,14 @@ class WebClientConfiguration(
     val client = WebClientReactiveClientCredentialsTokenResponseClient()
     val webClient = WebClient.builder().filter { request, next ->
       next.exchange(request)
-        .retryWhen(Retry.backoff(3, Duration.ofMillis(50)).filter { it.isRetryableException() })
+        .retryWhen(Retry.backoff(3, Duration.ofMillis(100)).filter { it.isRetryableException() })
     }.build()
 
     client.setWebClient(webClient)
     return client
   }
 
-  private fun Throwable.isRetryableException(): Boolean = this is IOException || (this is WebClientResponseException && this.statusCode.is5xxServerError)
+  private fun Throwable.isRetryableException(): Boolean = this is IOException || this is WebClientRequestException || (this is WebClientResponseException && this.statusCode.is5xxServerError)
 
   @Bean
   fun courtRegisterApiWebClient(authorizedClientManager: OAuth2AuthorizedClientManager, builder: Builder): WebClient = authorisedWebClient(courtRegisterBaseUri, builder, authorizedClientManager)
