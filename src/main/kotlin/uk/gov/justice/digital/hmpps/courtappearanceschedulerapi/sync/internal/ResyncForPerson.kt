@@ -20,6 +20,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.pris
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonerMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonSummaryService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.AtAndBy
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventMapping
@@ -66,8 +67,10 @@ class ResyncForPerson(
     }
     val migrationAudits = msa.findAllById(appearances.map { it.id } + movements.map { it.id })
 
-    val appearanceProvider = { id: UUID?, legacyId: Long ->
-      appearances.firstOrNull { it.id == id || it.legacyId == legacyId }
+    val appearanceProvider = { legacyId: Long, er: ExternalReference?, id: UUID? ->
+      appearances.firstOrNull { it.legacyId == legacyId }
+        ?: appearances.firstOrNull { it.externalReference == er }
+        ?: appearances.firstOrNull { it.id == id }
     }
     val movementProvider = { id: UUID?, legacyId: String ->
       movements.firstOrNull { it.id == id || it.legacyId == legacyId }
@@ -119,7 +122,7 @@ class ResyncForPerson(
 
   private fun ResyncCourtEvent.resync(
     person: PersonSummary,
-    appearanceProvider: (UUID?, Long) -> CourtAppearance?,
+    appearanceProvider: (Long, ExternalReference?, UUID?) -> CourtAppearance?,
     movementProvider: (UUID?, String) -> CourtAppearanceMovement?,
     reasonProvider: ReasonProvider,
     statusProvider: StatusProvider,
@@ -128,7 +131,7 @@ class ResyncForPerson(
     prisonerMovements: List<PrisonerMovement>,
   ): CourtEventMapping {
     val rasScheduleInfo = courtEvent.externalReferenceUrn?.uuid?.let { scheduleInfoProvider(it) }
-    val appearance = appearanceProvider(courtEvent.dpsId, requireNotNull(courtEvent.eventId))
+    val appearance = appearanceProvider(requireNotNull(courtEvent.eventId), courtEvent.externalReferenceUrn, courtEvent.dpsId)
       ?.updateFrom(person, courtEvent, reasonProvider, statusProvider, rasScheduleInfo, prisonerMovements)
       ?: appearanceRepository.save(courtEvent.asEntity(person, reasonProvider, statusProvider, rasScheduleInfo, prisonerMovements))
     val scheduledMovements = movements.map {
