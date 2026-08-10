@@ -30,5 +30,3 @@ service:
     cron: "0 30 5 * * 2-7"
   enhanced-reconciliation:
     cron: "0 30 5 * * 1"
-  ras:
-    send-updates: false
