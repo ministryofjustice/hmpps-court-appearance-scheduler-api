@@ -1,0 +1,58 @@
+spring:
+  jpa:
+    show-sql: true
+    properties:
+      hibernate.generate_statistics: true
+  datasource:
+    hikari:
+      connectionTimeout: 1000
+      validationTimeout: 500
+      maximumPoolSize: 5
+      auto-commit: false
+      data-source-properties:
+        sslmode: 'disable'
+
+# The client id and secret should be overridden with env vars to run locally (CLIENT_ID & CLIENT_SECRET)
+client:
+  id: court-appearance-scheduler
+  secret: court-appearance-scheduler
+
+db:
+  server: "localhost:5432"
+  name: "appearance"
+  user: "court"
+  pass: "5ch3du13r"
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+hmpps.sqs:
+  provider: localstack
+  queues:
+    hmppsdomaineventsqueue:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+      subscribeTopicId: hmppseventtopic
+    offendereventsqueue:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+      subscribeTopicId: offendereventstopic
+    internalevents:
+      queueName: ${random.uuid}
+      dlqName: ${random.uuid}
+  topics:
+    hmppseventtopic:
+      arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
+    offendereventstopic:
+      arn: arn:aws:sns:eu-west-2:000000000000:${random.uuid}
+
+service:
+  ui-base-url: "https://local-ui"
+  api-base-url: "http://local-api"
+  appearance-expiration:
+    cron: "-"
+  domain-events:
+    poll-interval: PT0s
