@@ -1,31 +1,25 @@
 services:
-  hmpps-court-appearance-scheduler-api:
-    image: ghcr.io/ministryofjustice/hmpps-court-appearance-scheduler-api:latest
+  localstack:
+    image: localstack/localstack:4.14.0
     networks:
       - hmpps
-    container_name: hmpps-court-appearance-scheduler-api
     ports:
-      - "8080:8080"
-    healthcheck:
-      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/8080"]
+      - "4566:4566"
     environment:
-      - SERVER_PORT=8080
-      - HMPPS_AUTH_URL=http://hmpps-auth:8080/auth
-      - SPRING_PROFILES_ACTIVE=dev
+      - SERVICES=sqs,sns
 
-  hmpps-auth:
-    image: ghcr.io/ministryofjustice/hmpps-auth:latest
+  court-appearance-db:
+    image: postgres
     networks:
       - hmpps
-    container_name: hmpps-auth
+    container_name: court-appearance-db
+    restart: always
     ports:
-      - "8090:8080"
-    healthcheck:
-      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/8080"]
+      - "5432:5432"
     environment:
-      - SERVER_PORT=8080
-      - SPRING_PROFILES_ACTIVE=dev
-      - APPLICATION_AUTHENTICATION_UI_ALLOWLIST=0.0.0.0/0
+      - POSTGRES_PASSWORD=5ch3du13r
+      - POSTGRES_USER=court
+      - POSTGRES_DB=appearance
 
 networks:
   hmpps:
