@@ -10,6 +10,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.set
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceReasonRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatusRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReasonByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getStatusByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonApiClient
@@ -30,8 +31,10 @@ class SyncCourtAppearance(
   private val statusRepository: CourtAppearanceStatusRepository,
   private val appearanceRepository: CourtAppearanceRepository,
 ) {
-
   fun sync(personIdentifier: String, request: SyncCourtEvent): ReferenceId {
+    if (request.courtEvent.externalReferenceUrn != null && serviceConfig.ras.sendUpdates) {
+      return ReferenceId(newUuid())
+    }
     with(request) {
       SchedulerContext.get()
         .copy(requestAt = occurredAt, username = user.username, caseloadId = user.activeCaseloadId)
@@ -55,16 +58,15 @@ class SyncCourtAppearance(
       statusRepository::getStatusByCode,
       rasScheduleInfo,
       prisonerMovements,
+    ) ?: appearanceRepository.save(
+      request.courtEvent.asEntity(
+        person,
+        reasonRepository::getReasonByCode,
+        statusRepository::getStatusByCode,
+        rasScheduleInfo,
+        prisonerMovements,
+      ),
     )
-      ?: appearanceRepository.save(
-        request.courtEvent.asEntity(
-          person,
-          reasonRepository::getReasonByCode,
-          statusRepository::getStatusByCode,
-          rasScheduleInfo,
-          prisonerMovements,
-        ),
-      )
     return ReferenceId(appearance.id)
   }
 

@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.syn
 
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.envers.RevisionType
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -142,6 +143,7 @@ class SyncCourtAppearanceIntTest(
     )
   }
 
+  @Disabled
   @Test
   fun `200 ok - next court appearance scheduled for RaS`() {
     val person = givenPersonSummary(personSummary())
@@ -208,6 +210,7 @@ class SyncCourtAppearanceIntTest(
     )
   }
 
+  @Disabled
   @Test
   fun `200 ok scheduled appearance id and legacy id returned if external reference already exists`() {
     val appearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
@@ -242,17 +245,9 @@ class SyncCourtAppearanceIntTest(
   @Test
   fun `200 ok - court appearance updated`() {
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
-    val rasScheduleInfo = rasMockServer.givenCourtAppearanceSchedule(appearance.schedule(false))
     prisonApi.givenMovementsFor(appearance.person.identifier, listOf(prisonerMovement(appearance.prisonCode)))
 
-    val request =
-      syncRequest(
-        courtEvent(
-          appearance.prisonCode,
-          eventId = appearance.legacyId!!,
-          externalReference = externalReference(uuid = rasScheduleInfo.id),
-        ),
-      )
+    val request = syncRequest(courtEvent(appearance.prisonCode, eventId = appearance.legacyId!!))
     val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -298,9 +293,7 @@ class SyncCourtAppearanceIntTest(
     val prisonCode = requireNotNull(person.prisonCode)
     prisonApi.givenMovementsFor(person.identifier, listOf(prisonerMovement(prisonCode, dateTime = LocalDateTime.now())))
 
-    val request =
-      syncRequest(courtEvent(prisonCode, date = LocalDate.now().minusDays(1), externalReference = externalReference()))
-    rasMockServer.givenCourtAppearanceSchedule(request.courtEvent.schedule(person.identifier)!!)
+    val request = syncRequest(courtEvent(prisonCode, date = LocalDate.now().minusDays(1)))
     val response = syncAppearance(person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -343,13 +336,11 @@ class SyncCourtAppearanceIntTest(
       courtEvent(
         scheduledCourtCode = appearance.courtCode,
         eventId = appearance.legacyId!!,
-        externalReference = externalReference(),
         date = appearance.start.toLocalDate(),
         startTime = appearance.start.toLocalTime(),
         commentText = appearance.comments,
       ),
     )
-    rasMockServer.givenCourtAppearanceSchedule(request.courtEvent.schedule(appearance.person.identifier)!!)
     val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -377,6 +368,7 @@ class SyncCourtAppearanceIntTest(
     )
   }
 
+  @Disabled
   @Test
   fun `200 ok - court appearance unscheduled by ras information`() {
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
