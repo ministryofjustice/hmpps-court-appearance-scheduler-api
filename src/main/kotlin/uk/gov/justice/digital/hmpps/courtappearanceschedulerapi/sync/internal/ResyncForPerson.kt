@@ -69,7 +69,7 @@ class ResyncForPerson(
 
     val appearanceProvider = { legacyId: Long, er: ExternalReference?, id: UUID? ->
       appearances.firstOrNull { it.legacyId == legacyId }
-        ?: appearances.firstOrNull { it.externalReference == er }
+        ?: er?.let { appearances.firstOrNull { app -> app.externalReference == it } }
         ?: appearances.firstOrNull { it.id == id }
     }
     val movementProvider = { id: UUID?, legacyId: String ->
@@ -131,9 +131,18 @@ class ResyncForPerson(
     prisonerMovements: List<PrisonerMovement>,
   ): CourtEventMapping {
     val rasScheduleInfo = courtEvent.externalReferenceUrn?.uuid?.let { scheduleInfoProvider(it) }
-    val appearance = appearanceProvider(requireNotNull(courtEvent.eventId), courtEvent.externalReferenceUrn, courtEvent.dpsId)
-      ?.updateFrom(person, courtEvent, reasonProvider, statusProvider, rasScheduleInfo, prisonerMovements)
-      ?: appearanceRepository.save(courtEvent.asEntity(person, reasonProvider, statusProvider, rasScheduleInfo, prisonerMovements))
+    val appearance =
+      appearanceProvider(requireNotNull(courtEvent.eventId), courtEvent.externalReferenceUrn, courtEvent.dpsId)
+        ?.updateFrom(person, courtEvent, reasonProvider, statusProvider, rasScheduleInfo, prisonerMovements)
+        ?: appearanceRepository.save(
+          courtEvent.asEntity(
+            person,
+            reasonProvider,
+            statusProvider,
+            rasScheduleInfo,
+            prisonerMovements,
+          ),
+        )
     val scheduledMovements = movements.map {
       it.resync(person, appearance, movementProvider, reasonProvider, statusProvider, migrationAuditProvider)
     }
