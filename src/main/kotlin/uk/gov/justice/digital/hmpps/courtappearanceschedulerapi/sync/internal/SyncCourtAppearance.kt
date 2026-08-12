@@ -32,7 +32,7 @@ class SyncCourtAppearance(
   private val appearanceRepository: CourtAppearanceRepository,
 ) {
   fun sync(personIdentifier: String, request: SyncCourtEvent): ReferenceId {
-    if (request.courtEvent.externalReferenceUrn != null && serviceConfig.ras.sendUpdates) {
+    if (request.courtEvent.externalReferenceUrn != null && serviceConfig.isProcessingRasEvents()) {
       return ReferenceId(newUuid())
     }
     with(request) {
