@@ -5,6 +5,8 @@ import org.springframework.boot.actuate.info.Info
 import org.springframework.boot.actuate.info.InfoContributor
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceInserted
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceUpdated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.integration.IntegrationUrlBuilder
 import java.time.Duration
 
@@ -28,6 +30,8 @@ data class ServiceConfig(
 ) {
   data class DomainEventConfig(val pollInterval: Duration, val batchSize: Int, val disabledEvents: Set<String> = setOf())
   data class RasConfig(val enableWithResync: Boolean, val enableWithSync: Boolean, val sendUpdates: Boolean)
+
+  fun isProcessingRasEvents(): Boolean = setOf(RasAppearanceInserted.EVENT_TYPE, RasAppearanceUpdated.EVENT_TYPE).none { it in disablePrisonEvents }
 }
 
 @Component
