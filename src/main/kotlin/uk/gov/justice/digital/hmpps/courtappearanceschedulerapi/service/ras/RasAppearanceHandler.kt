@@ -10,6 +10,8 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReason
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getStatusByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceDeleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceEvent
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceInserted
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceUpdated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonApiClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.locationAt
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.mostRecent
@@ -35,7 +37,8 @@ class RasAppearanceHandler(
 ) {
   fun handle(event: RasAppearanceEvent) = when (event) {
     is RasAppearanceDeleted -> handleDelete(event)
-    else -> handleUpsert(event)
+    is RasAppearanceInserted -> createAppearance(event)
+    is RasAppearanceUpdated -> handleUpdate(event)
   }
 
   private fun handleDelete(event: RasAppearanceDeleted) {
@@ -46,7 +49,13 @@ class RasAppearanceHandler(
       }
   }
 
-  private fun handleUpsert(event: RasAppearanceEvent) {
+  private fun createAppearance(event: RasAppearanceInserted) {
+    rasClient.findCourtAppearanceSchedule(event.additionalInformation.courtAppearanceId)?.also { ras ->
+      appearanceRepository.save(ras.asEntity())
+    }
+  }
+
+  private fun handleUpdate(event: RasAppearanceEvent) {
     rasClient.findCourtAppearanceSchedule(event.additionalInformation.courtAppearanceId)?.also { ras ->
       val movements = prisonApi.movementsFor(event.getPersonIdentifier())
       val mrm = movements.mostRecent()
@@ -62,8 +71,6 @@ class RasAppearanceHandler(
           ras.start.isBefore(mrm?.movementDateTime ?: LocalDateTime.now()),
           ras.isDuplicate,
         )
-      } ?: run {
-        appearanceRepository.save(ras.asEntity())
       }
     }
   }

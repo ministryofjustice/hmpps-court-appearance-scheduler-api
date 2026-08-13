@@ -7,11 +7,13 @@ import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.set
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.Notification
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonUpdatedHandler
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PrisonerMergedHandler
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PrisonerReceivedHandler
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.ras.RasAppearanceHandler
+import java.time.LocalDateTime
 
 @Component
 class DomainEventListener(
@@ -25,6 +27,7 @@ class DomainEventListener(
 
   @SqsListener("hmppsdomaineventsqueue", factory = "hmppsQueueContainerFactoryProxy")
   fun handleDomainEvent(notification: Notification) {
+    SchedulerContext.get().copy(requestAt = LocalDateTime.now()).set()
     try {
       if (notification.eventType in serviceConfig.domainEvents.disabledEvents) return
       when (notification.eventType) {

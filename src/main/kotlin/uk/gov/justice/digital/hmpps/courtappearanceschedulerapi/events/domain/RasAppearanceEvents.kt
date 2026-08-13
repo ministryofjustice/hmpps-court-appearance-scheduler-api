@@ -13,7 +13,7 @@ data class RasAppearanceInformation(val courtAppearanceId: UUID) : AdditionalInf
   )
 }
 
-interface RasAppearanceEvent : DomainEvent<RasAppearanceInformation> {
+sealed interface RasAppearanceEvent : DomainEvent<RasAppearanceInformation> {
   fun externalReference(): ExternalReference = additionalInformation.externalReference()
 }
 
