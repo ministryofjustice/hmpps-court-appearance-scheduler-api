@@ -70,9 +70,12 @@ class SyncCourtAppearance(
     return ReferenceId(appearance.id)
   }
 
-  fun delete(id: UUID) = appearanceRepository.findByIdOrNull(id)?.let { appearance ->
-    SchedulerContext.get().copy(username = SYSTEM_USERNAME).set()
-    appearance.movements.toList().forEach(appearance::removeMovement)
-    appearanceRepository.delete(appearance)
+  fun delete(id: UUID) {
+    appearanceRepository.findByIdOrNull(id)?.let { appearance ->
+      if (appearance.externalReference != null && serviceConfig.isProcessingRasEvents()) return
+      SchedulerContext.get().copy(username = SYSTEM_USERNAME).set()
+      appearance.movements.toList().forEach(appearance::removeMovement)
+      appearanceRepository.delete(appearance)
+    }
   }
 }
