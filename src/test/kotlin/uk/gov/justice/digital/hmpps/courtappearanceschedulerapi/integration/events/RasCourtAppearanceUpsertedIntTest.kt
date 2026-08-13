@@ -32,7 +32,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.UUID
-import kotlin.random.Random
 
 class RasCourtAppearanceUpsertedIntTest(
   @Autowired pso: PersonSummaryOperations,
@@ -47,7 +46,7 @@ class RasCourtAppearanceUpsertedIntTest(
     val ras = rasMockServer.givenCourtAppearanceSchedule(rasSchedule(prisoner.prisonerNumber))
     prisonApi.givenMovementsFor(ras.personIdentifier, listOf(prisonerMovement(prisoner.prisonId!!)))
 
-    sendDomainEvent(event(ras.id, ras.personIdentifier))
+    sendDomainEvent(event(true, ras.id, ras.personIdentifier))
 
     waitUntil { findByExternalReference(ras.externalReference) != null }
 
@@ -61,7 +60,7 @@ class RasCourtAppearanceUpsertedIntTest(
     val ras = rasMockServer.givenCourtAppearanceSchedule(rasSchedule(person.identifier, isDuplicate = true))
     prisonApi.givenMovementsFor(ras.personIdentifier, listOf(prisonerMovement()))
 
-    sendDomainEvent(event(ras.id, ras.personIdentifier))
+    sendDomainEvent(event(true, ras.id, ras.personIdentifier))
 
     waitUntil { findByExternalReference(ras.externalReference) != null }
 
@@ -81,7 +80,7 @@ class RasCourtAppearanceUpsertedIntTest(
       listOf(prisonerMovement(dateTime = LocalDateTime.now())),
     )
 
-    sendDomainEvent(event(ras.id, ras.personIdentifier))
+    sendDomainEvent(event(true, ras.id, ras.personIdentifier))
 
     waitUntil { findByExternalReference(ras.externalReference) != null }
 
@@ -104,7 +103,7 @@ class RasCourtAppearanceUpsertedIntTest(
     )
     prisonApi.givenMovementsFor(ras.personIdentifier, listOf(prisonerMovement(existing.person.prisonCode!!)))
 
-    sendDomainEvent(event(ras.id, ras.personIdentifier))
+    sendDomainEvent(event(false, ras.id, ras.personIdentifier))
 
     waitUntil { findByExternalReference(ras.externalReference) != null }
 
@@ -123,7 +122,7 @@ class RasCourtAppearanceUpsertedIntTest(
     )
     prisonApi.givenMovementsFor(ras.personIdentifier, listOf(prisonerMovement(existing.person.prisonCode!!)))
 
-    sendDomainEvent(event(ras.id, ras.personIdentifier))
+    sendDomainEvent(event(false, ras.id, ras.personIdentifier))
 
     waitUntil { findByExternalReference(ras.externalReference) != null }
 
@@ -134,9 +133,10 @@ class RasCourtAppearanceUpsertedIntTest(
 }
 
 private fun event(
+  new: Boolean,
   appearanceId: UUID = UUID.randomUUID(),
   personIdentifier: String = personIdentifier(),
-) = if (Random.nextBoolean()) {
+) = if (new) {
   RasAppearanceInserted(RasAppearanceInformation(appearanceId), PersonReference.withIdentifier(personIdentifier))
 } else {
   RasAppearanceUpdated(RasAppearanceInformation(appearanceId), PersonReference.withIdentifier(personIdentifier))
