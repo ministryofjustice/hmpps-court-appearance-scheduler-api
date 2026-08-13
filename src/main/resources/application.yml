@@ -12,10 +12,11 @@ spring:
     password: ${db.pass}
 
     hikari:
-      connectionTimeout: 1000
-      validationTimeout: 500
-      maximumPoolSize: 32
+      connection-timeout: 5000
+      validation-timeout: 500
+      maximum-pool-size: 32
       minimum-idle: 10
+      leak-detection-threshold: 2000
       auto-commit: false
       data-source-properties:
         sslmode: "verify-full"
