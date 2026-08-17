@@ -34,7 +34,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publicati
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.DomainEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.TestConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.container.LocalStackContainer
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.container.LocalStackContainer.setLocalStackProperties
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.container.LocalStackContainer.setMiniStackProperties
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.container.PostgresContainer
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourterRegisterExtension
@@ -230,7 +230,7 @@ abstract class IntegrationTest {
       }
 
       System.setProperty("aws.region", "eu-west-2")
-      localStackContainer?.also { setLocalStackProperties(it, registry) }
+      localStackContainer?.also { setMiniStackProperties(it, registry) }
     }
   }
 }

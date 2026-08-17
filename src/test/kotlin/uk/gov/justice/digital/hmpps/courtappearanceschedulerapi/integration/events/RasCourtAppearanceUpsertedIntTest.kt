@@ -105,7 +105,7 @@ class RasCourtAppearanceUpsertedIntTest(
 
     sendDomainEvent(event(false, ras.id, ras.personIdentifier))
 
-    waitUntil { findByExternalReference(ras.externalReference) != null }
+    waitUntil { findByExternalReference(ras.externalReference)!!.version!! > 0 }
 
     val saved = requireNotNull(findByExternalReference(ras.externalReference))
     assertThat(saved.external).isFalse
