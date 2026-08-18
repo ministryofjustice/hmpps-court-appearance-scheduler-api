@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance
 
 import jakarta.persistence.criteria.JoinType
 import org.springframework.data.jpa.domain.Specification
@@ -7,10 +7,14 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.findByIdOrNull
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.IDENTIFIER
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.PRISON_CODE
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.matchesIdentifier
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.matchesName
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.matchesPrisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.clashes.ClashRange
 import java.time.LocalDate
 import java.time.LocalDateTime

@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model
 
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceReason
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceReason
 
 data class AppearanceReason(val code: String, val description: String, val external: Boolean)
 

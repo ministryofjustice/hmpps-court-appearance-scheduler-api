@@ -2,13 +2,13 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovementRepository
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanceMatchesPersonIdentifier
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getAppearance
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceMovementRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.appearanceMatchesPersonIdentifier
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.getAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.getMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.ReconciliationCourtEvent

@@ -4,8 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.PersonReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceInformation
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceInserted
@@ -124,7 +124,7 @@ class RasCourtAppearanceUpsertedIntTest(
 
     sendDomainEvent(event(false, ras.id, ras.personIdentifier))
 
-    waitUntil { findByExternalReference(ras.externalReference) != null }
+    waitUntil { findByExternalReference(ras.externalReference)!!.version!! > 0 }
 
     val saved = requireNotNull(findByExternalReference(ras.externalReference))
     assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.COMPLETED)

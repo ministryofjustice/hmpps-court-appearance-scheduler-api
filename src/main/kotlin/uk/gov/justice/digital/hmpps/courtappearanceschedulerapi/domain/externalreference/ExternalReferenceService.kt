@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference
 
 enum class ExternalReferenceService(val code: String, val description: String) {
   REMAND_AND_SENTENCING("remand-and-sentencing", "Remand and Sentencing"),

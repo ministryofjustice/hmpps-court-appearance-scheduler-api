@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -21,7 +21,14 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.findByIdOrNull
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DomainEventProducer
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DomainEventPublication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PrisonRelated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReasonProvider
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.StatusProvider
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementDeleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.AppearanceMovementRecorded

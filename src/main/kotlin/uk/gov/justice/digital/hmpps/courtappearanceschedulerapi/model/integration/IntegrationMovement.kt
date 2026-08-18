@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.integration
 
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceMovement
 import java.time.LocalDateTime
 import java.util.UUID
 

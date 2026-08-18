@@ -1,8 +1,7 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference
 
 import jakarta.persistence.AttributeConverter
 import jakarta.persistence.Converter
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 
 @Converter
 class ExternalReferenceConverter : AttributeConverter<ExternalReference, String> {

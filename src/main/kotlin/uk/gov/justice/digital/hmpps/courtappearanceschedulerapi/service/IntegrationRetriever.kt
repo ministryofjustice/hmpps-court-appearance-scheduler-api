@@ -1,13 +1,13 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service
 
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovementRepository
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceReason
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getAppearance
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceMovementRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceReason
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.getAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.getMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.integration.IntegrationAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.integration.IntegrationMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.integration.IntegrationReason
