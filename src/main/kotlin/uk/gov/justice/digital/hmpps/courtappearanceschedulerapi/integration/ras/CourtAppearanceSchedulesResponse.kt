@@ -2,9 +2,9 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceEntity.COURT_APPEARANCE
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceService.REMAND_AND_SENTENCING
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReferenceEntity.COURT_APPEARANCE
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReferenceService.REMAND_AND_SENTENCING
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID

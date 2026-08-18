@@ -3,7 +3,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.ap
 import jakarta.validation.Constraint
 import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceRescheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.DomainEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.StartAndEnd

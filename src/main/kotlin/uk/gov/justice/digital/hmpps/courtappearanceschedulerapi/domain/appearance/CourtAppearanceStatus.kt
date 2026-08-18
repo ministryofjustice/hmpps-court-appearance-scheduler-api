@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

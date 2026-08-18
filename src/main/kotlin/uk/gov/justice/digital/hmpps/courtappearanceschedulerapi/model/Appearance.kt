@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model
 
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceStatus
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AppearanceOrigin.OriginSource
 import java.time.LocalDateTime
 import java.util.UUID

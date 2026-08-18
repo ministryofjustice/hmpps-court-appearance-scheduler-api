@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance
 
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
@@ -22,14 +22,23 @@ import org.hibernate.annotations.FetchMode
 import org.hibernate.envers.Audited
 import org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction.IN
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceMovement.Direction.OUT
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DomainEventProducer
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DomainEventPublication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.Identifiable
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PrisonRelated
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReasonProvider
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.StatusProvider
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceMovement.Direction.IN
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceMovement.Direction.OUT
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReferenceConverter
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceCancelled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceRecorded
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceScheduled
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearancePrison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CompleteAppearance

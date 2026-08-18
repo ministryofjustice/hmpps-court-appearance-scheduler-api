@@ -1,11 +1,11 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync
 
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.username
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.User

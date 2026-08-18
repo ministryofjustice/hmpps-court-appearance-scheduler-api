@@ -6,11 +6,11 @@ import jakarta.validation.ConstraintValidatorContext
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction
 import org.springframework.data.domain.Sort.by
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.FIRST_NAME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.IDENTIFIER
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.LAST_NAME
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.StartAndEnd
 import java.time.Duration
 import java.time.LocalDate
@@ -83,14 +83,12 @@ class MonthBetweenValidator : ConstraintValidator<ValidDateRange, StartAndEnd<*>
   }
 
   override fun isValid(request: StartAndEnd<*>, context: ConstraintValidatorContext): Boolean = with(request) {
-    return if (start == null || end == null) {
-      false
-    } else {
+    return start != null &&
+      end != null &&
       when (start) {
         is LocalDate -> DAYS.between(start as LocalDate, end as LocalDate) <= daysBetween
         is LocalDateTime -> Duration.between(start, end).toDays() <= daysBetween
         else -> throw UnsupportedOperationException("${start!!::class.simpleName} is not supported by this validator")
       }
-    }
   }
 }

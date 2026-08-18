@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.history
 
 import jakarta.persistence.EntityManager
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.manageusers.ManageUsersClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditedAction
 

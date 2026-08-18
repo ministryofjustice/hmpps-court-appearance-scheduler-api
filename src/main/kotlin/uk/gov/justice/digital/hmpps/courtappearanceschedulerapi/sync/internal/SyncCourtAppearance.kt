@@ -7,12 +7,12 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceCo
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext.Companion.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.set
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceReasonRepository
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceRepository
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatusRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getReasonByCode
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.getStatusByCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceReasonRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceStatusRepository
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.getReasonByCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.getStatusByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonApiClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ReferenceId

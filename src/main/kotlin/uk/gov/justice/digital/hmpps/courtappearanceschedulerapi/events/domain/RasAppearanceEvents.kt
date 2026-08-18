@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain
 
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceEntity
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceService
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ExternalReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReference
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReferenceEntity
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReferenceService
 import java.util.UUID
 
 data class RasAppearanceInformation(val courtAppearanceId: UUID) : AdditionalInformation {

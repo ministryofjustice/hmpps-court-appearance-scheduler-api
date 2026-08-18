@@ -1,7 +1,7 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation
 
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearanceStatus
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 
 interface PropertyReconciler {
