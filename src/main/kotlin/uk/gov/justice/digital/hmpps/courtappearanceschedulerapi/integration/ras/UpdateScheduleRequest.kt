@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras
 
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance
 import java.time.LocalDateTime
 
 data class UpdateScheduleRequest(

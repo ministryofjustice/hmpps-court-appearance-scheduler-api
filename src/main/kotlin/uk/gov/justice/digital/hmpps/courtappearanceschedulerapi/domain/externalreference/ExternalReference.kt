@@ -1,9 +1,8 @@
-package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model
+package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceEntity
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ExternalReferenceService
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.toUuid
 import java.util.UUID
 
 class ExternalReference(val service: ExternalReferenceService, val entity: ExternalReferenceEntity, val uuid: UUID) {
