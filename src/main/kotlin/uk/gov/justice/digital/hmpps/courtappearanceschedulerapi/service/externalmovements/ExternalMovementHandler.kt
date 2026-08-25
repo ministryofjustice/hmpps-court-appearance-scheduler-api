@@ -8,7 +8,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.appearanceMatchesPersonIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.getStatusByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.startsAtOrAfter
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearancePrison
 
 @Service
 class ExternalMovementHandler(
@@ -22,7 +21,6 @@ class ExternalMovementHandler(
       appearanceMatchesPersonIdentifier(emre.personIdentifier, null)
         .and(startsAtOrAfter(emre.movementDateTime)),
     ).forEach {
-      it.applyResponsibility(ChangeAppearancePrison(emre.prisonCode))
       if (it.status.code == CourtAppearanceStatus.Code.IN_PROGRESS) {
         it.calculateStatus(statusRepository::getStatusByCode, completeOverride = true)
       }

@@ -17,7 +17,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.internal.
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.word
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.IntegrationTest
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
@@ -91,9 +90,9 @@ class ReconciliationIntTest(
     prisonApi.givenMovementsFor(
       casAppearance.person.identifier,
       listOf(
-        prisonerMovement(toAgency = prisonCode(), dateTime = casAppearance.start.minusDays(2)),
-        prisonerMovement(toAgency = casAppearance.prisonCode, dateTime = casAppearance.start.minusDays(1)),
-        prisonerMovement(toAgency = prisonCode(), dateTime = casAppearance.start.plusDays(1)),
+        prisonerMovement(dateTime = casAppearance.start.minusDays(2)),
+        prisonerMovement(dateTime = casAppearance.start.minusDays(1)),
+        prisonerMovement(dateTime = casAppearance.start.plusDays(1)),
       ),
     )
 
@@ -140,7 +139,7 @@ class ReconciliationIntTest(
     )
 
     val rasFound = rasMockServer.givenCourtAppearanceSchedule(casAppearance.schedule(false).copy(personIdentifier = personIdentifier()))
-    prisonApi.givenMovementsFor(casAppearance.person.identifier, listOf(prisonerMovement(casAppearance.prisonCode)))
+    prisonApi.givenMovementsFor(casAppearance.person.identifier, listOf(prisonerMovement()))
 
     personReconciliation.reconcile(casAppearance.person.identifier)
 

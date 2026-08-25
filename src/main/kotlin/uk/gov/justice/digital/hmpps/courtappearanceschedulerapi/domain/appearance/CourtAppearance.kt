@@ -27,7 +27,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DomainEve
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.Identifiable
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PrisonRelated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReasonProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.StatusProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceMovement.Direction.IN
@@ -40,7 +39,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.Co
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceRecorded
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceScheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearancePrison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CompleteAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.CourtAppearanceAction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ExpireAppearance
@@ -77,7 +75,6 @@ import java.util.UUID
 @Table(name = "court_appearance")
 final class CourtAppearance(
   person: PersonSummary,
-  prisonCode: String,
   courtCode: String,
   reason: CourtAppearanceReason,
   start: LocalDateTime,
@@ -89,8 +86,7 @@ final class CourtAppearance(
   @Column(name = "id", nullable = false)
   override val id: UUID = newUuid(),
 ) : Identifiable,
-  DomainEventProducer,
-  PrisonRelated {
+  DomainEventProducer {
   @Version
   @Column(name = "version", nullable = false)
   override var version: Int? = null
@@ -102,12 +98,6 @@ final class CourtAppearance(
   @ManyToOne(optional = false)
   @JoinColumn(name = "person_identifier", nullable = false)
   var person: PersonSummary = person
-    private set
-
-  @Size(max = 6)
-  @NotNull
-  @Column(name = "prison_code", nullable = false, length = 6)
-  override var prisonCode: String = prisonCode
     private set
 
   @Size(max = 6)
@@ -217,13 +207,6 @@ final class CourtAppearance(
 
   fun movePerson(person: PersonSummary) = apply {
     this.person = person
-  }
-
-  fun applyResponsibility(action: ChangeAppearancePrison) = apply {
-    if (action.prisonCode != prisonCode) {
-      prisonCode = action.prisonCode
-      appliedActions += action
-    }
   }
 
   fun calculateStatus(

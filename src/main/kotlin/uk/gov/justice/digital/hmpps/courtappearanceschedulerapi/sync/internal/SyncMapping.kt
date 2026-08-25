@@ -7,11 +7,9 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.StatusPro
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonerMovement
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.locationAt
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.mostRecent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearancePrison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
@@ -33,7 +31,6 @@ fun CourtEvent.asEntity(
   movements: List<PrisonerMovement>,
 ): CourtAppearance = CourtAppearance(
   person,
-  movements.locationAt(start),
   scheduledCourtCode,
   reason(type),
   start,
@@ -58,7 +55,6 @@ fun CourtAppearance.updateFrom(
   movements: List<PrisonerMovement>,
 ): CourtAppearance = apply {
   movePerson(personSummary)
-  applyResponsibility(ChangeAppearancePrison(movements.locationAt(request.start)))
   applyExternalIdentifiers(request.externalReferenceUrn, request.eventId)
   relocate(RelocateAppearance(request.scheduledCourtCode))
   recategorise(RecategoriseAppearance(request.type), reason)

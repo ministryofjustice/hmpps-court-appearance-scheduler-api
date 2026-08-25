@@ -13,12 +13,10 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.Ra
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceInserted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.RasAppearanceUpdated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonApiClient
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.locationAt
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.mostRecent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearanceComments
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.ChangeAppearancePrison
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
@@ -59,9 +57,7 @@ class RasAppearanceHandler(
     rasClient.findCourtAppearanceSchedule(event.additionalInformation.courtAppearanceId)?.also { ras ->
       val movements = prisonApi.movementsFor(event.getPersonIdentifier())
       val mrm = movements.mostRecent()
-      val prisonCode = movements.locationAt(ras.start)
       appearanceRepository.findByExternalReference(event.externalReference())?.also { cas ->
-        cas.applyResponsibility(ChangeAppearancePrison(prisonCode))
         cas.reschedule(RescheduleAppearance(ras.start, cas.end))
         cas.relocate(RelocateAppearance(ras.courtCode))
         cas.recategorise(RecategoriseAppearance(ras.reason.code), reasonRepository::getReasonByCode)
@@ -79,10 +75,8 @@ class RasAppearanceHandler(
     val person = personSummaryService.getWithSave(personIdentifier)
     val movements = prisonApi.movementsFor(personIdentifier)
     val mrm = movements.mostRecent()
-    val prisonCode = movements.locationAt(start)
     return CourtAppearance(
       person,
-      prisonCode,
       courtCode,
       reasonRepository.getReasonByCode(reason.code),
       start,

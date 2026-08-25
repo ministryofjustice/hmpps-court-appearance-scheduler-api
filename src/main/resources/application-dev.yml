@@ -27,8 +27,6 @@ service:
     cron: "0 0 17 * * 1-4"
   enhanced-reconciliation:
     cron: "0 0 17 * * 5"
-  disable-prison-events:
-    - LEI
 
 springdoc:
   api-docs:

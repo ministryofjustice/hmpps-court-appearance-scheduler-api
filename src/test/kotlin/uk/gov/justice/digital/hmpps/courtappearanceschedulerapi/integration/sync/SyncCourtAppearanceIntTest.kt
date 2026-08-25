@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.syn
 
 import org.assertj.core.api.Assertions.assertThat
 import org.hibernate.envers.RevisionType
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.MethodSource
@@ -26,7 +25,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.Co
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceRescheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceScheduled
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceUnscheduled
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
@@ -41,8 +39,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wire
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerApiExtension.Companion.prisonApi
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchExtension.Companion.prisonerSearch
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchServer.Companion.prisoner
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.schedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ReferenceId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.SyncCourtEvent
@@ -143,48 +139,12 @@ class SyncCourtAppearanceIntTest(
     )
   }
 
-  @Disabled
-  @Test
-  fun `200 ok - next court appearance scheduled for RaS`() {
-    val person = givenPersonSummary(personSummary())
-    val prisonCode = requireNotNull(person.prisonCode)
-    prisonApi.givenMovementsFor(person.identifier, listOf(prisonerMovement(prisonCode)))
-
-    val request = syncRequest(courtEvent(prisonCode, externalReference = externalReference()))
-    rasMockServer.givenCourtAppearanceSchedule(request.courtEvent.schedule(person.identifier)!!)
-    val response = syncAppearance(person.identifier, request).successResponse<ReferenceId>()
-
-    val saved = requireNotNull(findCourtAppearance(response.id))
-    assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
-    saved verifyAgainst request.courtEvent
-
-    verifyAudit(
-      saved,
-      RevisionType.ADD,
-      setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearance::class.simpleName!!),
-      SchedulerContext.get()
-        .copy(username = request.user.username, caseloadId = request.user.activeCaseloadId, source = DataSource.NOMIS),
-    )
-
-    verifyEventPublications(
-      saved,
-      setOf(
-        CourtAppearanceScheduled(
-          saved.person.identifier,
-          saved.id,
-          saved.externalReference,
-          DataSource.NOMIS,
-        ).publication(saved.id),
-      ),
-    )
-  }
-
   @Test
   fun `200 ok scheduled appearance id returned if legacy id already exists`() {
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
     prisonApi.givenMovementsFor(
       appearance.person.identifier,
-      listOf(prisonerMovement(appearance.prisonCode, dateTime = appearance.start.minusDays(1))),
+      listOf(prisonerMovement(dateTime = appearance.start.minusDays(1))),
     )
 
     val request = with(appearance) {
@@ -210,44 +170,12 @@ class SyncCourtAppearanceIntTest(
     )
   }
 
-  @Disabled
-  @Test
-  fun `200 ok scheduled appearance id and legacy id returned if external reference already exists`() {
-    val appearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
-    rasMockServer.givenCourtAppearanceSchedule(appearance.schedule(false))
-    prisonApi.givenMovementsFor(appearance.person.identifier, listOf(prisonerMovement(appearance.prisonCode)))
-
-    val request = with(appearance) {
-      syncRequest(
-        courtEvent(
-          courtCode,
-          reason.code,
-          date = appearance.start.toLocalDate(),
-          startTime = appearance.start.toLocalTime(),
-          commentText = appearance.comments,
-          externalReference = appearance.externalReference!!,
-        ),
-      )
-    }
-
-    val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
-
-    assertThat(response.id).isEqualTo(appearance.id)
-    verifyAudit(
-      appearance,
-      RevisionType.MOD,
-      setOf(CourtAppearance::class.simpleName!!),
-      SchedulerContext.get()
-        .copy(username = request.user.username, caseloadId = request.user.activeCaseloadId, source = DataSource.NOMIS),
-    )
-  }
-
   @Test
   fun `200 ok - court appearance updated`() {
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
-    prisonApi.givenMovementsFor(appearance.person.identifier, listOf(prisonerMovement(appearance.prisonCode)))
+    prisonApi.givenMovementsFor(appearance.person.identifier, listOf(prisonerMovement()))
 
-    val request = syncRequest(courtEvent(appearance.prisonCode, eventId = appearance.legacyId!!))
+    val request = syncRequest(courtEvent(eventId = appearance.legacyId!!))
     val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(response.id))
@@ -327,7 +255,7 @@ class SyncCourtAppearanceIntTest(
     prisonApi.givenMovementsFor(
       appearance.person.identifier,
       listOf(
-        prisonerMovement(appearance.prisonCode, dateTime = appearance.start.minusDays(1)),
+        prisonerMovement(dateTime = appearance.start.minusDays(1)),
         prisonerMovement(dateTime = appearance.start.plusDays(1)),
       ),
     )
@@ -368,57 +296,12 @@ class SyncCourtAppearanceIntTest(
     )
   }
 
-  @Disabled
-  @Test
-  fun `200 ok - court appearance unscheduled by ras information`() {
-    val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
-    assertThat(appearance.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
-    val scheduleInfo = rasMockServer.givenCourtAppearanceSchedule(appearance.schedule(true))
-    prisonApi.givenMovementsFor(appearance.person.identifier, listOf(prisonerMovement(appearance.prisonCode)))
-
-    val request = syncRequest(
-      courtEvent(
-        scheduledCourtCode = appearance.courtCode,
-        eventId = appearance.legacyId!!,
-        externalReference = externalReference(uuid = scheduleInfo.id),
-        date = appearance.start.toLocalDate(),
-        startTime = appearance.start.toLocalTime(),
-        commentText = appearance.comments,
-      ),
-    )
-    val response = syncAppearance(appearance.person.identifier, request).successResponse<ReferenceId>()
-
-    val saved = requireNotNull(findCourtAppearance(response.id))
-    assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.UNSCHEDULED)
-    saved verifyAgainst request.courtEvent
-
-    verifyAudit(
-      saved,
-      RevisionType.MOD,
-      setOf(HmppsDomainEvent::class.simpleName!!, CourtAppearance::class.simpleName!!),
-      SchedulerContext.get()
-        .copy(username = request.user.username, caseloadId = request.user.activeCaseloadId, source = DataSource.NOMIS),
-    )
-
-    verifyEventPublications(
-      saved,
-      setOf(
-        CourtAppearanceUnscheduled(
-          saved.person.identifier,
-          saved.id,
-          request.courtEvent.externalReferenceUrn,
-          DataSource.NOMIS,
-        ).publication(saved.id),
-      ),
-    )
-  }
-
   @Test
   fun `200 ok - court appearance unscheduled by sync`() {
     val appearance = givenCourtAppearance(courtAppearance(legacyId = newId()))
     assertThat(appearance.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
 
-    prisonApi.givenMovementsFor(appearance.person.identifier, listOf(prisonerMovement(appearance.prisonCode)))
+    prisonApi.givenMovementsFor(appearance.person.identifier, listOf(prisonerMovement()))
 
     val request = syncRequest(
       courtEvent(
@@ -465,7 +348,7 @@ class SyncCourtAppearanceIntTest(
     assertThat(appearance.status.code).isEqualTo(CourtAppearanceStatus.Code.UNSCHEDULED)
     prisonApi.givenMovementsFor(
       appearance.person.identifier,
-      listOf(prisonerMovement(appearance.prisonCode, dateTime = appearance.start.minusDays(1))),
+      listOf(prisonerMovement(dateTime = appearance.start.minusDays(1))),
     )
 
     val request = syncRequest(
