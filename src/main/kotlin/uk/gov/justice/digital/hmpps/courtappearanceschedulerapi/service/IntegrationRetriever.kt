@@ -28,7 +28,6 @@ class IntegrationRetriever(
 private fun CourtAppearance.forIntegration() = IntegrationAppearance(
   id,
   person.identifier,
-  prisonCode,
   courtCode,
   reason.forIntegration(),
   start,

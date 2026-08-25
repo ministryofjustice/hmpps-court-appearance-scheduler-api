@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.set
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance
@@ -34,7 +33,6 @@ import java.util.UUID
 class CourtAppearanceModifications(
   private val transactionTemplate: TransactionTemplate,
   private val iee: InternalEventEmitter,
-  private val serviceConfig: ServiceConfig,
   private val reasonRepository: CourtAppearanceReasonRepository,
   private val statusRepository: CourtAppearanceStatusRepository,
   private val appearanceRepository: CourtAppearanceRepository,
@@ -50,8 +48,7 @@ class CourtAppearanceModifications(
       appearanceRepository.flush()
       UpdateAppearanceDetails(readVersion!!, appearance.version!!, appearance.externalReference)
     }
-    externalReference?.takeIf { serviceConfig.ras.sendUpdates }
-      ?.also { iee.publishInternalEvent(CourtAppearancePushSingle(it)) }
+    externalReference?.also { iee.publishInternalEvent(CourtAppearancePushSingle(it)) }
     return AuditHistory(listOfNotNull(appearanceHistory.currentAction(id, readVersion, writeVersion)))
   }
 

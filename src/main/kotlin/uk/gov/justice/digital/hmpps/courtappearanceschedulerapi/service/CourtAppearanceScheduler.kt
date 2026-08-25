@@ -38,7 +38,16 @@ class CourtAppearanceScheduler(
     person: PersonSummary,
     reason: ReasonProvider,
     status: StatusProvider,
-  ) = CourtAppearance(person, person.prisonCode!!, courtCode, reason(reasonCode), start, end ?: start.toLocalDate().atTime(DEFAULT_END_TIME), comments, null, null)
+  ) = CourtAppearance(
+    person,
+    courtCode,
+    reason(reasonCode),
+    start,
+    end ?: start.toLocalDate().atTime(DEFAULT_END_TIME),
+    comments,
+    null,
+    null,
+  )
     .calculateStatus(status)
 
   companion object {

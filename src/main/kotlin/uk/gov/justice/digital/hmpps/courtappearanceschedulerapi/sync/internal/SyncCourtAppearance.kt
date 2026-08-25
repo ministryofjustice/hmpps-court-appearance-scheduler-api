@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext.Companion.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.set
@@ -25,14 +24,13 @@ import java.util.UUID
 class SyncCourtAppearance(
   private val rasClient: RemandAndSentencingClient,
   private val prisonClient: PrisonApiClient,
-  private val serviceConfig: ServiceConfig,
   private val personSummaryService: PersonSummaryService,
   private val reasonRepository: CourtAppearanceReasonRepository,
   private val statusRepository: CourtAppearanceStatusRepository,
   private val appearanceRepository: CourtAppearanceRepository,
 ) {
   fun sync(personIdentifier: String, request: SyncCourtEvent): ReferenceId {
-    if (request.courtEvent.externalReferenceUrn != null && serviceConfig.isProcessingRasEvents()) {
+    if (request.courtEvent.externalReferenceUrn != null) {
       return ReferenceId(newUuid())
     }
     with(request) {
@@ -40,11 +38,8 @@ class SyncCourtAppearance(
         .copy(requestAt = occurredAt, username = user.username, caseloadId = user.activeCaseloadId)
         .set()
     }
-    val rasScheduleInfo = if (serviceConfig.ras.enableWithSync) {
-      request.courtEvent.externalReferenceUrn?.uuid?.let(rasClient::findCourtAppearanceSchedule)
-    } else {
-      null
-    }
+    val rasScheduleInfo = request.courtEvent.externalReferenceUrn?.uuid?.let(rasClient::findCourtAppearanceSchedule)
+
     val prisonerMovements = prisonClient.movementsFor(personIdentifier)
     val person = personSummaryService.getWithSave(personIdentifier)
     val appearance = (
@@ -72,7 +67,7 @@ class SyncCourtAppearance(
 
   fun delete(id: UUID) {
     appearanceRepository.findByIdOrNull(id)?.let { appearance ->
-      if (appearance.externalReference != null && serviceConfig.isProcessingRasEvents()) return
+      if (appearance.externalReference != null) return
       SchedulerContext.get().copy(username = SYSTEM_USERNAME).set()
       appearance.movements.toList().forEach(appearance::removeMovement)
       appearanceRepository.delete(appearance)

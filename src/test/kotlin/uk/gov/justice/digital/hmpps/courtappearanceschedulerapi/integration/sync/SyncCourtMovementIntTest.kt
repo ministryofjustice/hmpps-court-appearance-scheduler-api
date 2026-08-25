@@ -138,7 +138,7 @@ class SyncCourtMovementIntTest(
   @Test
   fun `200 ok - new scheduled movement created and schedule status updated`() {
     val appearance = givenCourtAppearance(courtAppearance(movements = listOf(movement(CourtAppearanceMovement.Direction.OUT))))
-    val prisonCode = appearance.prisonCode
+    val prisonCode = appearance.person.prisonCode!!
 
     val request = syncRequest(courtEventMovement(scheduleId = appearance.id, fromAgencyId = prisonCode, directionCode = "IN"))
     val response = syncMovement(appearance.person.identifier, request).successResponse<ReferenceId>()
@@ -180,7 +180,7 @@ class SyncCourtMovementIntTest(
   @Test
   fun `200 ok - new scheduled movement created and applied to RaS appearance`() {
     val appearance = givenCourtAppearance(courtAppearance(externalReference = externalReference()))
-    val prisonCode = appearance.prisonCode
+    val prisonCode = appearance.person.prisonCode!!
 
     val request = syncRequest(
       courtEventMovement(

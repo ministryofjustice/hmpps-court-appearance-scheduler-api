@@ -47,7 +47,6 @@ interface CourtAppearanceOperations {
       val p = person(personIdentifier)
       CourtAppearance(
         p,
-        requireNotNull(p.prisonCode),
         courtCode,
         reason(reasonCode),
         start.truncatedTo(ChronoUnit.SECONDS),
@@ -67,7 +66,7 @@ interface CourtAppearanceOperations {
     comments: String? = word(25),
     legacyId: String? = null,
   ): (CourtAppearance) -> CourtAppearanceMovement = { ca ->
-    CourtAppearanceMovement(ca, ca.person, ca.prisonCode, ca.courtCode, ca.reason, direction, occurredAt, comments, legacyId)
+    CourtAppearanceMovement(ca, ca.person, ca.person.prisonCode!!, ca.courtCode, ca.reason, direction, occurredAt, comments, legacyId)
   }
 }
 

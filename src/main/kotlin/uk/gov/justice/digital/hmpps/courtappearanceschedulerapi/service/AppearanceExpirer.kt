@@ -29,8 +29,7 @@ class AppearanceExpirer(
     val statusProvider = { code: CourtAppearanceStatus.Code -> requireNotNull(statuses[code]) }
     val scheduled = statusProvider(CourtAppearanceStatus.Code.SCHEDULED)
     appearanceRepository.findByStatusIdAndStartBefore(scheduled.id, LocalDate.now().atStartOfDay())
-      .takeIf { it.isNotEmpty() }
-      ?.forEach { it.calculateStatus(statusProvider) }
+      .forEach { it.calculateStatus(statusProvider) }
   }
 }
 
