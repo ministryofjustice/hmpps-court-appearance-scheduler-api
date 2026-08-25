@@ -31,22 +31,21 @@
          <column autoUpdated="false" defaultValue="null" digits="0" id="2" name="person_identifier" nullable="false" remarks="" size="10" type="varchar" typeCode="12">
             <parent catalog="appearance" column="person_identifier" foreignKey="pk_court_appearance_person" implied="false" onDeleteCascade="false" schema="public" table="person_summary"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="prison_code" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="court_code" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="reason_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="3" name="court_code" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="reason_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
             <parent catalog="appearance" column="id" foreignKey="fk_court_appearance_reason" implied="false" onDeleteCascade="false" schema="public" table="court_appearance_reason"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="external" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="status_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="external" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="status_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111">
             <parent catalog="appearance" column="id" foreignKey="fk_court_appearance_status" implied="false" onDeleteCascade="false" schema="public" table="court_appearance_status"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="6" id="8" name="start" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
-         <column autoUpdated="false" defaultValue="null" digits="6" id="9" name="end" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="comments" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="11" name="legacy_id" nullable="true" remarks="" size="19" type="int8" typeCode="-5">
+         <column autoUpdated="false" defaultValue="null" digits="6" id="7" name="start" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="8" name="end" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="comments" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="10" name="legacy_id" nullable="true" remarks="" size="19" type="int8" typeCode="-5">
             <parent catalog="appearance" column="id" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="public" table="audit_revision"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="12" name="external_reference" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="11" name="external_reference" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
          <primaryKey column="id" sequenceNumberInPK="1"/>
          <index name="pk_court_appearance" unique="true">
             <column ascending="true" name="id"/>
@@ -60,16 +59,6 @@
             <column ascending="true" name="person_identifier"/>
             <column ascending="true" name="status_id"/>
             <column ascending="true" name="start"/>
-         </index>
-         <index name="idx_court_appearance_prison_start_external" unique="false">
-            <column ascending="true" name="prison_code"/>
-            <column ascending="true" name="start"/>
-         </index>
-         <index name="idx_court_appearance_prison_start_status_reason" unique="false">
-            <column ascending="true" name="prison_code"/>
-            <column ascending="true" name="start"/>
-            <column ascending="true" name="status_id"/>
-            <column ascending="true" name="reason_id"/>
          </index>
          <index name="uq_court_appearance_external_reference" unique="true">
             <column ascending="true" name="external_reference"/>
@@ -90,18 +79,17 @@
          <column autoUpdated="false" defaultValue="null" digits="0" id="4" name="person_identifier" nullable="false" remarks="" size="10" type="varchar" typeCode="12">
             <parent catalog="appearance" column="person_identifier" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="public" table="person_summary"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="prison_code" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="court_code" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="reason_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="external" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="9" name="status_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
-         <column autoUpdated="false" defaultValue="null" digits="6" id="10" name="start" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
-         <column autoUpdated="false" defaultValue="null" digits="6" id="11" name="end" nullable="true" remarks="" size="29" type="timestamp" typeCode="93"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="12" name="comments" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="13" name="legacy_id" nullable="true" remarks="" size="19" type="int8" typeCode="-5">
+         <column autoUpdated="false" defaultValue="null" digits="0" id="5" name="court_code" nullable="false" remarks="" size="6" type="varchar" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="6" name="reason_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="7" name="external" nullable="false" remarks="" size="1" type="bool" typeCode="-7"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="8" name="status_id" nullable="false" remarks="" size="2147483647" type="uuid" typeCode="1111"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="9" name="start" nullable="false" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="6" id="10" name="end" nullable="true" remarks="" size="29" type="timestamp" typeCode="93"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="11" name="comments" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="12" name="legacy_id" nullable="true" remarks="" size="19" type="int8" typeCode="-5">
             <parent catalog="appearance" column="id" foreignKey="Implied Constraint" implied="true" onDeleteCascade="false" schema="public" table="audit_revision"/>
          </column>
-         <column autoUpdated="false" defaultValue="null" digits="0" id="14" name="external_reference" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
+         <column autoUpdated="false" defaultValue="null" digits="0" id="13" name="external_reference" nullable="true" remarks="" size="2147483647" type="text" typeCode="12"/>
          <primaryKey column="id" sequenceNumberInPK="1"/>
          <primaryKey column="rev_id" sequenceNumberInPK="2"/>
          <index name="pk_court_appearance_audit" unique="true">
