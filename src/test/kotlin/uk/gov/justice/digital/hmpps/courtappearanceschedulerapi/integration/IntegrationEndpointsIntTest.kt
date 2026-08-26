@@ -119,7 +119,6 @@ class IntegrationEndpointsIntTest(
   private infix fun IntegrationAppearance.verifyAgainst(appearance: CourtAppearance) {
     assertThat(id).isEqualTo(appearance.id)
     assertThat(personIdentifier).isEqualTo(appearance.person.identifier)
-    assertThat(prisonCode).isEqualTo(appearance.prisonCode)
     assertThat(courtCode).isEqualTo(appearance.courtCode)
     assertThat(reason.code to reason.description).isEqualTo(appearance.reason.code to appearance.reason.description)
     assertThat(start.truncatedTo(ChronoUnit.SECONDS)).isEqualTo(appearance.start.truncatedTo(ChronoUnit.SECONDS))

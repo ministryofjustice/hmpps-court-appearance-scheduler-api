@@ -5,7 +5,6 @@ import io.sentry.Sentry
 import org.springframework.stereotype.Component
 import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.ServiceConfig
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.set
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.Notification
@@ -17,7 +16,6 @@ import java.time.LocalDateTime
 
 @Component
 class DomainEventListener(
-  private val serviceConfig: ServiceConfig,
   private val jsonMapper: JsonMapper,
   private val person: PersonUpdatedHandler,
   private val merged: PrisonerMergedHandler,
@@ -29,7 +27,6 @@ class DomainEventListener(
   fun handleDomainEvent(notification: Notification) {
     SchedulerContext.get().copy(requestAt = LocalDateTime.now()).set()
     try {
-      if (notification.eventType in serviceConfig.domainEvents.disabledEvents) return
       when (notification.eventType) {
         PrisonerUpdated.EVENT_TYPE -> person.handle(jsonMapper.readValue(notification.message))
         PrisonerMerged.EVENT_TYPE -> merged.handle(jsonMapper.readValue(notification.message))

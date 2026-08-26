@@ -334,7 +334,7 @@ class ResyncCourtAppearanceIntTest(
     val scheduled = schedule.movements.single()
     val unscheduled = givenUnscheduledMovement(unscheduledMovement(schedule.person.identifier))
     rasMockServer.givenReconciliationAppearances(schedule.person.identifier, emptyList())
-    prisonApi.givenMovementsFor(schedule.person.identifier, listOf(prisonerMovement(schedule.prisonCode)))
+    prisonApi.givenMovementsFor(schedule.person.identifier, listOf(prisonerMovement()))
 
     val res = resync(schedule.person.identifier, resyncRequest()).successResponse<ResyncResponse>()
     assertThat(res.courtEvents).isEmpty()

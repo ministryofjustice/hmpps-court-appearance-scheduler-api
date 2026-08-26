@@ -14,7 +14,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceScheduled
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.DISABLED_EVENTS_PRISON_CODE
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
@@ -80,7 +79,6 @@ class ScheduleCourtAppearanceIntTest(
     val saved = requireNotNull(findCourtAppearance(res.id))
     saved.verifyAgainst(request)
     assertThat(saved.person.identifier).isEqualTo(person.identifier)
-    assertThat(saved.prisonCode).isEqualTo(prisonCode)
     assertThat(saved.external).isTrue
     assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
 
@@ -127,36 +125,6 @@ class ScheduleCourtAppearanceIntTest(
     verifyEventPublications(
       saved,
       setOf(CourtAppearanceScheduled(saved.person.identifier, saved.id, null).publication(saved.id)),
-    )
-  }
-
-  @Test
-  fun `200 ok - disabled events are not published`() {
-    val prisonCode = DISABLED_EVENTS_PRISON_CODE
-    val prisoner = prisonerSearch.givenPrisoner(prisoner(prisonCode))
-    val username = username()
-
-    val request = scheduleCourtAppearance(prisonCode)
-    val res = scheduleAppearance(prisoner.prisonerNumber, request, username, prisonCode)
-      .successResponse<ReferenceId>()
-
-    val saved = requireNotNull(findCourtAppearance(res.id))
-    saved.verifyAgainst(request)
-    assertThat(saved.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
-
-    verifyAudit(
-      saved,
-      RevisionType.ADD,
-      setOf(CourtAppearance::class.simpleName!!, HmppsDomainEvent::class.simpleName!!),
-      SchedulerContext.get().copy(username = username, caseloadId = prisonCode),
-    )
-
-    verifyEventPublications(
-      saved,
-      setOf(
-        CourtAppearanceScheduled(saved.person.identifier, saved.id, saved.externalReference)
-          .publication(saved.id) { false },
-      ),
     )
   }
 

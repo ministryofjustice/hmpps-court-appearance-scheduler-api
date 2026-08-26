@@ -6,7 +6,6 @@ import java.util.UUID
 data class IntegrationAppearance(
   val id: UUID,
   val personIdentifier: String,
-  val prisonCode: String,
   val courtCode: String,
   val reason: IntegrationReason,
   val start: LocalDateTime,
