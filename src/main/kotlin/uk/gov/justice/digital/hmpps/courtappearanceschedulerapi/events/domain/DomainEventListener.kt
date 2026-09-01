@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.P
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PrisonerMergedHandler
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PrisonerReceivedHandler
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.ras.RasAppearanceHandler
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal.CourtAppearanceClonedHandler
 import java.time.LocalDateTime
 
 @Component
@@ -21,6 +22,7 @@ class DomainEventListener(
   private val merged: PrisonerMergedHandler,
   private val received: PrisonerReceivedHandler,
   private val rasHandler: RasAppearanceHandler,
+  private val cacHandler: CourtAppearanceClonedHandler,
 ) {
 
   @SqsListener("hmppsdomaineventsqueue", factory = "hmppsQueueContainerFactoryProxy")
@@ -33,6 +35,8 @@ class DomainEventListener(
         PrisonerReceived.EVENT_TYPE -> received.handle(jsonMapper.readValue(notification.message))
         RasAppearanceDeleted.EVENT_TYPE, RasAppearanceInserted.EVENT_TYPE, RasAppearanceUpdated.EVENT_TYPE ->
           rasHandler.handle(jsonMapper.readValue(notification.message))
+
+        CourtAppearanceCloned.EVENT_TYPE -> cacHandler.handle(jsonMapper.readValue(notification.message))
       }
     } catch (ex: Exception) {
       Sentry.captureException(ex)

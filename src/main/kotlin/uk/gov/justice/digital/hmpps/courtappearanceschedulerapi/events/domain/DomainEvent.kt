@@ -43,6 +43,8 @@ import java.util.UUID
     JsonSubTypes.Type(value = RasAppearanceDeleted::class, name = RasAppearanceDeleted.EVENT_TYPE),
     JsonSubTypes.Type(value = RasAppearanceInserted::class, name = RasAppearanceInserted.EVENT_TYPE),
     JsonSubTypes.Type(value = RasAppearanceUpdated::class, name = RasAppearanceUpdated.EVENT_TYPE),
+
+    JsonSubTypes.Type(value = CourtAppearanceCloned::class, name = CourtAppearanceCloned.EVENT_TYPE),
   ],
 )
 sealed interface DomainEvent<T : AdditionalInformation> {
