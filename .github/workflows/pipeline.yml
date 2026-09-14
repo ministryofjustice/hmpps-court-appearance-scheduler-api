@@ -18,10 +18,7 @@ on:
         type: boolean
 
 permissions:
-  contents: write
-  packages: write
-  id-token: write
-  attestations: write
+  contents: read
 
 jobs:
   helm_lint:
@@ -42,6 +39,8 @@ jobs:
         name: Application version creators
         uses: ministryofjustice/hmpps-github-shared-actions/.github/actions/build-test-and-deploy/create_app_version@accf37e936517ed39e7a888cf74f0277dab3310e # v1.1.4
   gradle_verify:
+    permissions:
+      contents: write
     name: Validate the kotlin
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/gradle_verify.yml@v2 # WORKFLOW_VERSION
     secrets: inherit
@@ -52,6 +51,10 @@ jobs:
     needs:
       - app_version
   build:
+    permissions:
+      packages: write
+      id-token: write
+      attestations: write
     name: Build docker image from hmpps-github-actions
     if: github.ref == 'refs/heads/main'
     uses: ministryofjustice/hmpps-github-actions/.github/workflows/docker_build.yml@v2 # WORKFLOW_VERSION
@@ -67,16 +70,6 @@ jobs:
       generate_sbom: true
       attach_sbom_to_registry: true
       sign_image: true
-  schema_spy:
-    uses: ./.github/workflows/schema-spy.yml
-    if: github.ref == 'refs/heads/main'
-    with:
-      docker_compose_file: 'docker-compose-schema-spy.yml'
-      database_name: 'appearance'
-      database_schema: 'public'
-      database_user: 'court'
-      database_password: '5ch3du13r'
-    secrets: inherit
   deploy_dev:
     name: Deploy to the development environment
     concurrency:
