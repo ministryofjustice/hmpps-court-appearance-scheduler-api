@@ -25,6 +25,7 @@ class CourtRegisterClient(
       .retrieve()
       .bodyToMono<List<Court>>()
       .retryOnTransientException()
+      .onErrorResume { Mono.just(emptyList()) }
   }
 
   fun getCourts(ids: Set<String>): List<Court> = findCourts(ids).block()!!
