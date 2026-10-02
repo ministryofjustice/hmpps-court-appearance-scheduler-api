@@ -53,7 +53,7 @@ interface CourtAppearanceRepository :
   fun findIdsForLegacyIds(legacyIds: Set<Long>): List<UUID>
 
   @EntityGraph("court-appearance.full")
-  fun findByStatusIdAndStartBefore(statusId: UUID, date: LocalDateTime): List<CourtAppearance>
+  fun findByStatusIdInAndStartBefore(statusIds: List<UUID>, date: LocalDateTime): List<CourtAppearance>
 
   @EntityGraph("court-appearance.full")
   fun findByPersonIdentifierAndExternalReferenceIsNotNull(personIdentifier: String): List<CourtAppearance>
