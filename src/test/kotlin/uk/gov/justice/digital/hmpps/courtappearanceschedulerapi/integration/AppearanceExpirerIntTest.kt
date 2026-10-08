@@ -3,9 +3,11 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceStatus
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.publication
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceCompleted
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceExpired
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
@@ -28,6 +30,16 @@ class AppearanceExpirerIntTest(
     val toExpire = appearanceRepository.findAllById(scheduled.map { it.id }.toSet())
     toExpire.forEach { assertThat(it.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED) }
     val noExpire = givenCourtAppearance(courtAppearance(start = start.plusDays(2), end = end.plusDays(2)))
+    val inProgress = givenCourtAppearance(
+      courtAppearance(
+        movements = listOf(
+          movement(CourtAppearanceMovement.Direction.OUT),
+        ),
+      ),
+    )
+    appearanceRepository.save(inProgress.reschedule(RescheduleAppearance(start, end)))
+    val toComplete = requireNotNull(findCourtAppearance(inProgress.id))
+    assertThat(toComplete.status.code).isEqualTo(CourtAppearanceStatus.Code.IN_PROGRESS)
 
     expirer.expireScheduledAppearances()
 
@@ -35,12 +47,19 @@ class AppearanceExpirerIntTest(
     expired.forEach { assertThat(it.status.code).isEqualTo(CourtAppearanceStatus.Code.EXPIRED) }
     val notExpired = requireNotNull(findCourtAppearance(noExpire.id))
     assertThat(notExpired.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
+    val completed = requireNotNull(findCourtAppearance(inProgress.id))
+    assertThat(completed.status.code).isEqualTo(CourtAppearanceStatus.Code.COMPLETED)
 
     verifyEventPublications(
       scheduled.first(),
-      scheduled.map {
-        CourtAppearanceExpired(it.person.identifier, it.id, it.externalReference).publication(it.id)
-      }.toSet(),
+      (
+        scheduled.map {
+          CourtAppearanceExpired(it.person.identifier, it.id, it.externalReference)
+            .publication(it.id)
+        } + CourtAppearanceCompleted(completed.person.identifier, completed.id, completed.externalReference)
+          .publication(completed.id)
+        )
+        .toSet(),
     )
   }
 }

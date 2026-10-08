@@ -28,7 +28,8 @@ class AppearanceExpirer(
     val statuses = statusRepository.findAll().associateBy { it.code }
     val statusProvider = { code: CourtAppearanceStatus.Code -> requireNotNull(statuses[code]) }
     val scheduled = statusProvider(CourtAppearanceStatus.Code.SCHEDULED)
-    appearanceRepository.findByStatusIdAndStartBefore(scheduled.id, LocalDate.now().atStartOfDay())
+    val inProgress = statusProvider(CourtAppearanceStatus.Code.IN_PROGRESS)
+    appearanceRepository.findByStatusIdInAndStartBefore(listOf(scheduled.id, inProgress.id), LocalDate.now().atStartOfDay())
       .forEach { it.calculateStatus(statusProvider) }
   }
 }
