@@ -12,7 +12,6 @@ generic-service:
 
 generic-prometheus-alerts:
   businessHoursOnly: true
-  alertSeverity: move-and-improve-alerts-non-prod
   rdsAlertsDatabases:
     cloud-platform-fca6318f6d828047: "Court Appearance Scheduler DB"
   rdsAlertsConnectionThreshold: 130
