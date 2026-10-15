@@ -34,7 +34,6 @@ generic-service:
         BUCKET_NAME: "bucket_name"
 
 generic-prometheus-alerts:
-  alertSeverity: move-and-improve-alerts
   rdsAlertsDatabases:
     cloud-platform-0bd73f82c47caa68: "Court Appearance Scheduler DB"
   rdsAlertsConnectionThreshold: 130
