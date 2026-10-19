@@ -16,6 +16,8 @@ import java.time.LocalDateTime
     JsonSubTypes.Type(value = CourtAppearancePushAll::class, name = CourtAppearancePushAll.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearancePushPerson::class, name = CourtAppearancePushPerson.EVENT_TYPE),
     JsonSubTypes.Type(value = CourtAppearancePushSingle::class, name = CourtAppearancePushSingle.EVENT_TYPE),
+
+    JsonSubTypes.Type(value = CourtCodePull::class, name = CourtCodePull.EVENT_TYPE),
   ],
 )
 sealed interface InternalEvent {
@@ -77,5 +79,14 @@ data class CourtAppearancePushSingle(val externalReference: ExternalReference) :
 
   companion object {
     const val EVENT_TYPE = "court-appearance.push.single"
+  }
+}
+
+data class CourtCodePull(val code: String) : InternalEvent {
+  override val type: String = EVENT_TYPE
+
+  companion object {
+    const val EVENT_TYPE = "court-code.refresh"
+    const val ALL = "***"
   }
 }

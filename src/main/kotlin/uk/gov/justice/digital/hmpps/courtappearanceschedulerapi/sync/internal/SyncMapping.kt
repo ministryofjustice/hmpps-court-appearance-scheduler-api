@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.internal
 
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtCodeProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReasonProvider
@@ -27,11 +28,12 @@ fun CourtEvent.asEntity(
   person: PersonSummary,
   reason: ReasonProvider,
   status: StatusProvider,
+  courtCodeProvider: CourtCodeProvider,
   rasScheduleInfo: CourtAppearanceSchedule?,
   movements: List<PrisonerMovement>,
 ): CourtAppearance = CourtAppearance(
   person,
-  scheduledCourtCode,
+  courtCodeProvider(scheduledCourtCode),
   reason(type),
   start,
   end,
@@ -51,12 +53,13 @@ fun CourtAppearance.updateFrom(
   request: CourtEvent,
   reason: ReasonProvider,
   status: StatusProvider,
+  courtCodeProvider: CourtCodeProvider,
   rasScheduleInfo: CourtAppearanceSchedule?,
   movements: List<PrisonerMovement>,
 ): CourtAppearance = apply {
   movePerson(personSummary)
   applyExternalIdentifiers(request.externalReferenceUrn, request.eventId)
-  relocate(RelocateAppearance(request.scheduledCourtCode))
+  relocate(RelocateAppearance(request.scheduledCourtCode), courtCodeProvider)
   recategorise(RecategoriseAppearance(request.type), reason)
   reschedule(RescheduleAppearance(request.start, request.end))
   applyComments(ChangeAppearanceComments(request.commentText))

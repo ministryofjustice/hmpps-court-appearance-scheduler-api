@@ -86,7 +86,7 @@ class ReconcilePerson(
 
   private fun propertyReconcilers(): List<PropertyReconciler> = listOf(
     DuplicateReconciler(),
-    EqualityReconciler("courtCode", { it.courtCode }, { it.courtCode }),
+    EqualityReconciler("courtCode", { it.courtCode }, { it.courtCode.code }),
     EqualityReconciler("start", { it.start }, { it.start }),
     EqualityReconciler("reasonCode", { it.reason.code }, { it.reason.code }),
     EqualityReconciler("comments", { it.comments }, { it.comments }),

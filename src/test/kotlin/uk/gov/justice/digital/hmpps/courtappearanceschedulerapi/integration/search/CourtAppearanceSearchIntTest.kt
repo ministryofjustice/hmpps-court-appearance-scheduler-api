@@ -73,7 +73,7 @@ class CourtAppearanceSearchIntTest(
       givenCourtAppearance(
         courtAppearance(
           personIdentifier = people[it].identifier,
-          courtCode = if (it % 2 == 0) courts.last().code else courts.first().code,
+          court = if (it % 2 == 0) courts.last() else courts.first(),
           reasonCode = if (it % 2 == 0) "VL" else "CRT",
           start = startDateTime,
         ),
@@ -95,7 +95,7 @@ class CourtAppearanceSearchIntTest(
     val court = courtRegister.givenCourt()
 
     val person = givenPersonSummary(personSummary(prisonCode = prison.code))
-    val toFind = givenCourtAppearance(courtAppearance(personIdentifier = person.identifier, courtCode = court.code))
+    val toFind = givenCourtAppearance(courtAppearance(personIdentifier = person.identifier, court = court))
     givenCourtAppearance(courtAppearance())
 
     val res = searchAppearances(prison.code, searchRequest(courtCodes = setOf(court.code)))
@@ -112,8 +112,10 @@ class CourtAppearanceSearchIntTest(
     val court = courtRegister.givenCourt()
 
     val person = givenPersonSummary(personSummary(prisonCode = prison.code))
-    val scheduled = givenCourtAppearance(courtAppearance(personIdentifier = person.identifier, courtCode = court.code))
-    val unscheduled = givenCourtAppearance(courtAppearance(personIdentifier = person.identifier, courtCode = court.code, unschedule = true))
+    val scheduled = givenCourtAppearance(courtAppearance(personIdentifier = person.identifier, court = court))
+    val unscheduled = givenCourtAppearance(
+      courtAppearance(personIdentifier = person.identifier, court = court, unschedule = true),
+    )
     assertThat(unscheduled.status.code).isEqualTo(CourtAppearanceStatus.Code.UNSCHEDULED)
 
     val res = searchAppearances(prison.code, searchRequest()).successResponse<CourtAppearanceSearchResponse>()
@@ -129,9 +131,10 @@ class CourtAppearanceSearchIntTest(
     val court = courtRegister.givenCourt()
 
     val personToFind = givenPersonSummary(personSummary(prisonCode = prison.code))
-    val toFind = givenCourtAppearance(courtAppearance(personIdentifier = personToFind.identifier, courtCode = court.code))
+    val toFind =
+      givenCourtAppearance(courtAppearance(personIdentifier = personToFind.identifier, court = court))
     val personNotFound = givenPersonSummary(personSummary(prisonCode = prison.code))
-    givenCourtAppearance(courtAppearance(personIdentifier = personNotFound.identifier, courtCode = court.code))
+    givenCourtAppearance(courtAppearance(personIdentifier = personNotFound.identifier, court = court))
 
     val res = searchAppearances(prison.code, searchRequest(query = personToFind.identifier))
       .successResponse<CourtAppearanceSearchResponse>()
@@ -147,9 +150,10 @@ class CourtAppearanceSearchIntTest(
     val court = courtRegister.givenCourt()
 
     val personToFind = givenPersonSummary(personSummary(prisonCode = prison.code))
-    val toFind = givenCourtAppearance(courtAppearance(personIdentifier = personToFind.identifier, courtCode = court.code))
+    val toFind =
+      givenCourtAppearance(courtAppearance(personIdentifier = personToFind.identifier, court = court))
     val personNotFound = givenPersonSummary(personSummary(prisonCode = prison.code))
-    givenCourtAppearance(courtAppearance(personIdentifier = personNotFound.identifier, courtCode = court.code))
+    givenCourtAppearance(courtAppearance(personIdentifier = personNotFound.identifier, court = court))
 
     personToFind.nameFormats().forEach {
       val res = searchAppearances(prison.code, searchRequest(query = it))
@@ -170,7 +174,7 @@ class CourtAppearanceSearchIntTest(
     val expired = givenCourtAppearance(
       courtAppearance(
         personIdentifier = person.identifier,
-        courtCode = court.code,
+        court = court,
         start = LocalDate.now().minusDays(1).atTime(9, 0),
       ),
     )
@@ -178,7 +182,7 @@ class CourtAppearanceSearchIntTest(
     val scheduled = givenCourtAppearance(
       courtAppearance(
         personIdentifier = person.identifier,
-        courtCode = court.code,
+        court = court,
         start = LocalDate.now().atTime(6, 0),
         end = LocalDate.now().atTime(23, 59),
       ),
@@ -187,7 +191,7 @@ class CourtAppearanceSearchIntTest(
     val inProgress = givenCourtAppearance(
       courtAppearance(
         personIdentifier = person.identifier,
-        courtCode = court.code,
+        court = court,
         start = LocalDate.now().atTime(10, 0),
         end = LocalDate.now().atTime(23, 59),
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT)),
@@ -197,7 +201,7 @@ class CourtAppearanceSearchIntTest(
     val completed = givenCourtAppearance(
       courtAppearance(
         personIdentifier = person.identifier,
-        courtCode = court.code,
+        court = court,
         start = LocalDate.now().minusDays(1).atTime(10, 0),
         movements = listOf(
           movement(CourtAppearanceMovement.Direction.OUT, LocalDate.now().minusDays(1).atTime(8, 0)),
@@ -263,7 +267,7 @@ class CourtAppearanceSearchIntTest(
       givenCourtAppearance(
         courtAppearance(
           personIdentifier = person.identifier,
-          courtCode = court.code,
+          court = court,
           reasonCode = "VL",
           start = LocalDate.now().plusDays(1).atTime(9, 0),
         ),
@@ -271,7 +275,7 @@ class CourtAppearanceSearchIntTest(
       givenCourtAppearance(
         courtAppearance(
           personIdentifier = person.identifier,
-          courtCode = court.code,
+          court = court,
           reasonCode = "VL",
           start = LocalDate.now().plusDays(1).atTime(11, 0),
         ),
@@ -281,14 +285,14 @@ class CourtAppearanceSearchIntTest(
       givenCourtAppearance(
         courtAppearance(
           personIdentifier = person.identifier,
-          courtCode = court.code,
+          court = court,
           start = LocalDate.now().plusDays(1).atTime(9, 0),
         ),
       ),
       givenCourtAppearance(
         courtAppearance(
           personIdentifier = person.identifier,
-          courtCode = court.code,
+          court = court,
           start = LocalDate.now().plusDays(1).atTime(11, 0),
         ),
       ),
@@ -325,6 +329,34 @@ class CourtAppearanceSearchIntTest(
   }
 
   @Test
+  fun `can sort appearances by court`() {
+    val prison = prisonRegister.givenPrison()
+    val courts = courtRegister.givenCourts(setOf(court(), court(), court(), court()))
+    val appearances = courts.map {
+      val person = givenPersonSummary(personSummary(prisonCode = prison.code))
+      givenCourtAppearance(
+        courtAppearance(
+          personIdentifier = person.identifier,
+          court = it,
+        ),
+      )
+    }
+
+    val expectedAsc = courts.sortedBy { it.name }.map { court -> appearances.first { it.courtCode.code == court.code } }
+    val asc = searchAppearances(prison.code, searchRequest(sort = "court,asc"))
+      .successResponse<CourtAppearanceSearchResponse>()
+    assertThat(asc.content).hasSize(4)
+    assertThat(asc.metadata.totalElements).isEqualTo(4)
+    assertThat(asc.content.map { it.id }).isEqualTo(expectedAsc.map { it.id })
+
+    val desc = searchAppearances(prison.code, searchRequest(sort = "court,desc"))
+      .successResponse<CourtAppearanceSearchResponse>()
+    assertThat(desc.content).hasSize(4)
+    assertThat(desc.metadata.totalElements).isEqualTo(4)
+    assertThat(desc.content.map { it.id }).isEqualTo(expectedAsc.reversed().map { it.id })
+  }
+
+  @Test
   fun `person not resident is not found`() {
     val prison = prisonRegister.givenPrison()
     val court = courtRegister.givenCourt()
@@ -336,13 +368,13 @@ class CourtAppearanceSearchIntTest(
     val fApp = givenCourtAppearance(
       courtAppearance(
         personIdentifier = fPerson.identifier,
-        courtCode = court.code,
+        court = court,
       ),
     )
     givenCourtAppearance(
       courtAppearance(
         personIdentifier = nfPerson.identifier,
-        courtCode = court.code,
+        court = court,
       ),
     )
 

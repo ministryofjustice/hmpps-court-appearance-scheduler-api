@@ -57,7 +57,7 @@ class ClashesIntTest(
     val court = courtRegister.givenCourt()
     val appearance = givenCourtAppearance(
       courtAppearance(
-        courtCode = court.code,
+        court = court,
         start = CLASH_DATE.atTime(10, 0),
         end = CLASH_DATE.atTime(17, 0),
       ),
@@ -83,7 +83,7 @@ class ClashesIntTest(
       ),
     )
     assertThat(clash.location.description).isEqualTo(court.name)
-    assertThat(clash.additionalInformation).isEqualTo(Clash.AdditionalInformation(appearance.courtCode))
+    assertThat(clash.additionalInformation).isEqualTo(Clash.AdditionalInformation(appearance.courtCode.code))
   }
 
   @ParameterizedTest
@@ -92,7 +92,7 @@ class ClashesIntTest(
     val court = courtRegister.givenCourt()
     val appearance = givenCourtAppearance(
       courtAppearance(
-        courtCode = court.code,
+        court = court,
         start = CLASH_DATE.atTime(10, 0),
         end = CLASH_DATE.atTime(17, 0),
       ),

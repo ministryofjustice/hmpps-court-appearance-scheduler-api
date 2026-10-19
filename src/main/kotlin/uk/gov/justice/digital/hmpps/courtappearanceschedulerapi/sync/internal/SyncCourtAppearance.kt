@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonApiClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ReferenceId
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.court.CourtCodeService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonSummaryService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.SyncCourtEvent
 import java.util.UUID
@@ -25,6 +26,7 @@ class SyncCourtAppearance(
   private val rasClient: RemandAndSentencingClient,
   private val prisonClient: PrisonApiClient,
   private val personSummaryService: PersonSummaryService,
+  private val courtCodeService: CourtCodeService,
   private val reasonRepository: CourtAppearanceReasonRepository,
   private val statusRepository: CourtAppearanceStatusRepository,
   private val appearanceRepository: CourtAppearanceRepository,
@@ -39,7 +41,6 @@ class SyncCourtAppearance(
         .set()
     }
     val rasScheduleInfo = request.courtEvent.externalReferenceUrn?.uuid?.let(rasClient::findCourtAppearanceSchedule)
-
     val prisonerMovements = prisonClient.movementsFor(personIdentifier)
     val person = personSummaryService.getWithSave(personIdentifier)
     val appearance = (
@@ -51,6 +52,7 @@ class SyncCourtAppearance(
       request.courtEvent,
       reasonRepository::getReasonByCode,
       statusRepository::getStatusByCode,
+      courtCodeService::getCourtCode,
       rasScheduleInfo,
       prisonerMovements,
     ) ?: appearanceRepository.save(
@@ -58,6 +60,7 @@ class SyncCourtAppearance(
         person,
         reasonRepository::getReasonByCode,
         statusRepository::getStatusByCode,
+        courtCodeService::getCourtCode,
         rasScheduleInfo,
         prisonerMovements,
       ),

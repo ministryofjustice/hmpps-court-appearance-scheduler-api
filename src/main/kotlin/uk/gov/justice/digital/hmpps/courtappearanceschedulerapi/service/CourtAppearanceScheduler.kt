@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service
 
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtCodeProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReasonProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.StatusProvider
@@ -13,6 +14,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.getStatusByCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ReferenceId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ScheduleCourtAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.court.CourtCodeService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonSummaryService
 import java.time.LocalTime
 
@@ -20,6 +22,7 @@ import java.time.LocalTime
 @Service
 class CourtAppearanceScheduler(
   private val personService: PersonSummaryService,
+  private val courtCodeService: CourtCodeService,
   private val appearanceRepository: CourtAppearanceRepository,
   private val reasonRepository: CourtAppearanceReasonRepository,
   private val statusRepository: CourtAppearanceStatusRepository,
@@ -29,8 +32,12 @@ class CourtAppearanceScheduler(
     checkNotNull(person.prisonCode) {
       "Unable to schedule a court appearance when current location is unknown"
     }
-    val saved = request.persistable(person, reasonRepository::getReasonByCode, statusRepository::getStatusByCode)
-      .also { appearanceRepository.save(it) }
+    val saved = request.persistable(
+      person,
+      reasonRepository::getReasonByCode,
+      statusRepository::getStatusByCode,
+      courtCodeService::getCourtCode,
+    ).also { appearanceRepository.save(it) }
     return ReferenceId(saved.id)
   }
 
@@ -38,17 +45,17 @@ class CourtAppearanceScheduler(
     person: PersonSummary,
     reason: ReasonProvider,
     status: StatusProvider,
+    ccp: CourtCodeProvider,
   ) = CourtAppearance(
     person,
-    courtCode,
+    ccp(courtCode),
     reason(reasonCode),
     start,
     end ?: start.toLocalDate().atTime(DEFAULT_END_TIME),
     comments,
     null,
     null,
-  )
-    .calculateStatus(status)
+  ).calculateStatus(status)
 
   companion object {
     private val DEFAULT_END_TIME = LocalTime.of(17, 0)

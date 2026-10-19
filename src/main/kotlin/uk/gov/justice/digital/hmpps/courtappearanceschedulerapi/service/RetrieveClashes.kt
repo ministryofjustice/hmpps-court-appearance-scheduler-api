@@ -25,7 +25,7 @@ class RetrieveClashes(
     val appearances = appearanceRepository.findAll(
       clashesFor(request.personIdentifiers.map { it.value }.toSet(), request.ranges),
     )
-    val courts = courtRegisterClient.getCourts(appearances.map { it.courtCode }.toSet()).associateBy { it.code }
+    val courts = courtRegisterClient.getCourts(appearances.map { it.courtCode.code }.toSet()).associateBy { it.code }
     val courtSupplier = { code: String -> courts[code] ?: Court.default(code) }
 
     return appearances.groupBy { it.person.identifier }
@@ -34,7 +34,7 @@ class RetrieveClashes(
   }
 
   private fun CourtAppearance.clash(courtSupplier: (String) -> Court): Clash {
-    val court = courtSupplier(courtCode)
+    val court = courtSupplier(courtCode.code)
     return Clash(
       start,
       end,

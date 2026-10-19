@@ -150,7 +150,7 @@ class SyncCourtAppearanceIntTest(
     val request = with(appearance) {
       syncRequest(
         courtEvent(
-          courtCode,
+          courtCode.code,
           reason.code,
           date = appearance.start.toLocalDate(),
           startTime = appearance.start.toLocalTime(),
@@ -262,7 +262,7 @@ class SyncCourtAppearanceIntTest(
 
     val request = syncRequest(
       courtEvent(
-        scheduledCourtCode = appearance.courtCode,
+        scheduledCourtCode = appearance.courtCode.code,
         eventId = appearance.legacyId!!,
         date = appearance.start.toLocalDate(),
         startTime = appearance.start.toLocalTime(),
@@ -305,7 +305,7 @@ class SyncCourtAppearanceIntTest(
 
     val request = syncRequest(
       courtEvent(
-        scheduledCourtCode = appearance.courtCode,
+        scheduledCourtCode = appearance.courtCode.code,
         eventId = appearance.legacyId!!,
         status = "SCHED",
         externalReference = null,
@@ -353,7 +353,7 @@ class SyncCourtAppearanceIntTest(
 
     val request = syncRequest(
       courtEvent(
-        scheduledCourtCode = appearance.courtCode,
+        scheduledCourtCode = appearance.courtCode.code,
         eventId = appearance.legacyId!!,
         status = "SCHED",
         externalReference = null,

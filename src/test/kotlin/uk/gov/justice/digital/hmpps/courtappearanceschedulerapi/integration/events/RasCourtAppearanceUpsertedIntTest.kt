@@ -144,7 +144,7 @@ private fun event(
 
 private infix fun CourtAppearance.verifyAgainst(ras: CourtAppearanceSchedule) {
   assertThat(person.identifier).isEqualTo(ras.personIdentifier)
-  assertThat(courtCode).isEqualTo(ras.courtCode)
+  assertThat(courtCode.code).isEqualTo(ras.courtCode)
   assertThat(reason.code).isEqualTo(ras.reason.code)
   assertThat(start).isCloseTo(ras.start, within(1, ChronoUnit.MINUTES))
   assertThat(comments).isEqualTo(ras.comments)

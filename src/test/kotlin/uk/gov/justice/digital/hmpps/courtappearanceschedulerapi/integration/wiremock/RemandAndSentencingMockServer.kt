@@ -132,7 +132,7 @@ class RemandAndSentencingMockServer : WireMockServer(mockServerConfig(9007)) {
 fun CourtAppearance.schedule(isDuplicate: Boolean) = CourtAppearanceSchedule(
   externalReference?.uuid ?: newUuid(),
   person.identifier,
-  courtCode,
+  courtCode.code,
   CourtAppearanceSchedule.ScheduleReason(reason.code),
   start,
   isDuplicate,

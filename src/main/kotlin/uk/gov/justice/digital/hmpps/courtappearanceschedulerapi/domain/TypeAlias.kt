@@ -7,3 +7,4 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.Court
 typealias CourtProvider = (String) -> Court
 typealias ReasonProvider = (String) -> CourtAppearanceReason
 typealias StatusProvider = (CourtAppearanceStatus.Code) -> CourtAppearanceStatus
+typealias CourtCodeProvider = (String) -> CourtCode

@@ -4,6 +4,7 @@ import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Convert
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
@@ -16,12 +17,13 @@ import jakarta.persistence.Table
 import jakarta.persistence.Transient
 import jakarta.persistence.Version
 import jakarta.validation.constraints.NotNull
-import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Fetch
 import org.hibernate.annotations.FetchMode
 import org.hibernate.envers.Audited
 import org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtCode
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtCodeProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DomainEventProducer
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DomainEventPublication
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
@@ -75,7 +77,7 @@ import java.util.UUID
 @Table(name = "court_appearance")
 final class CourtAppearance(
   person: PersonSummary,
-  courtCode: String,
+  courtCode: CourtCode,
   reason: CourtAppearanceReason,
   start: LocalDateTime,
   end: LocalDateTime,
@@ -100,10 +102,11 @@ final class CourtAppearance(
   var person: PersonSummary = person
     private set
 
-  @Size(max = 6)
+  @Audited(targetAuditMode = NOT_AUDITED)
   @NotNull
-  @Column(name = "court_code", nullable = false, length = 6)
-  var courtCode: String = courtCode
+  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @JoinColumn(name = "court_code", nullable = false)
+  var courtCode: CourtCode = courtCode
     private set
 
   @Fetch(FetchMode.JOIN)
@@ -244,9 +247,9 @@ final class CourtAppearance(
     }
   }
 
-  fun relocate(action: RelocateAppearance) = apply {
-    if (action.courtCode != courtCode) {
-      courtCode = action.courtCode
+  fun relocate(action: RelocateAppearance, ccProvider: CourtCodeProvider) = apply {
+    if (action.courtCode != courtCode.code) {
+      courtCode = ccProvider(action.courtCode)
       appliedActions += action
     }
   }

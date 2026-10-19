@@ -7,6 +7,7 @@ import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.readValue
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.Notification
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.court.CourtCodeService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.PushCourtAppearanceData
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.PushPersonAppearanceData
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.reconciliation.PushSingleAppearanceData
@@ -25,6 +26,7 @@ class InternalEventListener(
   private val pushAll: PushCourtAppearanceData,
   private val pushPerson: PushPersonAppearanceData,
   private val pushSingle: PushSingleAppearanceData,
+  private val ccs: CourtCodeService,
 ) {
   @SqsListener(
     "internalevents",
@@ -44,6 +46,8 @@ class InternalEventListener(
         is CourtAppearancePushAll -> pushAll.toRemandAndSentencing()
         is CourtAppearancePushPerson -> pushPerson.toRemandAndSentencing(event.identifier)
         is CourtAppearancePushSingle -> pushSingle.toExternalService(event.externalReference)
+
+        is CourtCodePull -> ccs.handleEvent(event)
       }
     } catch (ex: Exception) {
       Sentry.captureException(ex)
