@@ -67,9 +67,10 @@ class CourtAppearanceHistoryIntTest(
     val relocateUser = manageUsers.givenUser()
     val relocateAction = RelocateAppearance(courtCode = courtCode())
     val relocationReason = word(12)
+    val cc = givenCourtSort(relocateAction.courtCode, word(10))
     transactionTemplate.executeWithoutResult {
       SchedulerContext.get().copy(username = relocateUser.username, reason = relocationReason).set()
-      requireNotNull(findCourtAppearance(ca.id)).relocate(relocateAction)
+      requireNotNull(findCourtAppearance(ca.id)).relocate(relocateAction) { _ -> cc }
     }
     val recategoriseUser = manageUsers.givenUser()
     val recategoriseAction = RecategoriseAppearance("VL")
@@ -107,7 +108,7 @@ class CourtAppearanceHistoryIntTest(
       assertThat(changes).containsExactly(
         AuditedAction.Change(
           CourtAppearance::courtCode.name,
-          ca.courtCode,
+          ca.courtCode.code,
           relocateAction.courtCode,
         ),
       )

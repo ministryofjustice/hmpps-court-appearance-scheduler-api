@@ -25,7 +25,7 @@ class CourtAppearanceRetriever(
 ) {
   fun byId(id: UUID): Appearance {
     val appearance = appearanceRepository.getAppearance(id)
-    return appearance.toModel(courtRegister.getCourt(appearance.courtCode))
+    return appearance.toModel(courtRegister.getCourt(appearance.courtCode.code))
   }
 
   private fun CourtAppearance.toModel(court: Court) = Appearance(

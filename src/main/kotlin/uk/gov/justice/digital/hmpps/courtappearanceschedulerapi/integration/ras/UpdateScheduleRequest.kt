@@ -11,4 +11,4 @@ data class UpdateScheduleRequest(
   val comments: String?,
 )
 
-fun CourtAppearance.asUpdateRequest() = UpdateScheduleRequest(person.prisonCode!!, courtCode, reason.code, start, comments)
+fun CourtAppearance.asUpdateRequest() = UpdateScheduleRequest(person.prisonCode!!, courtCode.code, reason.code, start, comments)

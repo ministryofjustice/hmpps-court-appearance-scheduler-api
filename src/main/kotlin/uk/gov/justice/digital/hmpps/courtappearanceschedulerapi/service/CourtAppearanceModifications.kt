@@ -26,6 +26,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.app
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.court.CourtCodeService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.history.CourtAppearanceHistory
 import java.util.UUID
 
@@ -37,6 +38,7 @@ class CourtAppearanceModifications(
   private val statusRepository: CourtAppearanceStatusRepository,
   private val appearanceRepository: CourtAppearanceRepository,
   private val appearanceHistory: CourtAppearanceHistory,
+  private val courtCodeService: CourtCodeService,
   private val rasClient: RemandAndSentencingClient,
 ) {
   fun apply(id: UUID, request: CourtAppearanceActions): AuditHistory {
@@ -56,7 +58,7 @@ class CourtAppearanceModifications(
     when (action) {
       is ChangeAppearanceComments -> applyComments(action)
       is RecategoriseAppearance -> recategorise(action, reasonRepository::getReasonByCode)
-      is RelocateAppearance -> relocate(action)
+      is RelocateAppearance -> relocate(action, courtCodeService::getCourtCode)
       is RescheduleAppearance -> reschedule(action).calculateStatus(statusRepository::getStatusByCode)
       is CancelAppearance -> handleCancel()
 

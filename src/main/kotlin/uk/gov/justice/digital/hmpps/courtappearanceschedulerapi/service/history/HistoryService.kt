@@ -7,6 +7,7 @@ import org.hibernate.envers.query.AuditEntity
 import org.hibernate.envers.query.AuditEntity.revisionNumber
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.AuditRevision
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.Identifiable
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceReason
@@ -108,6 +109,7 @@ abstract class HistoryService<T : Identifiable>(
   }
 
   protected fun Any?.asChangeValue(): Any? = when (this) {
+    is CourtCode -> code
     is CourtAppearanceReason -> description
     is Collection<*> -> map { it.asChangeValue() }
     else -> this

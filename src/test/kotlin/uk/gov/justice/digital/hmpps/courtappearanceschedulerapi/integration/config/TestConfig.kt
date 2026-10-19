@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.con
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.transaction.support.TransactionTemplate
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtCodeRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDomainEventRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummaryRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceMovementRepository
@@ -15,6 +16,7 @@ class TestConfig(
   private val transactionTemplate: TransactionTemplate,
   private val hmppsDomainEventRepository: HmppsDomainEventRepository,
   private val personSummaryRepository: PersonSummaryRepository,
+  private val courtCodeRepository: CourtCodeRepository,
   private val reasonRepository: CourtAppearanceReasonRepository,
   private val statusRepository: CourtAppearanceStatusRepository,
   private val appearanceRepository: CourtAppearanceRepository,
@@ -32,6 +34,7 @@ class TestConfig(
     reasonRepository,
     statusRepository,
     appearanceRepository,
+    courtCodeRepository,
     psOperations,
   )
 

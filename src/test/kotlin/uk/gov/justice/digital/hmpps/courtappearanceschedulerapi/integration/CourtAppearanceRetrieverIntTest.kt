@@ -8,12 +8,12 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.access.Roles
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.IdGenerator.newUuid
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceStatus
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.prisonCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations.Companion.courtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.AppearanceDeletionStatus
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourtRegisterMockServer.Companion.court
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourterRegisterExtension.Companion.courtRegister
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerRegisterExtension.Companion.prisonRegister
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.RemandAndSentencingExtension.Companion.rasMockServer
@@ -56,7 +56,7 @@ class CourtAppearanceRetrieverIntTest(
   @Test
   fun `200 can retrieve cancellable court appearance with prison and court`() {
     val court = courtRegister.givenCourt()
-    val ca = givenCourtAppearance(courtAppearance(courtCode = court.code))
+    val ca = givenCourtAppearance(courtAppearance(court = court))
     assertThat(ca.status.code).isEqualTo(CourtAppearanceStatus.Code.SCHEDULED)
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
@@ -70,7 +70,7 @@ class CourtAppearanceRetrieverIntTest(
     val court = courtRegister.givenCourt()
     val ca = givenCourtAppearance(
       courtAppearance(
-        courtCode = court.code,
+        court = court,
         start = LocalDate.now().minusDays(1).atTime(10, 0),
         end = LocalDate.now().minusDays(1).atTime(17, 0),
       ),
@@ -86,14 +86,14 @@ class CourtAppearanceRetrieverIntTest(
   @Test
   fun `200 can retrieve court appearance with default prison and default court`() {
     val prisonCode = prisonCode()
-    val courtCode = courtCode()
+    val court = court()
     prisonRegister.givenPrisons(setOf(), setOf(prisonCode))
-    courtRegister.givenCourts(setOf(), setOf(courtCode))
-    val ca = givenCourtAppearance(courtAppearance(courtCode = courtCode))
+    courtRegister.givenCourts(setOf(), setOf(court.code))
+    val ca = givenCourtAppearance(courtAppearance(court = court))
 
     val res = getAppearance(ca.id).successResponse<Appearance>()
     res.verifyAgainst(ca)
-    assertThat(res.court.name).isEqualTo(courtCode)
+    assertThat(res.court.name).isEqualTo(court.code)
   }
 
   @Test
@@ -101,7 +101,7 @@ class CourtAppearanceRetrieverIntTest(
     val court = courtRegister.givenCourt()
     val ca = givenCourtAppearance(
       courtAppearance(
-        courtCode = court.code,
+        court = court,
         externalReference = externalReference(),
       ),
     )
@@ -118,7 +118,7 @@ class CourtAppearanceRetrieverIntTest(
     val court = courtRegister.givenCourt()
     val ca = givenCourtAppearance(
       courtAppearance(
-        courtCode = court.code,
+        court = court,
         externalReference = externalReference(),
       ),
     )
@@ -135,7 +135,7 @@ class CourtAppearanceRetrieverIntTest(
     val court = courtRegister.givenCourt()
     val ca = givenCourtAppearance(
       courtAppearance(
-        courtCode = court.code,
+        court = court,
         start = LocalDateTime.now().minusDays(2),
         externalReference = externalReference(),
       ),
@@ -151,7 +151,7 @@ class CourtAppearanceRetrieverIntTest(
     assertThat(person.personIdentifier).isEqualTo(ca.person.identifier)
     assertThat(person.firstName).isEqualTo(ca.person.firstName)
     assertThat(person.lastName).isEqualTo(ca.person.lastName)
-    assertThat(court.code).isEqualTo(ca.courtCode)
+    assertThat(court.code).isEqualTo(ca.courtCode.code)
     assertThat(start).isEqualTo(ca.start)
     assertThat(end).isEqualTo(ca.end)
     assertThat(reason.code).isEqualTo(ca.reason.code)

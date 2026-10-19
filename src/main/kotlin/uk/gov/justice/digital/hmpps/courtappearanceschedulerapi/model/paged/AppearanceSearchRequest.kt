@@ -27,7 +27,7 @@ interface AppearanceSearchRequest :
   val courtCodes: Set<String>
   val external: Boolean?
 
-  override fun validSortFields(): Set<String> = setOf(START, END, STATUS, FIRST_NAME, LAST_NAME, REASON)
+  override fun validSortFields(): Set<String> = setOf(START, END, STATUS, FIRST_NAME, LAST_NAME, REASON, COURT)
 
   override fun buildSort(field: String, direction: Direction): Sort = when (field) {
     LAST_NAME -> sortByPersonName(direction)
@@ -36,6 +36,7 @@ interface AppearanceSearchRequest :
     END -> sortByDate(direction, END, START)
     STATUS -> by(direction, "${field}_${SEQUENCE_NUMBER}").and(sortByPersonName())
     REASON -> by(direction, "${field}_description").and(sortByPersonName())
+    COURT -> by(direction, "${CourtAppearance::courtCode.name}_sort")
 
     else -> throw IllegalArgumentException("Unrecognised sort field")
   }
@@ -62,6 +63,7 @@ interface AppearanceSearchRequest :
     private val PERSON = CourtAppearance::person.name
     private val PERSON_LAST_NAME = "${PERSON}_${LAST_NAME}"
     private val PERSON_FIRST_NAME = "${PERSON}_${FIRST_NAME}"
+    const val COURT = "court"
   }
 }
 

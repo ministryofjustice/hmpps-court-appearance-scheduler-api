@@ -29,7 +29,6 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.Co
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceMigrated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceRelocated
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.events.domain.CourtAppearanceRescheduled
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.courtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.externalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.newId
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.DataGenerator.personIdentifier
@@ -44,6 +43,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.conf
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync.SyncGenerator.courtEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.sync.SyncGenerator.courtEventMovement
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourtRegisterMockServer.Companion.court
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonApiMockServer.Companion.prisonerMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerApiExtension.Companion.prisonApi
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchExtension.Companion.prisonerSearch
@@ -487,13 +487,13 @@ class ResyncCourtAppearanceIntTest(
   @Test
   fun `200 ok - can reverse scheduled and unscheduled movements`() {
     val prisonCode = prisonCode()
-    val courtCode = courtCode()
+    val court = court()
     val person = givenPersonSummary(personSummary(prisonCode = prisonCode))
     val bookingId = newId()
     val schedule = givenCourtAppearance(
       courtAppearance(
         personIdentifier = person.identifier,
-        courtCode = courtCode,
+        court = court,
         legacyId = newId(),
         movements = listOf(movement(CourtAppearanceMovement.Direction.OUT, legacyId = "${bookingId}_1")),
       ),
@@ -503,7 +503,7 @@ class ResyncCourtAppearanceIntTest(
       givenUnscheduledMovement(
         unscheduledMovement(
           person.identifier,
-          courtCode = courtCode,
+          courtCode = court.code,
           legacyId = "${bookingId}_2",
         ),
       )
@@ -516,7 +516,7 @@ class ResyncCourtAppearanceIntTest(
           courtEvent = courtEvent(
             dpsId = schedule.id,
             eventId = schedule.legacyId!!,
-            scheduledCourtCode = courtCode,
+            scheduledCourtCode = court.code,
             date = schedule.start.toLocalDate(),
             startTime = schedule.start.toLocalTime(),
             commentText = schedule.comments,
@@ -587,12 +587,12 @@ class ResyncCourtAppearanceIntTest(
   @Test
   fun `200 ok - can switch external reference`() {
     val prisonCode = prisonCode()
-    val courtCode = courtCode()
+    val court = court()
     val person = givenPersonSummary(personSummary(prisonCode = prisonCode))
     val existing = givenCourtAppearance(
       courtAppearance(
         personIdentifier = person.identifier,
-        courtCode = courtCode,
+        court = court,
         externalReference = externalReference(),
         legacyId = newId(),
       ),
@@ -604,7 +604,7 @@ class ResyncCourtAppearanceIntTest(
           courtEvent = courtEvent(
             dpsId = existing.id,
             eventId = existing.legacyId!!,
-            scheduledCourtCode = courtCode,
+            scheduledCourtCode = court.code,
             date = existing.start.toLocalDate(),
             startTime = existing.start.toLocalTime(),
             commentText = existing.comments,
@@ -613,7 +613,7 @@ class ResyncCourtAppearanceIntTest(
         ),
         resyncCourtEvent(
           courtEvent = courtEvent(
-            scheduledCourtCode = courtCode,
+            scheduledCourtCode = court.code,
             date = existing.start.toLocalDate(),
             startTime = existing.start.toLocalTime(),
             commentText = existing.comments,

@@ -24,6 +24,8 @@ data class ResyncCourtEvents(
     return legacyIds.toSet() to ids.filterNotNull().toSet()
   }
 
+  fun courtCodes(): Set<String> = courtEvents.map { it.courtEvent.scheduledCourtCode }.toSet()
+
   fun includesRas(): Boolean = courtEvents.any { it.courtEvent.externalReferenceUrn?.uuid != null }
 }
 

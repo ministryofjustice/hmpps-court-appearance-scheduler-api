@@ -20,6 +20,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.app
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RecategoriseAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RelocateAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.RescheduleAppearance
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.court.CourtCodeService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonSummaryService
 import java.time.LocalDateTime
 
@@ -29,6 +30,7 @@ class RasAppearanceHandler(
   private val rasClient: RemandAndSentencingClient,
   private val prisonApi: PrisonApiClient,
   private val personSummaryService: PersonSummaryService,
+  private val courtCodeService: CourtCodeService,
   private val appearanceRepository: CourtAppearanceRepository,
   private val reasonRepository: CourtAppearanceReasonRepository,
   private val statusRepository: CourtAppearanceStatusRepository,
@@ -49,6 +51,7 @@ class RasAppearanceHandler(
 
   private fun createAppearance(event: RasAppearanceInserted) {
     rasClient.findCourtAppearanceSchedule(event.additionalInformation.courtAppearanceId)?.also { ras ->
+      courtCodeService.getCourtCode(ras.courtCode)
       appearanceRepository.save(ras.asEntity())
     }
   }
@@ -59,7 +62,7 @@ class RasAppearanceHandler(
       val mrm = movements.mostRecent()
       appearanceRepository.findByExternalReference(event.externalReference())?.also { cas ->
         cas.reschedule(RescheduleAppearance(ras.start, cas.end))
-        cas.relocate(RelocateAppearance(ras.courtCode))
+        cas.relocate(RelocateAppearance(ras.courtCode), courtCodeService::getCourtCode)
         cas.recategorise(RecategoriseAppearance(ras.reason.code), reasonRepository::getReasonByCode)
         cas.applyComments(ChangeAppearanceComments(ras.comments))
         cas.calculateStatus(
@@ -77,7 +80,7 @@ class RasAppearanceHandler(
     val mrm = movements.mostRecent()
     return CourtAppearance(
       person,
-      courtCode,
+      courtCodeService.getCourtCode(courtCode),
       reasonRepository.getReasonByCode(reason.code),
       start,
       end,

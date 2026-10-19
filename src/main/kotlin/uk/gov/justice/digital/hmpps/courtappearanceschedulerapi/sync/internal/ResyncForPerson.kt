@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.SchedulerContext.Companion.SYSTEM_USERNAME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.context.set
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtCodeProvider
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.DataSource
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.ReasonProvider
@@ -20,6 +21,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.pris
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonapi.PrisonerMovement
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.CourtAppearanceSchedule
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras.RemandAndSentencingClient
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.court.CourtCodeService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service.person.PersonSummaryService
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.AtAndBy
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.sync.CourtEventMapping
@@ -41,6 +43,7 @@ class ResyncForPerson(
   private val movementRepository: CourtAppearanceMovementRepository,
   private val msa: MigrationSystemAuditRepository,
   private val personSummaryService: PersonSummaryService,
+  private val courtCodeService: CourtCodeService,
 ) {
   fun all(personIdentifier: String, request: ResyncCourtEvents): ResyncResponse {
     SchedulerContext.get().copy(username = SYSTEM_USERNAME, source = DataSource.NOMIS, migratingData = true).set()
@@ -52,10 +55,12 @@ class ResyncForPerson(
     val prisonerMovements = prisonClient.movementsFor(personIdentifier)
     val scheduleInfoProvider = { uuid: UUID -> rasScheduleInfo[uuid] }
     val person = personSummaryService.getWithSave(personIdentifier)
+    val ccMap = courtCodeService.getCourtCodes(request.courtCodes()).associateBy { it.code }
     val reasonsMap = reasonRepository.findAll().associateBy { it.code }
     val statusMap = statusRepository.findAll().associateBy { it.code }
     val reason: ReasonProvider = { code -> requireNotNull(reasonsMap[code]) { "Reason code not found" } }
     val status: StatusProvider = { code -> requireNotNull(statusMap[code]) { "Status code not found" } }
+    val ccp: CourtCodeProvider = { code -> requireNotNull(ccMap[code]) { "Court code not found" } }
 
     val appearances = with(request.appearanceIds()) {
       findAllAppearances(personIdentifier, first, second)
@@ -82,6 +87,7 @@ class ResyncForPerson(
         movementProvider,
         reason,
         status,
+        ccp,
         scheduleInfoProvider,
         migrationAuditProvider,
         prisonerMovements,
@@ -124,6 +130,7 @@ class ResyncForPerson(
     movementProvider: (UUID?, String) -> CourtAppearanceMovement?,
     reasonProvider: ReasonProvider,
     statusProvider: StatusProvider,
+    ccp: CourtCodeProvider,
     scheduleInfoProvider: (UUID) -> CourtAppearanceSchedule?,
     migrationAuditProvider: MigrationAuditProvider,
     prisonerMovements: List<PrisonerMovement>,
@@ -131,12 +138,13 @@ class ResyncForPerson(
     val rasScheduleInfo = courtEvent.externalReferenceUrn?.uuid?.let { scheduleInfoProvider(it) }
     val appearance =
       appearanceProvider(requireNotNull(courtEvent.eventId), courtEvent.externalReferenceUrn, courtEvent.dpsId)
-        ?.updateFrom(person, courtEvent, reasonProvider, statusProvider, rasScheduleInfo, prisonerMovements)
+        ?.updateFrom(person, courtEvent, reasonProvider, statusProvider, ccp, rasScheduleInfo, prisonerMovements)
         ?: appearanceRepository.save(
           courtEvent.asEntity(
             person,
             reasonProvider,
             statusProvider,
+            ccp,
             rasScheduleInfo,
             prisonerMovements,
           ),

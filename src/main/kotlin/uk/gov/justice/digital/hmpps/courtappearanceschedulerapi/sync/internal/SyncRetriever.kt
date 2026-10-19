@@ -41,7 +41,7 @@ private fun CourtAppearance.reconcile() = ReconciliationCourtEvent(
 
 private fun CourtAppearance.asEvent() = CourtEvent(
   id,
-  courtCode,
+  courtCode.code,
   legacyId,
   start,
   reason.code,

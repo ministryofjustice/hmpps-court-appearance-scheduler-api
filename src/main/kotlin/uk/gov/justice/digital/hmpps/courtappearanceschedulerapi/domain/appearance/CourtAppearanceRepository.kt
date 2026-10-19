@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.findByIdOrNull
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.IDENTIFIER
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.PersonSummary.Companion.PRISON_CODE
@@ -65,7 +66,7 @@ interface CourtAppearanceRepository :
 fun CourtAppearanceRepository.getAppearance(id: UUID) = findByIdOrNull(id) ?: throw NotFoundException("Court appearance not found")
 
 fun appearanceMatchesCourtCodeIn(courtCodes: Set<String>) = Specification<CourtAppearance> { ca, _, _ ->
-  ca.get<String>(CourtAppearance::courtCode.name).`in`(courtCodes)
+  ca.get<CourtCode>(CourtAppearance::courtCode.name).get<String>(CourtCode::code.name).`in`(courtCodes)
 }
 
 fun appearanceMatchesPersonPrisonCode(prisonCode: String) = Specification<CourtAppearance> { ca, _, cb ->
@@ -82,10 +83,7 @@ fun appearanceMatchesPersonIdentifier(personIdentifier: String, prisonCode: Stri
 
 fun appearanceMatchesPersonName(name: String, prisonCode: String?) = Specification<CourtAppearance> { ca, _, cb ->
   val person = ca.join<CourtAppearance, PersonSummary>(CourtAppearance::person.name, JoinType.INNER)
-  cb.and(
-    person.matchesName(cb, name),
-    prisonCode?.let { person.matchesPrisonCode(cb, it) } ?: cb.conjunction(),
-  )
+  cb.and(person.matchesName(cb, name), prisonCode?.let { person.matchesPrisonCode(cb, it) } ?: cb.conjunction())
 }
 
 fun appearancePersonIdentifierIn(identifiers: Set<String>, prisonCode: String) = Specification<CourtAppearance> { ca, _, cb ->

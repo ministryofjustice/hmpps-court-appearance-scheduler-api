@@ -327,14 +327,14 @@ class CourtAppearanceModificationsIntTest(
       assertThat(changes).containsExactly(
         AuditedAction.Change(
           CourtAppearance::courtCode.name,
-          ca.courtCode,
+          ca.courtCode.code,
           action.courtCode,
         ),
       )
     }
 
     val saved = requireNotNull(findCourtAppearance(ca.id))
-    assertThat(saved.courtCode).isEqualTo(action.courtCode)
+    assertThat(saved.courtCode.code).isEqualTo(action.courtCode)
 
     verifyAudit(
       saved,

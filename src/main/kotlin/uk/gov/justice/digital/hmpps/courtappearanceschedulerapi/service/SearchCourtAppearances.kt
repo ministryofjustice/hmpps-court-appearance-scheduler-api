@@ -48,12 +48,12 @@ class SearchCourtAppearances(
 
   fun findSchedules(prisonCode: String, request: AppearanceScheduleSearchRequest): CourtAppearanceSchedules {
     val page = appearanceRepository.findAll(request.asSpecification(prisonCode), request.pageable())
-    val courts = courtRegister.getCourts(page.map { it.courtCode }.toSet()).associateBy { it.code }
+    val courts = courtRegister.getCourts(page.map { it.courtCode.code }.toSet()).associateBy { it.code }
     return page.map { app -> app.asSchedule { courts[it] ?: Court.default(it) } }.asScheduleResponse()
   }
 
   private fun Page<CourtAppearance>.asScheduleResponse(): CourtAppearanceSearchResponse {
-    val courts = courtRegister.getCourts(map { it.courtCode }.toSet()).associateBy { it.code }
+    val courts = courtRegister.getCourts(map { it.courtCode.code }.toSet()).associateBy { it.code }
     return map { item -> item.asResult { courts[it] ?: Court.default(it) } }.asResponse()
   }
 
@@ -100,7 +100,7 @@ class SearchCourtAppearances(
   private fun CourtAppearance.asResult(court: CourtProvider) = CourtAppearanceResult(
     id,
     person(),
-    court(courtCode),
+    court(courtCode.code),
     reason.asReason(),
     external,
     start,
@@ -116,7 +116,7 @@ class SearchCourtAppearances(
   private fun CourtAppearance.asSchedule(court: CourtProvider) = CourtAppearanceSchedule(
     id,
     person.identifier,
-    court(courtCode),
+    court(courtCode.code),
     reason.asReason(),
     external,
     start,

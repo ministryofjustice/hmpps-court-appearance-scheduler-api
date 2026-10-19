@@ -22,6 +22,8 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.Data
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.CourtAppearanceOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.config.PersonSummaryOperations.Companion.personSummary
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourtRegisterMockServer.Companion.court
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.CourterRegisterExtension.Companion.courtRegister
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchExtension.Companion.prisonerSearch
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.PrisonerSearchServer.Companion.prisoner
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.ReferenceId
@@ -73,7 +75,8 @@ class ScheduleCourtAppearanceIntTest(
     val username = username()
     val person = givenPersonSummary(personSummary(prisonCode = prisonCode))
 
-    val request = scheduleCourtAppearance(prisonCode, reasonCode = "CE")
+    val court = courtRegister.givenCourt(court())
+    val request = scheduleCourtAppearance(courtCode = court.code, reasonCode = "CE")
     val res = scheduleAppearance(person.identifier, request, username, prisonCode).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(res.id))
@@ -101,7 +104,8 @@ class ScheduleCourtAppearanceIntTest(
     val prisoner = prisonerSearch.givenPrisoner(prisoner(prisonCode))
     val username = username()
 
-    val request = scheduleCourtAppearance(prisonCode, reasonCode = "VLWT")
+    val court = courtRegister.givenCourt(court())
+    val request = scheduleCourtAppearance(courtCode = court.code, reasonCode = "VLWT")
     val res = scheduleAppearance(prisoner.prisonerNumber, request, username, prisonCode).successResponse<ReferenceId>()
 
     val saved = requireNotNull(findCourtAppearance(res.id))
@@ -129,7 +133,7 @@ class ScheduleCourtAppearanceIntTest(
   }
 
   private fun CourtAppearance.verifyAgainst(request: ScheduleCourtAppearance) {
-    assertThat(courtCode).isEqualTo(request.courtCode)
+    assertThat(courtCode.code).isEqualTo(request.courtCode)
     assertThat(start).isEqualTo(request.start)
     assertThat(end).isEqualTo(request.end)
     assertThat(reason.code).isEqualTo(request.reasonCode)
