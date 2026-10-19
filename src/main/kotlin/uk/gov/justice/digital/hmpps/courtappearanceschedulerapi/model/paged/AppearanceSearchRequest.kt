@@ -36,7 +36,7 @@ interface AppearanceSearchRequest :
     END -> sortByDate(direction, END, START)
     STATUS -> by(direction, "${field}_${SEQUENCE_NUMBER}").and(sortByPersonName())
     REASON -> by(direction, "${field}_description").and(sortByPersonName())
-    COURT -> by(direction, "${CourtAppearance::courtCode.name}_sort")
+    COURT -> by(direction, "${CourtAppearance::courtCode.name}_sort").and(sortByDate(direction, START, END)).and(sortByPersonName())
 
     else -> throw IllegalArgumentException("Unrecognised sort field")
   }
