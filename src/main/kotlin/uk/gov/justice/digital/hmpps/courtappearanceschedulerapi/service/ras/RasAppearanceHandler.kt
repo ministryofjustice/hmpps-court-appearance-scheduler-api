@@ -51,15 +51,14 @@ class RasAppearanceHandler(
 
   private fun createAppearance(event: RasAppearanceInserted) {
     rasClient.findCourtAppearanceSchedule(event.additionalInformation.courtAppearanceId)?.also { ras ->
-      courtCodeService.getCourtCode(ras.courtCode)
       appearanceRepository.save(ras.asEntity())
     }
   }
 
   private fun handleUpdate(event: RasAppearanceEvent) {
+    val movements = prisonApi.movementsFor(event.getPersonIdentifier())
+    val mrm = movements.mostRecent()
     rasClient.findCourtAppearanceSchedule(event.additionalInformation.courtAppearanceId)?.also { ras ->
-      val movements = prisonApi.movementsFor(event.getPersonIdentifier())
-      val mrm = movements.mostRecent()
       appearanceRepository.findByExternalReference(event.externalReference())?.also { cas ->
         cas.reschedule(RescheduleAppearance(ras.start, cas.end))
         cas.relocate(RelocateAppearance(ras.courtCode), courtCodeService::getCourtCode)
