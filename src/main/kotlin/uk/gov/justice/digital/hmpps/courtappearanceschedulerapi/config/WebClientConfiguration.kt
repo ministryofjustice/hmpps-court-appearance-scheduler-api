@@ -64,12 +64,12 @@ class WebClientConfiguration(
     url: String,
     builder: Builder,
     authorizedClientManager: OAuth2AuthorizedClientManager,
-    timeout: Duration = Companion.timeout,
+    timeout: Duration = TIMEOUT,
     registrationId: String = DEFAULT_REGISTRATION_ID,
-  ): WebClient = builder.authorisedWebClient(authorizedClientManager, registrationId, url, timeout)
+  ): WebClient = builder.authorisedWebClient(authorizedClientManager, registrationId, url, timeout = timeout)
 
   companion object {
     const val DEFAULT_REGISTRATION_ID = "default"
-    private val timeout: Duration = ofSeconds(2)
+    private val TIMEOUT: Duration = ofSeconds(2)
   }
 }
