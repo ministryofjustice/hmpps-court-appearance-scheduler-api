@@ -54,6 +54,7 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.app
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.UnscheduleAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.action.appearance.changes
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.util.UUID
 
 @NamedEntityGraph(
@@ -280,5 +281,7 @@ final class CourtAppearance(
       CourtAppearance::end,
       CourtAppearance::reason,
     )
+
+    val DEFAULT_END_TIME: LocalTime = LocalTime.of(17, 0)
   }
 }

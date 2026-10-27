@@ -4,10 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.media.Schema.RequiredMode.NOT_REQUIRED
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance.Companion.DEFAULT_END_TIME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceMovement.Direction
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReference
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.UUID
 
 data class CourtEvent(
@@ -28,10 +28,6 @@ data class CourtEvent(
 ) {
   @JsonIgnore
   val end: LocalDateTime = LocalDateTime.of(start.toLocalDate(), maxOf(DEFAULT_END_TIME, start.toLocalTime()))
-
-  companion object {
-    private val DEFAULT_END_TIME = LocalTime.of(17, 0)
-  }
 }
 
 data class CourtEventMovement(
