@@ -2,11 +2,11 @@ package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.ras
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance.Companion.DEFAULT_END_TIME
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReference
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReferenceEntity.COURT_APPEARANCE
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.externalreference.ExternalReferenceService.REMAND_AND_SENTENCING
 import java.time.LocalDateTime
-import java.time.LocalTime
 import java.util.UUID
 
 data class CourtAppearanceSchedulesResponse(val courtAppearances: List<CourtAppearanceSchedule>)
@@ -27,8 +27,4 @@ data class CourtAppearanceSchedule(
 
   @JsonIgnore
   val externalReference: ExternalReference = ExternalReference(REMAND_AND_SENTENCING, COURT_APPEARANCE, id)
-
-  companion object {
-    private val DEFAULT_END_TIME = LocalTime.of(17, 0)
-  }
 }

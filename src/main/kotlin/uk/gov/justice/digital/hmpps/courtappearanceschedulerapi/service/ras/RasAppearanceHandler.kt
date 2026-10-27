@@ -60,7 +60,7 @@ class RasAppearanceHandler(
     val mrm = movements.mostRecent()
     rasClient.findCourtAppearanceSchedule(event.additionalInformation.courtAppearanceId)?.also { ras ->
       appearanceRepository.findByExternalReference(event.externalReference())?.also { cas ->
-        cas.reschedule(RescheduleAppearance(ras.start, cas.end))
+        cas.reschedule(RescheduleAppearance(ras.start, maxOf(ras.start, ras.start.toLocalDate().atTime(CourtAppearance.DEFAULT_END_TIME))))
         cas.relocate(RelocateAppearance(ras.courtCode), courtCodeService::getCourtCode)
         cas.recategorise(RecategoriseAppearance(ras.reason.code), reasonRepository::getReasonByCode)
         cas.applyComments(ChangeAppearanceComments(ras.comments))
