@@ -36,8 +36,9 @@ class PersonAppearanceSearchIntTest(
   @Test
   fun `401 unauthorised without a valid token`() {
     webTestClient
-      .get()
+      .post()
       .uri(URL_TO_TEST, personIdentifier())
+      .bodyValue(searchRequest())
       .exchange()
       .expectStatus()
       .isUnauthorized

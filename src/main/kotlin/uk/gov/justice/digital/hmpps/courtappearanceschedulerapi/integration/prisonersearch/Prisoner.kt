@@ -20,6 +20,6 @@ data class Prisoner(
       Prisoner::cellLocation.name,
     )
 
-    const val PATTERN: String = "\\w\\d{4}\\w{2}"
+    const val PATTERN: String = "^\\w\\d{4}\\w{2}$"
   }
 }

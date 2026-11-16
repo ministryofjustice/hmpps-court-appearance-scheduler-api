@@ -24,7 +24,8 @@ import java.util.UUID
 
 interface CourtAppearanceRepository :
   JpaRepository<CourtAppearance, UUID>,
-  JpaSpecificationExecutor<CourtAppearance> {
+  JpaSpecificationExecutor<CourtAppearance>,
+  FindIdsRepository {
 
   @EntityGraph("court-appearance.full")
   override fun findById(id: UUID): Optional<CourtAppearance>
