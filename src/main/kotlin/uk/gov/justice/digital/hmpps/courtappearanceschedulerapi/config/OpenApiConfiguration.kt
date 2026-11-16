@@ -24,6 +24,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.method.HandlerMethod
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.OpenApiTags.INTEGRATIONS
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.OpenApiTags.REPLICATION
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.OpenApiTags.SYNC
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.config.OpenApiTags.UI
 import java.time.LocalDate
@@ -32,8 +33,9 @@ import java.time.format.DateTimeFormatter
 
 object OpenApiTags {
   const val INTEGRATIONS = "Integrations"
-  const val SYNC = "Sync"
   const val UI = "UI"
+  const val REPLICATION = "Schedule Replication"
+  const val SYNC = "Sync"
 }
 
 @Configuration
@@ -76,6 +78,7 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
       listOf(
         Tag().name(INTEGRATIONS).description("DPS integration endpoints"),
         Tag().name(UI).description("UI endpoints - not to be use by any other client"),
+        Tag().name(REPLICATION).description("Endpoints for schedule replication - not to be use by any other client"),
         Tag().name(SYNC).description("Legacy sync endpoints - not to be use by any other client"),
       ),
     )

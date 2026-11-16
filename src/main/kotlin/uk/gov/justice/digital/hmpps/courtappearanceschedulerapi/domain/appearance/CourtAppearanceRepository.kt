@@ -24,7 +24,8 @@ import java.util.UUID
 
 interface CourtAppearanceRepository :
   JpaRepository<CourtAppearance, UUID>,
-  JpaSpecificationExecutor<CourtAppearance> {
+  JpaSpecificationExecutor<CourtAppearance>,
+  FindIdsRepository {
 
   @EntityGraph("court-appearance.full")
   override fun findById(id: UUID): Optional<CourtAppearance>
@@ -74,11 +75,15 @@ fun appearanceMatchesPersonPrisonCode(prisonCode: String) = Specification<CourtA
 }
 
 fun appearanceMatchesPersonIdentifier(personIdentifier: String, prisonCode: String?) = Specification<CourtAppearance> { ca, _, cb ->
-  val person = ca.join<CourtAppearance, PersonSummary>(CourtAppearance::person.name, JoinType.INNER)
-  cb.and(
-    person.matchesIdentifier(cb, personIdentifier),
-    prisonCode?.let { person.matchesPrisonCode(cb, it) } ?: cb.conjunction(),
-  )
+  if (prisonCode == null) {
+    cb.equal(ca.get<Any>(CourtAppearance::person.name).get<String>(IDENTIFIER), personIdentifier)
+  } else {
+    val person = ca.join<CourtAppearance, PersonSummary>(CourtAppearance::person.name, JoinType.INNER)
+    cb.and(
+      person.matchesIdentifier(cb, personIdentifier),
+      person.matchesPrisonCode(cb, prisonCode),
+    )
+  }
 }
 
 fun appearanceMatchesPersonName(name: String, prisonCode: String?) = Specification<CourtAppearance> { ca, _, cb ->

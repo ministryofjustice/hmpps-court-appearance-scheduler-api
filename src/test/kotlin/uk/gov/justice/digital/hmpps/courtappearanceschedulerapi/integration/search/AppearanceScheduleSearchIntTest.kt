@@ -34,8 +34,9 @@ class AppearanceScheduleSearchIntTest(
   @Test
   fun `401 unauthorised without a valid token`() {
     webTestClient
-      .get()
+      .post()
       .uri(URL_TO_TEST, "NAR")
+      .bodyValue(searchRequest())
       .exchange()
       .expectStatus()
       .isUnauthorized

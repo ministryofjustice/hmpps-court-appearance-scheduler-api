@@ -9,13 +9,12 @@ import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.springframework.http.HttpStatus
-import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.prisonersearch.Prisoner
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.wiremock.WiremockConfig.mockServerConfig
 
 class NomisMigrationServer : WireMockServer(mockServerConfig(9990)) {
   fun requestRepair(status: HttpStatus = HttpStatus.OK) {
     stubFor(
-      put(urlMatching("/migrate/court-scheduler/repair/${Prisoner.PATTERN}"))
+      put(urlMatching("/migrate/court-scheduler/repair/\\w\\d{4}\\w{2}"))
         .withBearerToken()
         .willReturn(aResponse().withStatus(status.value())),
     )
