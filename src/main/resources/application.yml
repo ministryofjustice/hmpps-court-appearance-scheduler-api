@@ -55,7 +55,7 @@ spring:
         do_not_audit_optimistic_locking_field: false
     open-in-view: false
 
-  transaction.default-timeout: 2
+  transaction.default-timeout: 5
 
   mvc.servlet.load-on-startup: 1
 

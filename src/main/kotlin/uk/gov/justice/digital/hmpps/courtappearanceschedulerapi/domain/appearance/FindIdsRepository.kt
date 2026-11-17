@@ -15,7 +15,7 @@ interface FindIdsRepository {
   fun findIds(spec: Specification<CourtAppearance>, pageable: Pageable): Page<UUID>
 }
 
-@Transactional(readOnly = true, timeout = 5)
+@Transactional(readOnly = true)
 class FindIdsRepositoryImpl : FindIdsRepository {
   @PersistenceContext
   internal lateinit var entityManager: EntityManager

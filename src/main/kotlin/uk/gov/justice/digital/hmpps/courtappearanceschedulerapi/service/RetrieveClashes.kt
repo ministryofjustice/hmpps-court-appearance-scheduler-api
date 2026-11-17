@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.service
 
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearance
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceRepository
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.clashesFor
@@ -15,16 +14,13 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.clashes.Cl
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.clashes.ClashSource
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.clashes.PersonClashes
 
-@Transactional(readOnly = true)
 @Service
 class RetrieveClashes(
   private val appearanceRepository: CourtAppearanceRepository,
   private val courtRegisterClient: CourtRegisterClient,
 ) {
   fun retrieve(request: ClashRequest): ClashResponse {
-    val appearances = appearanceRepository.findAll(
-      clashesFor(request.personIdentifiers.map { it.value }.toSet(), request.ranges),
-    )
+    val appearances = appearanceRepository.findAll(clashesFor(request.personIdentifiers.map { it.value }.toSet(), request.ranges))
     val courts = courtRegisterClient.getCourts(appearances.map { it.courtCode.code }.toSet()).associateBy { it.code }
     val courtSupplier = { code: String -> courts[code] ?: Court.default(code) }
 
