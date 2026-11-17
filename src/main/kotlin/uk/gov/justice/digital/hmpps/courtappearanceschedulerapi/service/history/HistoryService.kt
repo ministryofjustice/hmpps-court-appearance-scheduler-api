@@ -5,12 +5,13 @@ import org.hibernate.envers.AuditReaderFactory
 import org.hibernate.envers.RevisionType
 import org.hibernate.envers.query.AuditEntity
 import org.hibernate.envers.query.AuditEntity.revisionNumber
-import org.springframework.transaction.annotation.Transactional
+import org.springframework.transaction.support.TransactionTemplate
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.AuditRevision
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.CourtCode
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.HmppsDomainEvent
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.Identifiable
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceReason
+import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.executeReadOnly
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.exception.NotFoundException
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.manageusers.ManageUsersClient
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.integration.manageusers.UserDetails
@@ -18,8 +19,8 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditHisto
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.model.AuditedAction
 import java.util.UUID
 
-@Transactional(readOnly = true)
 abstract class HistoryService<T : Identifiable>(
+  protected val transactionTemplate: TransactionTemplate,
   protected val entityManager: EntityManager,
   protected val managerUsers: ManageUsersClient,
 ) {
@@ -51,7 +52,7 @@ abstract class HistoryService<T : Identifiable>(
     }
   }
 
-  private fun getAuditRecords(id: UUID): List<AuditedEntity<T>> {
+  private fun getAuditRecords(id: UUID): List<AuditedEntity<T>> = transactionTemplate.executeReadOnly {
     val auditReader = AuditReaderFactory.get(entityManager)
     val entityRevisions: List<Array<*>> =
       auditReader
@@ -60,19 +61,20 @@ abstract class HistoryService<T : Identifiable>(
         .add(AuditEntity.id().eq(id))
         .resultList.filterIsInstance<Array<*>>()
 
-    return entityRevisions.map { it.asAuditedEntity() }.sortedBy { it.revision.timestamp }
-  }
+    entityRevisions.map { it.asAuditedEntity() }.sortedBy { it.revision.timestamp }
+  }!!
 
   private fun Array<*>.asAuditedEntity(): AuditedEntity<T> {
     val entity = entityClass.cast(this[0])
+    entity.loadRelatedEntities()
     val revision = this[1] as AuditRevision
     val type = this[2] as RevisionType
     return AuditedEntity(type, revision, entity)
   }
 
-  private fun getDomainEvents(id: UUID, revisionIds: Set<Long>): Map<Long, List<String>> {
+  private fun getDomainEvents(id: UUID, revisionIds: Set<Long>): Map<Long, List<String>> = transactionTemplate.executeReadOnly {
     val auditReader = AuditReaderFactory.get(entityManager)
-    return auditReader
+    auditReader
       .createQuery()
       .forRevisionsOfEntity(HmppsDomainEvent::class.java, false, false)
       .add(revisionNumber().`in`(revisionIds))
@@ -81,7 +83,7 @@ abstract class HistoryService<T : Identifiable>(
       .addProjection(AuditEntity.property(HmppsDomainEvent::eventType.name))
       .resultList.filterIsInstance<Array<*>>()
       .map { it[0] as Long to it[1] as String }.groupBy({ it.first }, { it.second })
-  }
+  }!!
 
   private fun List<AuditedEntity<T>>.actions(
     events: (Long) -> List<String>,
@@ -107,6 +109,8 @@ abstract class HistoryService<T : Identifiable>(
       )
     }
   }
+
+  protected abstract fun Any.loadRelatedEntities()
 
   protected fun Any?.asChangeValue(): Any? = when (this) {
     is CourtCode -> code

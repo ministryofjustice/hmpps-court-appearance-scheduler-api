@@ -25,8 +25,8 @@ class PrisonerMergedHandler(
     val pmi = de.additionalInformation
     personSummaryService.findPersonSummary(pmi.removedNomsNumber)?.also { person ->
       SchedulerContext.get().copy(reason = PrisonerMerged.DESCRIPTION, source = DataSource.NOMIS).set()
+      val toPerson = personSummaryService.getWithSave(pmi.nomsNumber)
       transactionTemplate.executeWithoutResult {
-        val toPerson = personSummaryService.getWithSave(pmi.nomsNumber)
         appearanceRepository.findAll(appearanceMatchesPersonIdentifier(pmi.removedNomsNumber, null))
           .forEach { it.movePerson(toPerson) }
         movementRepository.findAllByPersonIdentifier(pmi.removedNomsNumber).forEach { it.movePerson(toPerson) }
