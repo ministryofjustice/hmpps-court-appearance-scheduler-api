@@ -18,12 +18,12 @@ import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearanc
 import uk.gov.justice.digital.hmpps.courtappearanceschedulerapi.domain.appearance.CourtAppearanceStatusRepository
 import java.time.LocalDate
 
-@Transactional
 @Service
 class AppearanceExpirer(
   private val statusRepository: CourtAppearanceStatusRepository,
   private val appearanceRepository: CourtAppearanceRepository,
 ) {
+  @Transactional(timeout = 30)
   fun expireScheduledAppearances() {
     val statuses = statusRepository.findAll().associateBy { it.code }
     val statusProvider = { code: CourtAppearanceStatus.Code -> requireNotNull(statuses[code]) }
