@@ -41,7 +41,7 @@ class SyncController(
   ): ReferenceId = movement.sync(personIdentifier, request)
 
   @GetMapping("/court-appearances/{id}")
-  fun getCourtAppearance(@PathVariable id: UUID): CourtEvent = retrieve.courtAppearance(id)
+  fun findCourtAppearance(@PathVariable id: UUID): CourtEvent = retrieve.courtAppearance(id)
 
   @GetMapping("/court-appearance-movements/{id}")
   fun getCourtAppearanceMovement(@PathVariable id: UUID): CourtEventMovement = retrieve.courtAppearanceMovement(id)

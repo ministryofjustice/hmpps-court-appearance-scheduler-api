@@ -96,7 +96,6 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
           .name("Authorization"),
       ),
     )
-    .addSecurityItem(SecurityRequirement().addList("bearer-jwt", listOf("read", "write")))
     .also { PrimitiveType.customClasses()[LocalTime::class.java.name] = PrimitiveType.PARTIAL_TIME }
 
   @Bean
@@ -115,17 +114,25 @@ class OpenApiConfiguration(buildProperties: BuildProperties, private val context
 
       val roles = try {
         (preAuthExp.getValue(evalContext) as List<*>).filterIsInstance<String>()
-      } catch (e: SpelEvaluationException) {
+      } catch (_: SpelEvaluationException) {
         emptyList()
       }
       if (roles.isNotEmpty()) {
-        operation.description = "${operation.description ?: ""}\n\n" +
-          "Requires one of the following roles:\n" +
-          roles.joinToString(prefix = "* ", separator = "\n* ")
+        val rolesDescription = """
+            Requires one of the following roles:
+            ${roles.joinToString(prefix = "* ", separator = "${System.lineSeparator()}* ")}
+        """.trimMargin()
+        operation.description = operation.description?.let { des ->
+          """
+            $des
+          """.trimMargin()
+        } ?: rolesDescription
+        roles.forEach { role ->
+          operation.addSecurityItem(SecurityRequirement().addList(role, listOf("read")))
+        }
       }
+      operation
     }
-
-    operation
   }
 
   private fun HandlerMethod.preAuthorizeForMethodOrClass() = getMethodAnnotation(PreAuthorize::class.java)?.value
